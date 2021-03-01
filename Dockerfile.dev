@@ -1,0 +1,12 @@
+FROM node:14.16-alpine
+
+WORKDIR "/app"
+
+COPY ./package.json ./
+RUN yarn
+RUN yarn global add pm2
+
+COPY . .
+
+CMD ["pm2-runtime", "start", "ecosystem.config.js"]
+# CMD ["npm", "run", "dev"]
