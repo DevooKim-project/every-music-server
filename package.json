@@ -12,6 +12,11 @@
   },
   "dependencies": {
     "bcrypt": "^5.0.1",
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "mongoose": "^5.11.18",
+    "mysql2": "^2.2.5",
+    "redis": "^3.0.2",
+    "sequelize": "^6.5.0",
+    "sequelize-cli": "^6.2.0"
   }
 }
