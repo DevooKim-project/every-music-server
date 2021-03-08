@@ -1,17 +1,17 @@
 const express = require("express");
 const morgan = require("morgan");
+const passport = require("passport");
+const session = require("express-session");
+const cookieParser = require("cookie-parser");
 
+const envConfig = require("./config/envConfig");
+const apiRouter = require("./router");
 const { sequelize } = require("./models");
-const User = require("./models/user");
-const Playlist = require("./models/playlist");
+const passportConfig = require("./passport");
 
 const app = express();
 
-app.set("port", process.env.PORT || 3001);
-app.use(morgan("dev"));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-
+envConfig();
 sequelize
   .sync({ force: true })
   .then(() => {
@@ -21,59 +21,30 @@ sequelize
     console.error(err);
   });
 
-app.get("/", async (req, res) => {
-  try {
-    const user = await User.create({
-      email: "email@email.com",
-      nick: "nick",
-      provider: "provider",
-      oAuthId: "oAuth",
-    });
-    const user2 = await User.create({
-      email: "email2@email.com",
-      nick: "nick2",
-      provider: "provider",
-      oAuthId: "oAuth2",
-    });
-    const playlist = await Playlist.create({
-      title: "title",
-      owner: user.dataValues.nick,
-    });
-    const playlist2 = await Playlist.create({
-      title: "title2",
-      owner: user.dataValues.nick,
-    });
-    const playlist3 = await Playlist.create({
-      title: "title2",
-      owner: user2.dataValues.nick,
-    });
+app.set("port", process.env.PORT || 8001);
+app.use(morgan("dev"));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser(process.env.COOKIE_SECRET));
+app.use(
+  session({
+    resave: false,
+    saveUninitialized: false,
+    secret: process.env.COOKIE_SECRET,
+    cookie: {
+      httpOnly: true,
+      secure: false,
+    },
+  })
+);
 
-    const model = await User.findOne({
-      include: [
-        {
-          model: Playlist,
-          where: {
-            owner: "nick",
-          },
-        },
-      ],
-    });
+passportConfig();
+app.use(passport.initialize());
+app.use(passport.session());
 
-    console.log(model.Playlists);
-    // res.status(201).json({ user, user2, playlist, playlist2, playlist3 });
-    res.status(201).json({ model });
-  } catch (err) {
-    console.error(err);
-    res.status(404).send({ err });
-  }
-  // res.send("hello");
-});
+app.use("/", apiRouter);
 
-app.use((req, res, next) => {
-  res.status(404).send("Bad request");
-});
-
-app.listen(process.env.PORT, () => {
-  console.log("port open" + process.env.PORT);
+app.listen(app.get("port"), () => {
+  console.log("port open" + app.get("port"));
   console.log(process.env.NODE_ENV);
 });
