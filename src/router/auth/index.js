@@ -1,8 +1,11 @@
 const express = require("express");
 const googleRoute = require("./google");
 const kakaoRoute = require("./kakao");
-const { verifyToken } = require("../../middleware/auth");
-// const { isLoggedIn, isNotLoggedIn } = require("../../middleware/auth");
+const {
+  isLoggedIn,
+  isNotLoggedIn,
+  verifyToken,
+} = require("../../middleware/auth");
 
 const router = express.Router();
 

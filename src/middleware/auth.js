@@ -18,8 +18,8 @@ exports.isNotLoggedIn = (req, res, next) => {
 
 exports.verifyToken = (req, res, next) => {
   try {
-    let token = req.headers.authorization;
-    token = token.replace(/^Bearer\s+/, "");
+    const token = this.parseToken(req);
+
     const user = jwt.verify(token, process.env.JWT_SECRET);
     req.user = user;
     next();
@@ -30,4 +30,10 @@ exports.verifyToken = (req, res, next) => {
 
     return res.status(401).send("유효하지 않은 토큰");
   }
+};
+
+exports.parseToken = (req) => {
+  let token = req.headers.authorization;
+  token = token.replace(/^Bearer\s+/, "");
+  return token;
 };
