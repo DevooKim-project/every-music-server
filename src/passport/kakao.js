@@ -11,16 +11,27 @@ module.exports = () => {
         callbackURL: "/auth/kakao/callback",
       },
       async (accessToken, refreshToken, profile, done) => {
-        console.log("accessToken", accessToken);
-        console.log("kakao", profile);
+        try {
+          const exUser = await User.findOne({
+            where: { provider: "kakao", providerId: profile.id },
+          });
 
-        // try{
-        //   const exUser = await User.findOne({
-        //     where:
-        //   })
-        // }
-        // done(error);
-        done(null, false);
+          if (exUser) {
+            done(null, exUser);
+          } else {
+            const newUser = await User.create({
+              email: profile._json.email,
+              nick: profile.displayName,
+              provider: "kakao",
+              providerId: profile.id,
+            });
+
+            done(null, newUser);
+          }
+        } catch (error) {
+          console.error(error);
+          done(error);
+        }
       }
     )
   );

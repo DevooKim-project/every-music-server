@@ -28,7 +28,7 @@ module.exports = class User extends Sequelize.Model {
           type: DataTypes.STRING(10),
           allowNull: false,
         },
-        oAuthId: {
+        providerId: {
           type: DataTypes.STRING(255),
           allowNull: false,
         },
