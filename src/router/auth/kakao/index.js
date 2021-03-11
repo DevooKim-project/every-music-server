@@ -1,7 +1,7 @@
 const express = require("express");
 const passport = require("passport");
 
-const { getToken, refreshToken, logout } = require("./controller");
+const { getToken, refreshToken, logout, signout } = require("./controller");
 const { verifyToken } = require("../../../middleware/auth");
 
 const router = express.Router();
@@ -16,8 +16,8 @@ router.get(
 
 router.get("/refresh", verifyToken, refreshToken);
 
-router.get("/logout", logout);
+router.get("/logout", verifyToken, logout);
 
-router.delete("/signout");
+router.get("/signout", signout);
 
 module.exports = router;

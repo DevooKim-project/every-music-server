@@ -21,10 +21,15 @@ const findOneUser = async (param) => {
   }
 };
 
-const destroyUser = (param) => {
-  User.destroy({
-    where: { ...param },
-  });
+const destroyUser = async (param) => {
+  try {
+    await User.destroy({
+      where: { ...param },
+    });
+    return;
+  } catch (error) {
+    throw new Error(error);
+  }
 };
 
 module.exports = { createUser, findOneUser, destroyUser };
