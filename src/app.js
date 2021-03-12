@@ -6,21 +6,23 @@ const cookieParser = require("cookie-parser");
 
 const envConfig = require("./config/envConfig");
 const apiRouter = require("./router");
-const { sequelize } = require("./database/models");
+// const { sequelize } = require("./database/models");
+const dbConfig = require("./database");
 const passportConfig = require("./passport");
 const oAuthConfig = require("./oAuth");
 
 const app = express();
 
 envConfig();
-sequelize
-  .sync({ force: true })
-  .then(() => {
-    console.log("mysql connect ok");
-  })
-  .catch((err) => {
-    console.error(err);
-  });
+dbConfig();
+// sequelize
+//   .sync({ force: true })
+//   .then(() => {
+//     console.log("mysql connect ok");
+//   })
+//   .catch((err) => {
+//     console.error(err);
+//   });
 
 app.set("port", process.env.PORT || 8001);
 app.use(morgan("dev"));

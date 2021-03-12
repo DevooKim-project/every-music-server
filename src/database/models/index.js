@@ -13,16 +13,27 @@ const sequelize = new Sequelize(
 const User = require("./user");
 const Playlist = require("./playlist");
 
-const db = {};
+module.exports = () => {
+  const db = {};
 
-db.sequelize = sequelize;
-db.User = User;
-db.Playlist = Playlist;
+  db.sequelize = sequelize;
+  db.User = User;
+  db.Playlist = Playlist;
 
-User.init(sequelize);
-Playlist.init(sequelize);
+  User.init(sequelize);
+  Playlist.init(sequelize);
 
-User.associate(db);
-Playlist.associate(db);
+  User.associate(db);
+  Playlist.associate(db);
 
-module.exports = db;
+  sequelize
+    .sync({ force: true })
+    .then(() => {
+      console.log("mysql connect ok");
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+};
+
+// module.exports = db;
