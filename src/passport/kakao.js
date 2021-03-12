@@ -9,6 +9,7 @@ module.exports = () => {
     new KakaoStrategy(
       {
         clientID: process.env.KAKAO_ID,
+        // clientSecret: clientSecret, // clientSecret을 사용하지 않는다면 넘기지 말거나 빈 스트링을 넘길 것
         callbackURL: "/auth/kakao/callback",
       },
       async (accessToken, refreshToken, profile, done) => {

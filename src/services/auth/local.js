@@ -1,12 +1,12 @@
 const jwt = require("jsonwebtoken");
 
-const createToken = (user) => {
+exports.createToken = (user) => {
   const { id, nick, providerId, provider } = user;
   const accessToken = jwt.sign(
     { id, nick, providerId, provider },
     process.env.JWT_SECRET,
     {
-      expiresIn: "3m",
+      expiresIn: "3m", //50분
     }
   );
 
@@ -17,4 +17,4 @@ const createToken = (user) => {
   return { accessToken, refreshToken };
 };
 
-module.exports = createToken;
+// module.exports = createToken;

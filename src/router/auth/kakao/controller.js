@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const axios = require("axios");
 
-const createToken = require("../../../services/auth");
+const { createToken } = require("../../../services/auth/local");
 const { parseToken } = require("../../../middleware/auth");
 const { findOneUser, destroyUser } = require("../../../services/user");
 

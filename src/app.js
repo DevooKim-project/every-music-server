@@ -8,6 +8,7 @@ const envConfig = require("./config/envConfig");
 const apiRouter = require("./router");
 const { sequelize } = require("./models");
 const passportConfig = require("./passport");
+const oAuthConfig = require("./oAuth");
 
 const app = express();
 
@@ -39,6 +40,7 @@ app.use(cookieParser(process.env.COOKIE_SECRET));
 // );
 
 passportConfig();
+oAuthConfig();
 app.use(passport.initialize());
 // app.use(passport.session());
 
