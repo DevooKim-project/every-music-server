@@ -1,5 +1,5 @@
 const { Sequelize, DataTypes } = require("sequelize");
-const { User } = require(".");
+const { User } = require("./user");
 
 module.exports = class Playlist extends Sequelize.Model {
   static init(sequelize) {

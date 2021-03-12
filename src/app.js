@@ -6,7 +6,7 @@ const cookieParser = require("cookie-parser");
 
 const envConfig = require("./config/envConfig");
 const apiRouter = require("./router");
-const { sequelize } = require("./models");
+const { sequelize } = require("./database/models");
 const passportConfig = require("./passport");
 const oAuthConfig = require("./oAuth");
 
