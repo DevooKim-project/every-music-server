@@ -39,12 +39,4 @@ const refreshToken = async (token) => {
   }
 };
 
-const findUser = async ({ provider, providerId }) => {
-  try {
-    const result = await userService.findOneUser({ provider, providerId });
-  } catch (error) {
-    throw new Error(error);
-  }
-};
-
 module.exports = { createToken, refreshToken };
