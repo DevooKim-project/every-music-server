@@ -33,7 +33,7 @@ module.exports = class Playlist extends Sequelize.Model {
   static associate(db) {
     db.Playlist.belongsTo(db.User, {
       foreignKey: "owner",
-      targetKey: "nick",
+      targetKey: "id",
     });
   }
 };

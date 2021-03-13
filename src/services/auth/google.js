@@ -1,4 +1,5 @@
 const axios = require("axios");
+const jwt = require("jsonwebtoken");
 
 const { parseToken } = require("../../middleware/auth");
 const { tokenService } = require("../database");
@@ -20,6 +21,8 @@ const getToken = async (code) => {
       data,
     });
 
+    console.log("Google: ", response.data);
+
     return response.data;
   } catch (error) {
     throw new Error(error);
@@ -28,24 +31,27 @@ const getToken = async (code) => {
 
 const refreshToken = async (token) => {
   try {
-    const localToken = parseToken(req.headers.Authorization);
-    const data = jwt.verify(localToken, process.env.JWT_SECRET);
-    const userId = data.userId;
-
+    const localToken = parseToken(token);
+    const payload = jwt.verify(localToken, process.env.JWT_SECRET);
+    const userId = payload.id;
     const refreshToken = await tokenService.findRefreshToken(userId);
+    console.log("find refresh: ", refreshToken);
+
+    const data = {
+      client_id: process.env.GOOGLE_ID,
+      client_secret: process.env.GOOGLE_SECRET,
+      refresh_token: refreshToken,
+      grant_type: "refresh_token",
+    };
 
     const newToken = await axios({
       method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      data: {
-        client_id: process.env.GOOGLE_ID,
-        client_secret: process.env.GOOGLE_SECRET,
-        refresh_token: refreshToken,
-        grant_type: "refresh_token",
-      },
+
+      url: "https://oauth2.googleapis.com/token",
+      data,
     });
+
+    console.log(newToken);
 
     await tokenService.updateToken({
       userId,

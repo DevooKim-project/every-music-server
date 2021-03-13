@@ -7,6 +7,6 @@ const router = express.Router();
 
 router.get("/", login);
 router.get("/callback", getLocalToken);
-router.get("/refresh:type", verifyToken, refreshToken);
+router.get("/refresh/:type", verifyToken, refreshToken);
 
 module.exports = router;

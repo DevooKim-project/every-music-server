@@ -2,7 +2,7 @@ const Token = require("../../database/schema/token");
 
 const storeToken = async (token) => {
   try {
-    await Token.create({ token });
+    await Token.create({ ...token });
     return;
   } catch (error) {
     throw new Error(error);
@@ -11,20 +11,27 @@ const storeToken = async (token) => {
 
 const findRefreshToken = async (userId) => {
   try {
-    await Token.findOne({ userId }).populate("refreshToken");
-    return;
+    const token = await Token.findOne({ userId });
+    return token.refreshToken;
   } catch (error) {
     throw new Error(error);
   }
 };
 
-const updateToken = async ({ userId, accessToken }) => {
+const updateToken = async (data) => {
   try {
-    await Token.updateOne({ userId }, { accessToken });
+    const { userId, accessToken, refreshToken } = data;
+
+    if (refreshToken) {
+      await Token.updateOne({ userId }, { accessToken, refreshToken });
+    } else {
+      await Token.updateOne({ userId }, { accessToken });
+    }
+
     return;
   } catch (error) {
     throw new Error(error);
   }
 };
 
-module.exports = { findRefreshToken, updateToken };
+module.exports = { storeToken, findRefreshToken, updateToken };

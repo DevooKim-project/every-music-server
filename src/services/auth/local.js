@@ -8,7 +8,7 @@ const createToken = (user) => {
     { id, nick, providerId, provider },
     process.env.JWT_SECRET,
     {
-      expiresIn: "3m", //50분
+      expiresIn: "10m", //50분
     }
   );
 
@@ -16,18 +16,32 @@ const createToken = (user) => {
     expiresIn: "1w",
   });
 
+  console.log("local-access: ", accessToken);
+  console.log("refresh-access: ", refreshToken);
+
   return { accessToken, refreshToken };
 };
 
-const refreshToken = async (localToken) => {
+const refreshToken = async (token) => {
   try {
-    const localToken = parseToken(localToken);
+    const localToken = parseToken(token);
     const data = jwt.verify(localToken, process.env.JWT_SECRET);
 
+    console.log(data);
     const user = await userService.findOneUser({ id: data.id });
-    const newToken = this.createLocalToken(user);
+    console.log(user);
+    const newToken = createToken(user);
 
+    console.log("local-newAccess: ", newToken);
     return newToken;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+const findUser = async ({ provider, providerId }) => {
+  try {
+    const result = await userService.findOneUser({ provider, providerId });
   } catch (error) {
     throw new Error(error);
   }

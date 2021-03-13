@@ -16,12 +16,13 @@ module.exports = class User extends Sequelize.Model {
           validate: {
             isEmail: true,
           },
-          unique: true,
+          // unique: true,
+          unique: false,
         },
         nick: {
           type: DataTypes.STRING(20),
           allowNull: false,
-          unique: true,
+          // unique: true,
           // primaryKey: true,
         },
         provider: {
@@ -44,6 +45,6 @@ module.exports = class User extends Sequelize.Model {
   }
 
   static associate(db) {
-    db.User.hasMany(db.Playlist, { foreignKey: "owner", sourceKey: "nick" });
+    db.User.hasMany(db.Playlist, { foreignKey: "owner", sourceKey: "id" });
   }
 };
