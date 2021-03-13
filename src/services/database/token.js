@@ -34,4 +34,13 @@ const updateToken = async (data) => {
   }
 };
 
-module.exports = { storeToken, findRefreshToken, updateToken };
+const deleteToken = async (userId) => {
+  try {
+    await Token.deleteOne({ ...userId });
+    return;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+module.exports = { storeToken, findRefreshToken, updateToken, deleteToken };

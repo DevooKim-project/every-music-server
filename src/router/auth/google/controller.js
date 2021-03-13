@@ -1,5 +1,7 @@
+const { default: axios } = require("axios");
 const jwt = require("jsonwebtoken");
 const queryString = require("querystring");
+const { parseToken } = require("../../../middleware/auth");
 
 const { localService, googleService } = require("../../../services/auth");
 const { userService, tokenService } = require("../../../services/database");
@@ -93,6 +95,34 @@ exports.refreshToken = async (req, res) => {
       default:
         throw new Error("token type error");
     }
+  } catch (error) {
+    console.error(error);
+    return res.send(error);
+  }
+};
+
+exports.singout = async (req, res) => {
+  try {
+    const localToken = parseToken(req.headers.authorization);
+    const payload = jwt.verify(localToken, process.env.JWT_SECRET);
+    const userId = payload.id;
+
+    //refresh 토큰 검색
+    const refreshToken = await tokenService.findRefreshToken(userId);
+    //토큰 만료 요청 보냄
+    await axios({
+      method: "POST",
+      url: "https://oauth2.googleapis.com/revoke",
+      params: {
+        token: refreshToken,
+      },
+    });
+    //토큰 제거
+    await tokenService.deleteToken(userId);
+    //유저 제거
+    await userService.destroyUser({ id: userId });
+
+    return res.send("signout ok");
   } catch (error) {
     console.error(error);
     return res.send(error);
