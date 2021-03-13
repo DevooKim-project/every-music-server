@@ -1,8 +1,8 @@
-const axios = require("axios");
 const jwt = require("jsonwebtoken");
 const queryString = require("querystring");
 
-const { createToken } = require("../../../services/auth/local");
+const { localService, googleService } = require("../../../services/auth");
+const { userService, tokenService } = require("../../../services/database");
 
 exports.login = async (req, res) => {
   const url = "https://accounts.google.com/o/oauth2/v2/auth";
@@ -25,63 +25,62 @@ exports.login = async (req, res) => {
   res.redirect(`${url}?${queryString.stringify(params)}`);
 };
 
-exports.getToken = async (req, res, next) => {
+exports.getLocalToken = async (req, res) => {
   try {
-    const code = req.query.code;
-    //if (code)
-
-    const data = {
-      code,
-      client_id: process.env.GOOGLE_ID,
-      client_secret: process.env.GOOGLE_SECRET,
-      redirect_uri: "http://localhost:5000/auth/google/callback",
-      grant_type: "authorization_code",
-    };
-
-    const response = await axios({
-      method: "POST",
-      // url: "https://accounts.gogle.com/o/oauth2/token",
-      url: "https://oauth2.googleapis.com/token",
-      data,
-    });
-    console.log(response.data);
-
-    const { access_token, refresh_token, id_token } = response.data;
+    // const { access_token, refresh_token, id_token } = req.tokens;
+    const tokens = googleService.getToken(req.query.code);
+    const { access_token, refresh_token, id_token } = tokens;
     const profile = jwt.decode(id_token);
 
-    //0. id_token 파싱
-    //1. 유저생성
-    //2. 유저객체 리턴
-    //3. createToken(유저객체)
-    //4.
-    // const user = {
-    //   id:
-    // }
-    const token = createToken(user);
+    const user = {
+      email: profile.email,
+      nick: profile.name,
+      providerId: profile.sub,
+      provider: "google",
+    };
 
-    res.send(id);
+    //유저 생성
+    const newUser = await userService.createUser(user);
+
+    //로컬 토큰 발급
+    const localToken = localService.createToken(user);
+
+    //access토큰, refresh토큰 저장
+    await tokenService.storeToken({
+      userId: newUser.id,
+      accessToken: access_token,
+      refreshToken: refresh_token,
+    });
+
+    res.send(localToken);
   } catch (error) {
     console.error(error);
     res.send(error);
   }
 };
 
-/*
+exports.refreshToken = async (req, res) => {
+  try {
+    const type = req.params.type;
 
-구글 access 토큰 재발급
+    switch (type) {
+      case local:
+        const newToken = await localService.refreshToken(
+          req.headers.Authorization
+        );
+        res.send(newToken);
+        break;
 
-POST /token HTTP/1.1
+      case provider:
+        await googleService.refreshToken(req.headers.Authorization);
+        res.send("google refresh ok");
+        break;
 
-Host: oauth2.googleapis.com
-
-Content-Type: application/x-www-form-urlencoded
-
-client_id=your_client_id&
-
-client_secret=your_client_secret&
-
-refresh_token=refresh_token&
-
-grant_type=refresh_token
-
-*/
+      default:
+        throw new Error("token type error");
+    }
+  } catch (error) {
+    console.error(error);
+    res.send(error);
+  }
+};

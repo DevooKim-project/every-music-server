@@ -1,7 +1,8 @@
 const passport = require("passport");
 const KakaoStrategy = require("passport-kakao").Strategy;
 
-const { createUser, findOneUser } = require("../services/user");
+// const { createUser, findOneUser } = require("../services/user");
+const { userService } = require("../services/database");
 
 module.exports = () => {
   passport.use(
@@ -16,7 +17,8 @@ module.exports = () => {
         try {
           console.log("kakao", accessToken);
           console.log("kakao2", refreshToken);
-          const exUser = await findOneUser({
+          // const exUser = await findOneUser({
+          const exUser = await userService.findOneUser({
             provider: "kakao",
             providerId: profile.id,
           });
@@ -28,7 +30,8 @@ module.exports = () => {
             const id = "" + profile._json.id; //string으로 통일
             // const nick = email.replace(/@[\w\.]*/g, "");
             const nick = "testNick";
-            const newUser = await createUser({
+            // const newUser = await createUser({
+            const newUser = await userService.createUser({
               email,
               nick,
               providerId: id,

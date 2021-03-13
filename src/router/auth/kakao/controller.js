@@ -1,24 +1,25 @@
 const jwt = require("jsonwebtoken");
 const axios = require("axios");
 
-const { createToken } = require("../../../services/auth/local");
+const {
+  createLocalToken,
+  refreshLocalToken,
+} = require("../../../services/auth/local");
 const { parseToken } = require("../../../middleware/auth");
-const { findOneUser, destroyUser } = require("../../../services/user");
+// const { findOneUser, destroyUser } = require("../../../services/database");
+const { userService } = require("../../../services/database");
 
 exports.getToken = (req, res) => {
-  const token = createToken(req.user);
-  console.log("jwt: ", token);
+  const localToken = createLocalToken(req.user);
+  console.log("jwt: ", localToken);
   // res.redirect("/auth/login");
-  res.send(token);
+  res.send(localToken);
 };
 
 exports.refreshToken = async (req, res) => {
   try {
-    const exToken = parseToken(req);
-    const data = jwt.verify(exToken, process.env.JWT_SECRET);
-    const user = await findOneUser({ id: data.id });
-    const newToken = createToken(user);
-    res.json(newToken);
+    const newToken = await refreshLocalToken(req.headers.Authorization);
+    res.send(newToken);
   } catch (error) {
     console.error(error);
     res.send(error);
@@ -76,7 +77,8 @@ exports.signout = async (req, res) => {
     const token = parseToken(req);
     const data = jwt.verify(token, process.env.JWT_SECRET);
     const providerId = data.providerId;
-    await destroyUser(providerId);
+    // await destroyUser(providerId);
+    await userService.destroyUser(providerId);
 
     await axios.post(
       "https://kapi.kakao.com/v1/user/unlink",

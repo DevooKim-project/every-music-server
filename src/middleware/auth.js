@@ -18,7 +18,7 @@ exports.isNotLoggedIn = (req, res, next) => {
 
 exports.verifyToken = (req, res, next) => {
   try {
-    const token = this.parseToken(req);
+    const token = this.parseToken(req.headers.authorization);
 
     const user = jwt.verify(token, process.env.JWT_SECRET);
     req.user = user;
@@ -32,8 +32,8 @@ exports.verifyToken = (req, res, next) => {
   }
 };
 
-exports.parseToken = (req) => {
-  let token = req.headers.authorization;
-  token = token.replace(/^Bearer\s+/, "");
-  return token;
+exports.parseToken = (token) => {
+  // let token = req.headers.authorization;
+  const newToken = token.replace(/^Bearer\s+/, "");
+  return newToken;
 };
