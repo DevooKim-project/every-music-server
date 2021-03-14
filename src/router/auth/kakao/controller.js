@@ -1,5 +1,8 @@
-const axios = require("axios");
+const { default: axios } = require("axios");
+const jwt = require("jsonwebtoken");
 const qs = require("qs");
+const { parseToken } = require("../../../middleware/auth");
+
 const { kakaoService, localService } = require("../../../services/auth");
 const { userService, tokenService } = require("../../../services/database");
 
@@ -27,7 +30,7 @@ exports.getLocalToken = async (req, res) => {
 
     const { access_token, refresh_token } = tokens;
     const profile = await kakaoService.getProfile(access_token);
-
+    console.log(access_token);
     const exUser = await userService.findOneUser({
       provider: "kakao",
       providerId: profile.id,
@@ -63,6 +66,35 @@ exports.logout = async (req, res) => {
     };
 
     return res.redirect(`${url}?${qs.stringify(params)}`);
+  } catch (error) {
+    console.error(error);
+    return res.send(error);
+  }
+};
+
+exports.signout = async (req, res) => {
+  try {
+    const localToken = parseToken(req.headers.authorization);
+    const payload = jwt.verify(localToken, process.env.JWT_SECRET);
+    const params = {
+      target_id_type: "user_id",
+      target_id: payload.providerId,
+    };
+
+    const response = await axios({
+      method: "POST",
+      url: "https://kapi.kakao.com/v1/user/unlink",
+      headers: {
+        Authorization: `KakaoAK ${process.env.KAKAO_ADMIN}`,
+      },
+      params,
+    });
+
+    await userService.destroyUser({
+      provider: "kakao",
+      providerId: response.data.id,
+    });
+    return res.send("signout ok");
   } catch (error) {
     console.error(error);
     return res.send(error);

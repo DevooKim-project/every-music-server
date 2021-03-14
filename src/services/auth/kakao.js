@@ -1,5 +1,6 @@
 const axios = require("axios");
 const qs = require("qs");
+const { userService } = require("../database");
 
 const getToken = async (code) => {
   try {
@@ -40,7 +41,5 @@ const getProfile = async (token) => {
     throw new Error(error);
   }
 };
-
-// const logout = async();
 
 module.exports = { getToken, getProfile };
