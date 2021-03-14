@@ -1,5 +1,5 @@
 const axios = require("axios");
-const queryString = require("querystring");
+const qs = require("qs");
 const { kakaoService, localService } = require("../../../services/auth");
 const { userService, tokenService } = require("../../../services/database");
 
@@ -13,7 +13,7 @@ exports.login = async (req, res) => {
       // state: "", //CSRF 공격 보호를 위한 임의의 문자열
     };
 
-    return res.redirect(`${url}?${queryString.stringify(params)}`);
+    return res.redirect(`${url}?${qs.stringify(params)}`);
   } catch (error) {
     console.error(error);
     return res.send(error);
@@ -28,7 +28,6 @@ exports.getLocalToken = async (req, res) => {
     const { access_token, refresh_token } = tokens;
     const profile = await kakaoService.getProfile(access_token);
 
-    // console.log(profile);
     const exUser = await userService.findOneUser({
       provider: "kakao",
       providerId: profile.id,
@@ -51,6 +50,21 @@ exports.getLocalToken = async (req, res) => {
     return res.send(localToken);
   } catch (error) {
     // console.error(error);
+    return res.send(error);
+  }
+};
+
+exports.logout = async (req, res) => {
+  try {
+    const url = "https://kauth.kakao.com/oauth/logout";
+    const params = {
+      client_id: process.env.KAKAO_ID,
+      logout_redirect_uri: "http://localhost:5000/",
+    };
+
+    return res.redirect(`${url}?${qs.stringify(params)}`);
+  } catch (error) {
+    console.error(error);
     return res.send(error);
   }
 };

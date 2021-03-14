@@ -1,6 +1,6 @@
 const axios = require("axios");
 const jwt = require("jsonwebtoken");
-const queryString = require("querystring");
+const qs = require("qs");
 const { parseToken } = require("../../../middleware/auth");
 
 const { localService, googleService } = require("../../../services/auth");
@@ -24,7 +24,7 @@ exports.login = async (req, res) => {
     scope: scopes.join(" "),
   };
 
-  return res.redirect(`${url}?${queryString.stringify(params)}`);
+  return res.redirect(`${url}?${qs.stringify(params)}`);
 };
 
 exports.getLocalToken = async (req, res) => {
