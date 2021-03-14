@@ -17,7 +17,6 @@ const getToken = async (code) => {
       data: qs.stringify(data),
     });
 
-    console.log("tokens: ", response.data);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -25,4 +24,23 @@ const getToken = async (code) => {
   }
 };
 
-module.exports = { getToken };
+const getProfile = async (token) => {
+  try {
+    const profile = await axios({
+      method: "POST",
+      url: "https://kapi.kakao.com/v2/user/me",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        // "Content-type": "application/x-www-form-urlencoded;charset=utf-8",
+      },
+    });
+
+    return profile.data;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+// const logout = async();
+
+module.exports = { getToken, getProfile };

@@ -1,6 +1,7 @@
 const axios = require("axios");
 const queryString = require("querystring");
-const { kakaoService } = require("../../../services/auth");
+const { kakaoService, localService } = require("../../../services/auth");
+const { userService, tokenService } = require("../../../services/database");
 
 exports.login = async (req, res) => {
   try {
@@ -11,16 +12,6 @@ exports.login = async (req, res) => {
       response_type: "code",
       // state: "", //CSRF 공격 보호를 위한 임의의 문자열
     };
-
-    // const response = await axios({
-    //   method: "GET",
-    //   baseURL: "https://kauth.kakao.com",
-    //   url: "/oauth/authorize",
-    //   params,
-    // });
-
-    // return res.redirect("/auth/kakao/callback");
-    // return res.send(response.data);
 
     return res.redirect(`${url}?${queryString.stringify(params)}`);
   } catch (error) {
@@ -34,9 +25,32 @@ exports.getLocalToken = async (req, res) => {
     const tokens = await kakaoService.getToken(req.query.code);
     console.log(tokens);
 
-    return res.send(tokens);
+    const { access_token, refresh_token } = tokens;
+    const profile = await kakaoService.getProfile(access_token);
+
+    // console.log(profile);
+    const exUser = await userService.findOneUser({
+      provider: "kakao",
+      providerId: profile.id,
+    });
+
+    if (exUser) {
+      const localToken = localService.createToken(exUser);
+      return res.send(localToken);
+    }
+
+    const newUser = await userService.createUser({
+      email: profile.kakao_account.email,
+      nick: profile.kakao_account.profile.nickname,
+      providerId: profile.id,
+      provider: "kakao",
+    });
+
+    const localToken = localService.createToken(newUser);
+
+    return res.send(localToken);
   } catch (error) {
-    console.error(error);
+    // console.error(error);
     return res.send(error);
   }
 };
