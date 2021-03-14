@@ -1,102 +1,42 @@
-const jwt = require("jsonwebtoken");
 const axios = require("axios");
+const queryString = require("querystring");
+const { kakaoService } = require("../../../services/auth");
 
-const {
-  createLocalToken,
-  refreshLocalToken,
-} = require("../../../services/auth/local");
-const { parseToken } = require("../../../middleware/auth");
-// const { findOneUser, destroyUser } = require("../../../services/database");
-const { userService } = require("../../../services/database");
-
-exports.getToken = (req, res) => {
-  const localToken = createLocalToken(req.user);
-  console.log("jwt: ", localToken);
-  // res.redirect("/auth/login");
-  res.send(localToken);
-};
-
-exports.refreshToken = async (req, res) => {
+exports.login = async (req, res) => {
   try {
-    const newToken = await refreshLocalToken(req.headers.Authorization);
-    res.send(newToken);
+    const url = "https://kauth.kakao.com/oauth/authorize";
+    const params = {
+      client_id: process.env.KAKAO_ID,
+      redirect_uri: "http://localhost:5000/auth/kakao/callback",
+      response_type: "code",
+      // state: "", //CSRF 공격 보호를 위한 임의의 문자열
+    };
+
+    // const response = await axios({
+    //   method: "GET",
+    //   baseURL: "https://kauth.kakao.com",
+    //   url: "/oauth/authorize",
+    //   params,
+    // });
+
+    // return res.redirect("/auth/kakao/callback");
+    // return res.send(response.data);
+
+    return res.redirect(`${url}?${queryString.stringify(params)}`);
   } catch (error) {
     console.error(error);
-    res.send(error);
+    return res.send(error);
   }
 };
 
-exports.logout = async (req, res) => {
-  const token = parseToken(req);
-  const data = jwt.verify(token, process.env.JWT_SECRET);
-  const providerId = data.providerId;
-
-  axios
-    .get("https://kapi.kakao.com/v1/user/logout", {
-      params: {
-        target_id: providerId,
-        target_id_type: "user_id",
-      },
-      headers: {
-        Authorization: `KakaoAK ${process.env.KAKAO_ADMIN}`,
-      },
-    })
-    .then()
-    .catch((error) => {
-      console.error(error);
-    })
-    .finally(() => {
-      res.send("logout success");
-    });
-  // res.send(response);
-
-  // try {
-  //   await axios({
-  //     method: "POST",
-  //     headers: {
-  //       // "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
-  //       authorization: `KakaoAK ${process.env.KAKAO_ADMIN}`,
-  //     },
-  //     url: "https://kapi.kakao.com/v1/user/logout",
-  //     data: {
-  //       target_id: providerId,
-  //       target_id_type: "user_id",
-  //     },
-  //   });
-
-  // } catch (error) {
-  //   // console.log(error);
-  //   res.send(error);
-  // } finally {
-  // res.send('logout ok')
-  // }
-};
-
-exports.signout = async (req, res) => {
+exports.getLocalToken = async (req, res) => {
   try {
-    const token = parseToken(req);
-    const data = jwt.verify(token, process.env.JWT_SECRET);
-    const providerId = data.providerId;
-    // await destroyUser(providerId);
-    await userService.destroyUser(providerId);
+    const tokens = await kakaoService.getToken(req.query.code);
+    console.log(tokens);
 
-    await axios.post(
-      "https://kapi.kakao.com/v1/user/unlink",
-      {
-        target_id: providerId,
-        target_id_type: "user_id",
-      },
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
-          Authorization: `KakaoAK ${process.env.KAKAO_ADMIN}`,
-        },
-      }
-    );
-
-    res.send("signout ok");
+    return res.send(tokens);
   } catch (error) {
     console.error(error);
-    res.send(error);
+    return res.send(error);
   }
 };

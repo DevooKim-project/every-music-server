@@ -1,4 +1,4 @@
-const { default: axios } = require("axios");
+const axios = require("axios");
 const jwt = require("jsonwebtoken");
 const queryString = require("querystring");
 const { parseToken } = require("../../../middleware/auth");

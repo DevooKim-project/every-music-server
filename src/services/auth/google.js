@@ -1,5 +1,6 @@
 const axios = require("axios");
 const jwt = require("jsonwebtoken");
+const qs = require("qs");
 
 const { parseToken } = require("../../middleware/auth");
 const { tokenService } = require("../database");
@@ -18,7 +19,7 @@ const getToken = async (code) => {
       method: "POST",
       // url: "https://accounts.gogle.com/o/oauth2/token",
       url: "https://oauth2.googleapis.com/token",
-      data,
+      data: qs.stringify(data),
     });
 
     console.log("Google: ", response.data);

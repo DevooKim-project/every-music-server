@@ -1,23 +1,9 @@
 const express = require("express");
-const passport = require("passport");
-
-const { getToken, refreshToken, logout, signout } = require("./controller");
-const { verifyToken } = require("../../../middleware/auth");
+const { login, getLocalToken } = require("./controller");
 
 const router = express.Router();
 
-router.get("/", passport.authenticate("kakao", { session: false }));
-
-router.get(
-  "/callback",
-  passport.authenticate("kakao", { session: false }),
-  getToken
-);
-
-router.get("/refresh", verifyToken, refreshToken);
-
-router.get("/logout", verifyToken, logout);
-
-router.get("/signout", signout);
+router.get("/", login);
+router.get("/callback", getLocalToken);
 
 module.exports = router;
