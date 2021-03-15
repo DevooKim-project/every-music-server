@@ -5,9 +5,9 @@ WORKDIR "/app"
 RUN apk --no-cache add --virtual builds-deps build-base python
 COPY ./package.json ./
 RUN yarn
-RUN yarn global add pm2
+# RUN yarn global add pm2
 
 COPY . .
 
-CMD ["pm2-runtime", "start", "ecosystem.config.js"]
-# CMD ["npm", "run", "dev"]
+# CMD ["pm2-runtime", "start", "ecosystem.config.js"]
+CMD ["yarn", "dev"]
