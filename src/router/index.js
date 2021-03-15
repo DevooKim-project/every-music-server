@@ -2,6 +2,7 @@ const express = require("express");
 
 const authRoute = require("./auth");
 const playListRoute = require("./playlist");
+const test = require("./test");
 
 const router = express.Router();
 
@@ -11,6 +12,16 @@ router.get("/", (req, res) => {
 
 router.use("/auth", authRoute);
 router.use("/playListRoute", playListRoute);
+
+router.get("/test", async (req, res) => {
+  try {
+    const response = await test();
+    res.send(response);
+  } catch (error) {
+    console.error(error);
+    res.send(error);
+  }
+});
 
 router.use((req, res) => {
   res.status(404).send("Bad request");

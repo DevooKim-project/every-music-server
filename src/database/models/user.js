@@ -11,22 +11,27 @@ module.exports = class User extends Sequelize.Model {
           primaryKey: true,
         },
         email: {
-          type: DataTypes.STRING(40),
+          type: DataTypes.STRING(255),
           allowNull: true,
           validate: {
             isEmail: true,
           },
-          // unique: true,
-          unique: false,
         },
         nick: {
-          type: DataTypes.STRING(20),
+          type: DataTypes.STRING(40),
           allowNull: false,
-          // unique: true,
-          // primaryKey: true,
+        },
+        playList: {
+          type: DataTypes.STRING,
+          get() {
+            return this.getDataValue("playList").split(";");
+          },
+          set(val) {
+            return this.setDataValue("playList", val.join(";"));
+          },
         },
         provider: {
-          type: DataTypes.STRING(10),
+          type: DataTypes.STRING(20),
           allowNull: false,
         },
         providerId: {
