@@ -2,8 +2,10 @@ const mongoose = require("mongoose");
 
 const { Schema } = mongoose;
 const tokenSchema = new Schema({
-  accessToken: String,
-  refreshToken: String,
+  accessTokenGoogle: String,
+  accessTokenSpotify: String,
+  refreshTokenGoogle: String,
+  refreshTokenSpotify: String,
   userId: {
     type: String,
     required: true,

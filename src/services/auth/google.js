@@ -35,7 +35,10 @@ const refreshToken = async (token) => {
     const localToken = parseToken(token);
     const payload = jwt.verify(localToken, process.env.JWT_SECRET);
     const userId = payload.id;
-    const refreshToken = await tokenService.findRefreshToken(userId);
+    const refreshToken = await tokenService.findRefreshToken({
+      userId,
+      type: "google",
+    });
     console.log("find refresh: ", refreshToken);
 
     const data = {
@@ -49,17 +52,21 @@ const refreshToken = async (token) => {
       method: "POST",
 
       url: "https://oauth2.googleapis.com/token",
-      data,
+      data: qs.stringify(data),
     });
 
     console.log(newToken);
 
-    await tokenService.updateToken({
-      userId,
-      accessToken: newToken.accessToken,
-    });
+    await tokenService.updateToken(
+      {
+        userId,
+        accessToken: newToken.accessToken,
+      },
+      "google"
+    );
     return;
   } catch (error) {
+    console.error(error);
     throw new Error(error);
   }
 };

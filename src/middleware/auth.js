@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const { Base64 } = require("js-base64");
 
 exports.isLoggedIn = (req, res, next) => {
   if (req.isAuthenticated()) {
@@ -36,4 +37,9 @@ exports.parseToken = (token) => {
   // let token = req.headers.authorization;
   const newToken = token.replace(/^Bearer\s+/, "");
   return newToken;
+};
+
+exports.base64Encode = (key) => {
+  const base64Key = Base64.encode(key);
+  return base64Key;
 };

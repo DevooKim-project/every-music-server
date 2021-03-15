@@ -43,10 +43,13 @@ exports.getLocalToken = async (req, res) => {
 
     if (exUser) {
       const localToken = localService.createToken(exUser);
-      await tokenService.updateToken({
-        userId: exUser.id,
-        accessToken: access_token,
-      });
+      await tokenService.updateToken(
+        {
+          userId: exUser.id,
+          accessToken: access_token,
+        },
+        "google"
+      );
       console.log("exUser");
       return res.send(localToken);
     }
@@ -108,7 +111,7 @@ exports.singout = async (req, res) => {
     const userId = payload.id;
 
     //refresh 토큰 검색
-    const refreshToken = await tokenService.findRefreshToken(userId);
+    const refreshToken = await tokenService.findRefreshToken(userId, "google");
     //토큰 만료 요청 보냄
     await axios({
       method: "POST",
