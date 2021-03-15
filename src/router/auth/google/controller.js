@@ -27,10 +27,20 @@ exports.login = async (req, res) => {
   return res.redirect(`${url}?${qs.stringify(params)}`);
 };
 
+exports.getServiceToken = async (req, res, next) => {
+  try {
+    const tokens = await googleService.getToken(req.query.code);
+    req.tokens = tokens;
+    next();
+  } catch (error) {
+    console.error(error);
+    res.send(error);
+  }
+};
+
 exports.getLocalToken = async (req, res) => {
   try {
-    // const { access_token, refresh_token, id_token } = req.tokens;
-    const tokens = await googleService.getToken(req.query.code);
+    const tokens = req.tokens;
 
     //refresh_token은 최초 1회 발급
     const { access_token, refresh_token, id_token } = tokens;
