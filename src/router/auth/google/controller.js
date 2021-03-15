@@ -67,11 +67,14 @@ exports.getLocalToken = async (req, res) => {
     const localToken = localService.createToken(newUser);
 
     //access토큰, refresh토큰 저장
-    await tokenService.storeToken({
-      userId: newUser.id,
-      accessToken: access_token,
-      refreshToken: refresh_token,
-    });
+    await tokenService.storeToken(
+      {
+        userId: newUser.id,
+        accessToken: access_token,
+        refreshToken: refresh_token,
+      },
+      "google"
+    );
 
     return res.send(localToken);
   } catch (error) {

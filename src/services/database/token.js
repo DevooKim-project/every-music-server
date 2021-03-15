@@ -21,7 +21,7 @@ const storeToken = async (data, type) => {
         return;
 
       default:
-        throw new Error("token type error");
+        throw new Error("storeToken type error");
     }
   } catch (error) {
     throw new Error(error);
@@ -31,7 +31,7 @@ const storeToken = async (data, type) => {
 const findRefreshToken = async (userId, type) => {
   try {
     const token = await Token.findOne({ userId });
-
+    console.log(token);
     switch (type) {
       case "google":
         return token.refreshTokenGoogle;
@@ -39,7 +39,7 @@ const findRefreshToken = async (userId, type) => {
         return token.refreshTokenSpotify;
 
       default:
-        throw new Error("token type error");
+        throw new Error("refreshToken type error");
     }
   } catch (error) {
     throw new Error(error);
@@ -79,7 +79,7 @@ const updateToken = async (data, type) => {
         break;
 
       default:
-        throw new Error("token type error");
+        throw new Error("updateToken type error");
     }
 
     return;

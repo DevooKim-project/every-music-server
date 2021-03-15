@@ -37,6 +37,7 @@ exports.getServiceToken = async (req, res, next) => {
 exports.getLocalToken = async (req, res) => {
   try {
     const { access_token, refresh_token } = req.tokens;
+    console.log("refresh_token: ", refresh_token);
     const profile = await spotifyService.getProfile(access_token);
 
     const exUser = await userService.findOneUser({
@@ -46,10 +47,11 @@ exports.getLocalToken = async (req, res) => {
 
     if (exUser) {
       const localToken = localService.createToken(exUser);
-      await tokenService.storeToken(
+      await tokenService.updateToken(
         {
           userId: exUser.id,
           accessToken: access_token,
+          refresh_token: refresh_token,
         },
         "spotify"
       );
@@ -75,6 +77,30 @@ exports.getLocalToken = async (req, res) => {
     );
 
     return res.send(localToken);
+  } catch (error) {
+    console.error(error);
+    return res.send(error);
+  }
+};
+
+exports.refreshToken = async (req, res) => {
+  try {
+    const type = req.params.type;
+
+    switch (type) {
+      case "local":
+        const newToken = await localService.refreshToken(
+          req.headers.authorization
+        );
+        return res.send(newToken);
+
+      case "provider":
+        await spotifyService.refreshToken(req.headers.authorization);
+        return res.send("spotify refresh ok");
+
+      default:
+        throw new Error("token type error");
+    }
   } catch (error) {
     console.error(error);
     return res.send(error);
