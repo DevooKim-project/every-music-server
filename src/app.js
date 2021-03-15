@@ -3,14 +3,12 @@ const morgan = require("morgan");
 const session = require("express-session");
 const cookieParser = require("cookie-parser");
 
-const envConfig = require("./config/envConfig");
 const apiRouter = require("./router");
-const dbConfig = require("./database");
+const configs = require("./config");
 
 const app = express();
 
-envConfig();
-dbConfig();
+configs();
 
 app.set("port", process.env.PORT || 8001);
 app.use(morgan("dev"));
