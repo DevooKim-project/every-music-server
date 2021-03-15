@@ -106,3 +106,21 @@ exports.refreshToken = async (req, res) => {
     return res.send(error);
   }
 };
+
+exports.signout = async (req, res) => {
+  try {
+    const localToken = parseToken(req.headers.authorization);
+    const payload = jwt.verify(localToken, process.env.JWT_SECRET);
+    const userId = payload.id;
+
+    //사용자가 스포티파이에서 직접 토큰 제거해야함 따라서 db에서만 제거
+
+    await tokenService.deleteToken(userId);
+    await userService.destroyUser({ id: userId });
+
+    return res.send("signout ok");
+  } catch (error) {
+    console.error(error);
+    return res.send(error);
+  }
+};
