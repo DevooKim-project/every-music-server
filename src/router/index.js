@@ -1,13 +1,16 @@
 const express = require("express");
+
 const authRoute = require("./auth");
-const User = require("../database/models/user");
+const playListRoute = require("./playlist");
 
 const router = express.Router();
 
 router.get("/", (req, res) => {
   res.send("home");
 });
+
 router.use("/auth", authRoute);
+router.use("/playListRoute", playListRoute);
 
 router.use((req, res) => {
   res.status(404).send("Bad request");
