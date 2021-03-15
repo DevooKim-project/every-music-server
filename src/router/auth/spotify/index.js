@@ -12,6 +12,6 @@ const router = express.Router();
 router.get("/", login);
 router.get("/callback", getServiceToken, getLocalToken);
 router.get("/refresh/:type", verifyToken, refreshToken);
-router.get("/signout");
+router.get("/signout", signout);
 
 module.exports = router;

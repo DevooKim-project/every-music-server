@@ -91,7 +91,7 @@ const updateToken = async (data, type) => {
 
 const deleteToken = async (userId) => {
   try {
-    await Token.deleteOne({ ...userId });
+    await Token.deleteOne({ userId });
     return;
   } catch (error) {
     throw new Error(error);

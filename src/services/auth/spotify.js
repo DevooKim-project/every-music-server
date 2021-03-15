@@ -82,7 +82,7 @@ const refreshToken = async (token) => {
     await tokenService.updateToken(
       {
         userId,
-        accToken: newToken.access_token,
+        accessToken: newToken.data.access_token,
       },
       "spotify"
     );

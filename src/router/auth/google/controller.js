@@ -125,18 +125,26 @@ exports.singout = async (req, res) => {
 
     //refresh 토큰 검색
     const refreshToken = await tokenService.findRefreshToken(userId, "google");
-    //토큰 만료 요청 보냄
-    await axios({
+
+    const options = {
       method: "POST",
       url: "https://oauth2.googleapis.com/revoke",
       params: {
         token: refreshToken,
       },
-    });
-    //토큰 제거
-    await tokenService.deleteToken(userId);
-    //유저 제거
-    await userService.destroyUser({ id: userId });
+    };
+
+    Promise.all([
+      axios(options),
+      tokenService.deleteToken(userId),
+      userService.destroyUser({ id: userId }),
+    ]);
+    // //토큰 만료 요청 보냄
+    // await axios(options);
+    // //토큰 제거
+    // await tokenService.deleteToken(userId);
+    // //유저 제거
+    // await userService.destroyUser({ id: userId });
 
     return res.send("signout ok");
   } catch (error) {

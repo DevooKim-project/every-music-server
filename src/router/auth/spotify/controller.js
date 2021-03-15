@@ -1,7 +1,9 @@
 const qs = require("qs");
+const jwt = require("jsonwebtoken");
 
 const { spotifyService, localService } = require("../../../services/auth");
 const { userService, tokenService } = require("../../../services/database");
+const { parseToken } = require("../../../middleware/auth");
 
 exports.login = async (req, res) => {
   const url = "https://accounts.spotify.com/authorize";
@@ -113,10 +115,11 @@ exports.signout = async (req, res) => {
     const payload = jwt.verify(localToken, process.env.JWT_SECRET);
     const userId = payload.id;
 
-    //사용자가 스포티파이에서 직접 토큰 제거해야함 따라서 db에서만 제거
-
-    await tokenService.deleteToken(userId);
-    await userService.destroyUser({ id: userId });
+    //사용자가 스포티파이에서 직접 토큰 제거해야함(프론트에서 링크 연결) 서버에서는 db에서만 제거
+    Promise.all([
+      tokenService.deleteToken(userId),
+      userService.destroyUser({ id: userId }),
+    ]);
 
     return res.send("signout ok");
   } catch (error) {

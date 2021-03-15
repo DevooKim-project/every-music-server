@@ -52,12 +52,11 @@ const refreshToken = async (token) => {
       data: qs.stringify(data),
     });
 
-    console.log(newToken);
-
+    console.log("newToken: ", newToken.data);
     await tokenService.updateToken(
       {
         userId,
-        accessToken: newToken.accessToken,
+        accessToken: newToken.data.access_token,
       },
       "google"
     );
