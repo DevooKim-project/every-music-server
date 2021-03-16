@@ -8,6 +8,10 @@ const artistSchema = new Schema({
     spotify: { type: String },
     youtube: { type: String },
   },
+  display: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 module.exports = mongoose.model("Artist", artistSchema);

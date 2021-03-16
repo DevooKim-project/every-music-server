@@ -84,13 +84,22 @@ const test = async () => {
       }
     );
 
-    const a = await PlayList.find({}).populate("tracks", "title");
-    const b = await Track.find({
-      // artists: { $all: artist1.id },
-      artists: artist1.id,
-    }).populate("artists", "name");
-    const c = await Artist.find({});
+    // const a = await PlayList.find({}).populate("tracks", "title");
+    // const b = await Track.find({
+    //   // artists: { $all: artist1.id },
+    //   artists: artist1.id,
+    // }).populate("artists", "name");
+    // const c = await Artist.find({});
+    // console.log(b);
+
+    const a = await Album.find({});
+    console.log(a);
+
+    await Track.deleteOne({ _id: track1.id });
+
+    const b = await Album.find({});
     console.log(b);
+
     return b;
   } catch (error) {
     console.error(error);

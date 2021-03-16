@@ -11,6 +11,10 @@ const tokenSchema = new Schema({
     required: true,
   },
   updatedAt: { type: Date, default: Date.now },
+  display: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 // const Token = mongoose.model("Token", tokenSchema);
