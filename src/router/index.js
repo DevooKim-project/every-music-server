@@ -11,7 +11,7 @@ router.get("/", (req, res) => {
 });
 
 router.use("/auth", authRoute);
-router.use("/playListRoute", playListRoute);
+router.use("/playList", playListRoute);
 
 router.get("/test", async (req, res) => {
   try {

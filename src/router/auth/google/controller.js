@@ -13,6 +13,7 @@ exports.login = async (req, res) => {
     "https://www.googleapis.com/auth/userinfo.profile",
     "https://www.googleapis.com/auth/youtube.readonly",
     "https://www.googleapis.com/auth/youtube.upload",
+    "https://www.googleapis.com/auth/youtube.force-ssl",
     "https://www.googleapis.com/auth/youtube",
   ];
 
@@ -58,7 +59,7 @@ exports.getLocalToken = async (req, res) => {
           userId: exUser.id,
           accessToken: access_token,
         },
-        "google"
+        { provider: "google", type: "access" }
       );
       console.log("exUser");
       return res.send(localToken);
@@ -124,7 +125,10 @@ exports.singout = async (req, res) => {
     const userId = payload.id;
 
     //refresh 토큰 검색
-    const refreshToken = await tokenService.findRefreshToken(userId, "google");
+    const refreshToken = await tokenService.findToken(userId, {
+      provider: "google",
+      type: "refresh",
+    });
 
     const options = {
       method: "POST",

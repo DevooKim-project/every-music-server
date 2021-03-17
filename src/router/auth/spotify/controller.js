@@ -55,7 +55,7 @@ exports.getLocalToken = async (req, res) => {
           accessToken: access_token,
           refresh_token: refresh_token,
         },
-        "spotify"
+        { provider: "spotify", type: "all" }
       );
       return res.send(localToken);
     }

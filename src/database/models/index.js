@@ -26,7 +26,7 @@ module.exports = () => {
   Playlist.associate(db);
 
   sequelize
-    .sync({ force: true })
+    .sync({ force: false })
     .then(() => {
       console.log("mysql connect ok");
     })
