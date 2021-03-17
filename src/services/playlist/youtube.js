@@ -32,16 +32,7 @@ const searchList = async (token, nextPageToken) => {
   }
 };
 
-const parsePlayListData = (playList) => {
-  return {
-    id: playList.id,
-    title: playList.snippet.title,
-    thumbnail: playList.snippet.thumbnails.default,
-    description: playList.snippet.description,
-  };
-};
-
-const getItems = async (id, token, nextPageToken) => {
+const getPlayListItems = async (id, token, nextPageToken) => {
   try {
     const params = {
       part: "contentDetails",
@@ -62,7 +53,7 @@ const getItems = async (id, token, nextPageToken) => {
     const { data } = response;
     let recursive = [];
     if (data.nextPageToken) {
-      recursive = await getItems(id, token, data.nextPageToken);
+      recursive = await getPlayListItems(id, token, data.nextPageToken);
     }
 
     return [...data.items, ...recursive];
@@ -72,4 +63,47 @@ const getItems = async (id, token, nextPageToken) => {
   }
 };
 
-module.exports = { searchList, parsePlayListData, getItems };
+const getTrackInfo = async (id, token) => {
+  try {
+    const params = {
+      part: "snippet",
+      id: id,
+    };
+    const options = {
+      method: "GET",
+      url: "https://www.googleapis.com/youtube/v3/videos",
+      headers: {
+        authorization: `Bearer ${token}`,
+      },
+      params,
+    };
+
+    const response = await axios(options, params);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error);
+  }
+};
+
+const parsePlayListData = (playList) => {
+  return {
+    id: playList.id,
+    title: playList.snippet.title,
+    thumbnail: playList.snippet.thumbnails,
+    description: playList.snippet.description,
+  };
+};
+
+const parseTrackData = (track) => {
+  return {
+    id: track[0].id,
+  };
+};
+
+module.exports = {
+  searchList,
+  parsePlayListData,
+  getPlayListItems,
+  getTrackInfo,
+};

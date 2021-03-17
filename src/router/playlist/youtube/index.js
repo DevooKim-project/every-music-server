@@ -1,18 +1,13 @@
 const express = require("express");
 
-const {
-  searchPlayList,
-  getPlayListItem,
-  getTrackInfo,
-  structTrack,
-} = require("./controller");
+const { searchPlayList, getTracks, getTrackInfo } = require("./controller");
 
 const router = express.Router();
 
 router.get("/playLists", searchPlayList);
-router.get("/playListItems", getPlayListItem, getTrackInfo, structTrack);
-// router.get("/tracks");
-// router.get("/struct");
+router.get("/tracks", getTracks);
 router.get("/insert");
+
+router.get("/test", getTrackInfo);
 
 module.exports = router;
