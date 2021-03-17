@@ -21,26 +21,28 @@ const searchList = async (token) => {
     do {
       const response = await axios(options, params);
       const { data } = response;
-      playList.push(...data.items);
+
+      data.items.forEach((item) => {
+        playList.push(parsePlayList(item));
+      });
 
       params.pageToken = data.nextPageToken;
       console.log("test: ", params.pageToken);
     } while (params.pageToken);
 
-    return playList;
+    return { playList };
   } catch (error) {
     console.error(error);
     throw new Error(error);
   }
 };
 
-const getPlayListItems = async (id, token, nextPageToken) => {
+const getPlayListItems = async (id, token) => {
   try {
     const params = {
       part: "contentDetails",
       maxResults: 50,
       playlistId: id,
-      pageToken: nextPageToken,
     };
     const options = {
       method: "GET",
@@ -51,16 +53,18 @@ const getPlayListItems = async (id, token, nextPageToken) => {
       params,
     };
 
-    const playList = [];
+    const trackIds = [];
     do {
       const response = await axios(options, params);
       const { data } = response;
-      playList.push(...data.items);
+      data.items.forEach((item) => {
+        trackIds.push(parseTrackItem(item));
+      });
 
       params.pageToken = data.nextPageToken;
     } while (params.pageToken);
 
-    return playList;
+    return { trackIds };
   } catch (error) {
     // console.error(error);
     throw new Error(error);
@@ -71,7 +75,7 @@ const getTrackInfo = async (id, token) => {
   try {
     const params = {
       part: "snippet",
-      id: id,
+      id: id.toString(),
     };
     const options = {
       method: "GET",
@@ -82,32 +86,66 @@ const getTrackInfo = async (id, token) => {
       params,
     };
 
-    const response = await axios(options, params);
-    return response.data;
+    const trackInfo = [];
+    do {
+      const response = await axios(options, params);
+      const { data } = response;
+      data.items.forEach((item) => {
+        trackInfo.push(parseTrackInfo(item));
+      });
+
+      params.pageToken = data.nextPageToken;
+    } while (params.pageToken);
+
+    return { trackInfo };
   } catch (error) {
     console.error(error);
     throw new Error(error);
   }
 };
 
-const parsePlayListData = (playList) => {
+const parsePlayList = (playList) => {
   return {
     id: playList.id,
     title: playList.snippet.title,
-    thumbnail: playList.snippet.thumbnails,
+    // thumbnail: playList.snippet.thumbnails,
     description: playList.snippet.description,
   };
 };
 
-const parseTrackData = (track) => {
+const parseTrackItem = (trackId) => {
+  return trackId.contentDetails.videoId;
+};
+
+const parseTrackInfo = (track) => {
+  const artist = track.snippet.channelTitle.replace(/ - Topic/, "");
+  const album = [track.snippet.tags[0], track.snippet.tags[1]]; //[artist, albumTitle]
   return {
-    id: track[0].id,
+    id: track.id,
+    title: track.snippet.title,
+    artist: artist,
+    album: album,
+    // thumbnail: track.snippet.thumbnails,
   };
 };
 
+const splitArray50 = (array) => {
+  let start = 0;
+  let end = 50;
+  const result = [];
+  while (start < array.length) {
+    result.push(array.slice(start, end));
+    start = end;
+    end += 50;
+  }
+  return result;
+};
+
+const setLocalPlayList = (array) => {};
+
 module.exports = {
   searchList,
-  parsePlayListData,
   getPlayListItems,
   getTrackInfo,
+  splitArray50,
 };
