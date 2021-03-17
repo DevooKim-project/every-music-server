@@ -63,9 +63,6 @@ exports.getTracks = async (req, res, next) => {
       );
     }
 
-    //playList와 track을 합친다. (array index 매칭)
-
-    // console.log("trackInfo: ", trackInfos[0].length);
     res.json({
       playList: playLists,
       track: trackInfos,
