@@ -1,12 +1,12 @@
 const { default: axios } = require("axios");
 
-const searchList = async (token, nextPageToken) => {
+const searchList = async (token) => {
   try {
     const params = {
       part: "snippet",
       maxResults: 5,
       mine: true,
-      pageToken: nextPageToken,
+      pageToken: "",
     };
     const options = {
       method: "GET",
@@ -17,15 +17,17 @@ const searchList = async (token, nextPageToken) => {
       params,
     };
 
-    const response = await axios(options, params);
-    const { data } = response;
-    let recursive = [];
+    const playList = [];
+    do {
+      const response = await axios(options, params);
+      const { data } = response;
+      playList.push(...data.items);
 
-    if (data.nextPageToken) {
-      recursive = await searchList(token, data.nextPageToken);
-    }
+      params.pageToken = data.nextPageToken;
+      console.log("test: ", params.pageToken);
+    } while (params.pageToken);
 
-    return [...data.items, ...recursive];
+    return playList;
   } catch (error) {
     console.error(error);
     throw new Error(error);
@@ -49,14 +51,16 @@ const getPlayListItems = async (id, token, nextPageToken) => {
       params,
     };
 
-    const response = await axios(options, params);
-    const { data } = response;
-    let recursive = [];
-    if (data.nextPageToken) {
-      recursive = await getPlayListItems(id, token, data.nextPageToken);
-    }
+    const playList = [];
+    do {
+      const response = await axios(options, params);
+      const { data } = response;
+      playList.push(...data.items);
 
-    return [...data.items, ...recursive];
+      params.pageToken = data.nextPageToken;
+    } while (params.pageToken);
+
+    return playList;
   } catch (error) {
     // console.error(error);
     throw new Error(error);

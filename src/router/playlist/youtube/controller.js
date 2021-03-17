@@ -14,7 +14,7 @@ exports.searchPlayList = async (req, res) => {
       type: "access",
     });
 
-    let data = await youtubeService.searchList(accessToken, " ");
+    let data = await youtubeService.searchList(accessToken);
     data = data.map((element) => {
       return youtubeService.parsePlayListData(element);
     });
