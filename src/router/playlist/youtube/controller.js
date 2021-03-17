@@ -4,7 +4,7 @@ const { youtubeService } = require("../../../services/playlist");
 const { tokenService } = require("../../../services/database");
 const { parseToken } = require("../../../middleware/auth");
 
-exports.searchPlayList = async (req, res) => {
+exports.getAccessToken = async (req, res, next) => {
   try {
     const localToken = parseToken(req.headers.authorization);
     const payload = jwt.verify(localToken, process.env.JWT_SECRET);
@@ -13,6 +13,16 @@ exports.searchPlayList = async (req, res) => {
       provider: "google",
       type: "access",
     });
+    req.accessToken = accessToken;
+    next();
+  } catch (error) {
+    console.error(error);
+    res.send(error);
+  }
+};
+exports.searchPlayList = async (req, res) => {
+  try {
+    const accessToken = req.accessToken;
 
     const item = await youtubeService.searchList(accessToken);
 
@@ -24,15 +34,9 @@ exports.searchPlayList = async (req, res) => {
   }
 };
 
-exports.getTracks = async (req, res, next) => {
+exports.getTracks = async (req, res) => {
   try {
-    const localToken = parseToken(req.headers.authorization);
-    const payload = jwt.verify(localToken, process.env.JWT_SECRET);
-    const userId = payload.id;
-    const accessToken = await tokenService.findToken(userId, {
-      provider: "google",
-      type: "access",
-    });
+    const accessToken = req.accessToken;
 
     //playList에서 trackId를 가져온다.
     let { playLists } = req.body;
@@ -72,26 +76,3 @@ exports.getTracks = async (req, res, next) => {
     res.send(error);
   }
 };
-
-exports.getTrackInfo = async (req, res) => {
-  try {
-    const localToken = parseToken(req.headers.authorization);
-    const payload = jwt.verify(localToken, process.env.JWT_SECRET);
-    const userId = payload.id;
-    const accessToken = await tokenService.findToken(userId, {
-      provider: "google",
-      type: "access",
-    });
-
-    const data = await youtubeService.getTrackInfo(
-      ["UcOUJM08bYk", "BfRBYmRrhYg"],
-      accessToken
-    );
-    res.send(data);
-  } catch (error) {
-    console.error(error);
-    res.send(error);
-  }
-};
-
-exports.structTrack = async (req, res) => {};

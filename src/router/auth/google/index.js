@@ -13,6 +13,8 @@ const router = express.Router();
 
 router.get("/", login);
 router.get("/callback", getServiceToken, getLocalToken);
+
+// router.use(verifyToken)
 router.get("/refresh/:type", verifyToken, refreshToken);
 router.get("/signout", verifyToken, singout);
 
