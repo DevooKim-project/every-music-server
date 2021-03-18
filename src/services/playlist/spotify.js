@@ -37,7 +37,7 @@ const getTrack = async (id, token) => {
   try {
     const options = {
       method: "GET",
-      url: `https://api.spotify.com/v1/playlists/${id}`,
+      url: `https://api.spotify.com/v1/playlists/${id}/tracks`,
       headers: {
         authorization: `Bearer ${token}`,
       },
@@ -47,8 +47,8 @@ const getTrack = async (id, token) => {
     do {
       const response = await axios(options);
       const { data } = response;
-      data.tracks.items.forEach((item) => {
-        console.log("item: ", item.track);
+      data.items.forEach((item) => {
+        console.log("item: ", item);
         tracks.push(parseTrackItem(item.track));
       });
       options.url = data.next;
@@ -75,19 +75,24 @@ const parsePlayList = (playList) => {
 };
 
 const parseTrackItem = (track) => {
+  const artists = [];
+  track.artists.forEach((artist) => {
+    artists.push({
+      name: artist.name,
+      id: artist.id,
+    });
+  });
   return {
     id: track.id,
     title: track.name,
-    artist: {
-      name: track.artists.name,
-      id: track.artists.id,
-    },
+    artists: artists,
     album: {
       name: track.album.name,
       id: track.album.id,
     },
     duration_ms: track.duration_ms,
     track_number: track.track_number,
+    thumbnail: track.album.images,
   };
 };
 

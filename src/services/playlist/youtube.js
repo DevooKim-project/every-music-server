@@ -31,7 +31,7 @@ const searchList = async (token) => {
       console.log("test: ", params.pageToken);
     } while (params.pageToken);
 
-    return { playList };
+    return { playLists };
   } catch (error) {
     console.error(error);
     throw new Error(error);
@@ -87,18 +87,18 @@ const getTrackInfo = async (id, token) => {
       params,
     };
 
-    const trackInfo = [];
+    const trackInfos = [];
     do {
       const response = await axios(options, params);
       const { data } = response;
       data.items.forEach((item) => {
-        trackInfo.push(parseTrackInfo(item));
+        trackInfos.push(parseTrackInfo(item));
       });
 
       params.pageToken = data.nextPageToken;
     } while (params.pageToken);
 
-    return { trackInfo };
+    return { trackInfos };
   } catch (error) {
     console.error(error);
     throw new Error(error);
@@ -109,8 +109,12 @@ const parsePlayList = (playList) => {
   return {
     id: playList.id,
     title: playList.snippet.title,
-    // thumbnail: playList.snippet.thumbnails,
+    thumbnail: playList.snippet.thumbnails,
     description: playList.snippet.description,
+    owner: {
+      name: playList.snippet.channelTitle,
+      id: playList.snippet.channelId,
+    },
   };
 };
 
@@ -119,14 +123,21 @@ const parseTrackItem = (trackId) => {
 };
 
 const parseTrackInfo = (track) => {
-  const artist = track.snippet.channelTitle.replace(/ - Topic/, "");
-  const album = [track.snippet.tags[0], track.snippet.tags[1]]; //[artist, albumTitle]
+  const artist = {
+    name: track.snippet.channelTitle.replace(/ - Topic/, ""),
+    id: track.snippet.channelId,
+  };
+  const album = {
+    // name: track.snippet.tags[1],
+    // id: "",
+  };
+
   return {
     id: track.id,
     title: track.snippet.title,
     artist: artist,
     album: album,
-    // thumbnail: track.snippet.thumbnails,
+    thumbnail: track.snippet.thumbnails,
   };
 };
 

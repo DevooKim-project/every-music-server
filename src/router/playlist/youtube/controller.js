@@ -49,7 +49,7 @@ exports.getTracks = async (req, res) => {
       trackIds.push(item.trackIds);
     }
 
-    //trackId로 trackInfo를 가져온다.
+    //trackId로 track을 가져온다.
     const trackInfos = [];
     for (const trackId of trackIds) {
       //한번에 최대 50개 가능
@@ -57,7 +57,7 @@ exports.getTracks = async (req, res) => {
       for (const t of youtubeService.splitArray50(trackId)) {
         console.log(t.length);
         const item = await youtubeService.getTrackInfo(t, accessToken);
-        tracks.push(item.trackInfo);
+        tracks.push(item.trackInfos);
       }
 
       //50개로 나누어진 배열 결합
@@ -70,8 +70,8 @@ exports.getTracks = async (req, res) => {
 
     //PlayList와 track은 인덱스로 매칭
     res.json({
-      playList: playLists,
-      track: trackInfos,
+      playLists: playLists,
+      tracks: trackInfos,
     });
   } catch (error) {
     console.error(error);
