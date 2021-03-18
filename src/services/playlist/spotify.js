@@ -65,10 +65,10 @@ const parsePlayList = (playList) => {
   return {
     id: playList.id,
     title: playList.name,
-    thumbnail: playList.images,
+    thumbnail: playList.images[0],
     description: playList.description,
     owner: {
-      name: playList.owner.name,
+      name: playList.owner.display_name,
       id: playList.owner.id,
     },
   };
@@ -92,7 +92,7 @@ const parseTrackItem = (track) => {
     },
     duration_ms: track.duration_ms,
     track_number: track.track_number,
-    thumbnail: track.album.images,
+    thumbnail: track.album.images[0],
   };
 };
 

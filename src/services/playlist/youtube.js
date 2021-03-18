@@ -22,13 +22,11 @@ const searchList = async (token) => {
       const response = await axios(options, params);
       const { data } = response;
 
-      console.log(data.items);
       data.items.forEach((item) => {
         playLists.push(parsePlayList(item));
       });
 
       params.pageToken = data.nextPageToken;
-      console.log("test: ", params.pageToken);
     } while (params.pageToken);
 
     return { playLists };
@@ -109,7 +107,7 @@ const parsePlayList = (playList) => {
   return {
     id: playList.id,
     title: playList.snippet.title,
-    thumbnail: playList.snippet.thumbnails,
+    thumbnail: playList.snippet.thumbnails.default,
     description: playList.snippet.description,
     owner: {
       name: playList.snippet.channelTitle,
@@ -137,7 +135,7 @@ const parseTrackInfo = (track) => {
     title: track.snippet.title,
     artist: artist,
     album: album,
-    thumbnail: track.snippet.thumbnails,
+    thumbnail: track.snippet.thumbnails.default,
   };
 };
 

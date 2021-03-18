@@ -59,11 +59,13 @@ exports.getTracks = async (req, res) => {
       }
 
       //50개로 나누어진 배열 결합
-      trackInfos.push(
-        tracks.reduce((prev, current) => {
-          return prev.concat(current);
-        })
-      );
+      if (tracks.length !== 0) {
+        trackInfos.push(
+          tracks.reduce((prev, current) => {
+            return prev.concat(current);
+          })
+        );
+      }
     }
 
     //PlayList와 track은 인덱스로 매칭
