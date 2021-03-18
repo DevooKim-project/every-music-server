@@ -20,6 +20,7 @@ exports.getAccessToken = async (req, res, next) => {
     res.send(error);
   }
 };
+
 exports.searchPlayList = async (req, res) => {
   try {
     const accessToken = req.accessToken;
@@ -39,12 +40,12 @@ exports.getTracks = async (req, res) => {
     const accessToken = req.accessToken;
 
     //playList에서 trackId를 가져온다.
-    let { playLists } = req.body;
+    const { playLists } = req.body;
     const trackIds = [];
 
     for (const playList of playLists) {
       const id = playList.id;
-      const item = await youtubeService.getPlayListItems(id, accessToken);
+      const item = await youtubeService.getPlayListItem(id, accessToken);
       trackIds.push(item.trackIds);
     }
 
@@ -67,6 +68,7 @@ exports.getTracks = async (req, res) => {
       );
     }
 
+    //PlayList와 track은 인덱스로 매칭
     res.json({
       playList: playLists,
       track: trackInfos,

@@ -17,13 +17,14 @@ const searchList = async (token) => {
       params,
     };
 
-    const playList = [];
+    const playLists = [];
     do {
       const response = await axios(options, params);
       const { data } = response;
 
+      console.log(data.items);
       data.items.forEach((item) => {
-        playList.push(parsePlayList(item));
+        playLists.push(parsePlayList(item));
       });
 
       params.pageToken = data.nextPageToken;
@@ -37,7 +38,7 @@ const searchList = async (token) => {
   }
 };
 
-const getPlayListItems = async (id, token) => {
+const getPlayListItem = async (id, token) => {
   try {
     const params = {
       part: "contentDetails",
@@ -145,7 +146,7 @@ const setLocalPlayList = (array) => {};
 
 module.exports = {
   searchList,
-  getPlayListItems,
+  getPlayListItem,
   getTrackInfo,
   splitArray50,
 };
