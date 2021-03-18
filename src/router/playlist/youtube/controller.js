@@ -24,10 +24,8 @@ exports.getAccessToken = async (req, res, next) => {
 exports.searchPlayList = async (req, res) => {
   try {
     const accessToken = req.accessToken;
-
     const item = await youtubeService.searchList(accessToken);
 
-    console.log(item.playList.length);
     res.json(item);
   } catch (error) {
     console.error(error);
@@ -41,8 +39,8 @@ exports.getTracks = async (req, res) => {
 
     //playList에서 trackId를 가져온다.
     const { playLists } = req.body;
-    const trackIds = [];
 
+    const trackIds = [];
     for (const playList of playLists) {
       const id = playList.id;
       const item = await youtubeService.getPlayListItem(id, accessToken);

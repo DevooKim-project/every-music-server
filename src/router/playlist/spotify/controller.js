@@ -24,7 +24,6 @@ exports.getAccessToken = async (req, res, next) => {
 exports.searchPlayList = async (req, res) => {
   try {
     const accessToken = req.accessToken;
-
     const item = await spotifyService.searchList(accessToken);
 
     res.json(item);
@@ -39,13 +38,17 @@ exports.getTrack = async (req, res) => {
     const accessToken = req.accessToken;
 
     const { playLists } = req.body;
+
     const tracks = [];
     for (const playList of playLists) {
       const item = await spotifyService.getTrack(playList.id, accessToken);
       tracks.push(item.tracks);
     }
 
-    res.json({ tracks });
+    res.json({
+      playLists: playLists,
+      tracks: tracks,
+    });
   } catch (error) {
     console.error(error);
     res.send(error);
