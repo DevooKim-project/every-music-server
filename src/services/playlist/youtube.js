@@ -1,5 +1,7 @@
 const axios = require("axios");
 
+const { cacheService } = require("../database");
+
 const searchList = async (token) => {
   try {
     const params = {
@@ -90,7 +92,14 @@ const getTrackInfo = async (id, token) => {
       const response = await axios(options);
       const { data } = response;
       data.items.forEach((item) => {
-        trackInfos.push(parseTrackInfo(item));
+        const track = parseTrackInfo(item);
+        trackInfos.push(track);
+
+        //insert data to redis
+        const key = `artist-${track.artists[0].name}-google`;
+        const value = track.artists.id;
+
+        cacheService.addCacheSet(key, value);
       });
 
       params.pageToken = data.nextPageToken;
@@ -98,8 +107,7 @@ const getTrackInfo = async (id, token) => {
 
     return { trackInfos };
   } catch (error) {
-    console.error(error);
-    throw new Error(error);
+    throw error;
   }
 };
 
@@ -224,7 +232,7 @@ const parseTrackInfo = (track) => {
   return {
     id: track.id,
     title: track.snippet.title,
-    artist: artist,
+    artists: [artist],
     album: album,
     thumbnail: track.snippet.thumbnails.default,
   };

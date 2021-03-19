@@ -1,4 +1,5 @@
 const axios = require("axios");
+const { cacheService } = require("../database");
 
 const searchList = async (token) => {
   try {
@@ -48,7 +49,14 @@ const getTrack = async (id, token) => {
       const response = await axios(options);
       const { data } = response;
       data.items.forEach((item) => {
-        tracks.push(parseTrackItem(item.track));
+        const track = parseTrackItem(item.track);
+        tracks.push(track);
+
+        //insert data to redis
+        const key = `artist-${track.artists[0].name}-spotify`;
+        const value = track.artists[0].id;
+
+        cacheService.addCacheSet(key, value);
       });
       options.url = data.next;
     } while (options.url);
