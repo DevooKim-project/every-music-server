@@ -12,7 +12,7 @@ const router = express.Router();
 
 router.use(verifyToken, getAccessToken);
 router.get("/playLists", searchPlayList);
-router.post("/playLists/:from", insertMusic);
+router.post("/playLists", insertMusic);
 router.get("/tracks", getTracks);
 
 module.exports = router;

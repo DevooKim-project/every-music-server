@@ -4,18 +4,23 @@ const client = redis.createClient(
   process.env.REDIS_HOST
 );
 
-const addCacheSet = (key, value) => {
+const addArtist = (artist, service) => {
+  console.log("artist add cache");
+  const key = `artist-${artist.name}-${service}`;
+  const value = artist.id;
   client.sadd(key, value, (err, data) => {
     if (err) throw err;
     return;
   });
 };
 
-const getCacheSet = (key) => {
+const getArtist = (artist, service) => {
+  console.log("artist: ", artist);
+  const key = `artist-${artist.name}-${service}`;
   client.smembers(key, (err, data) => {
     if (err) throw err;
     return data;
   });
 };
 
-module.exports = { addCacheSet, getCacheSet };
+module.exports = { addArtist, getArtist };
