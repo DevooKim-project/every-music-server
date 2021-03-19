@@ -5,7 +5,6 @@ const client = redis.createClient(
 );
 
 const addArtist = (artist, service) => {
-  console.log("artist add cache");
   const key = `artist-${artist.name}-${service}`;
   const value = artist.id;
   client.sadd(key, value, (err, data) => {

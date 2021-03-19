@@ -36,7 +36,7 @@ const search = async (token) => {
   }
 };
 
-const create = async (playLists, token, from) => {
+const create = async (playList, token, from) => {
   try {
     const params = {
       part: "snippet",
@@ -56,17 +56,20 @@ const create = async (playLists, token, from) => {
       data,
     };
 
-    const newPlayLists = [];
-    for (const playList of playLists) {
-      data.snippet.title = playList.title;
-      const response = await axios(options);
-      newPlayLists.push(response.data.id);
-    }
+    // const newPlayLists = [];
+    // for (const playList of playLists) {
+    //   data.snippet.title = playList.title;
+    //   const response = await axios(options);
+    //   newPlayLists.push(response.data.id);
+    // }
 
-    return newPlayLists;
+    // return newPlayLists;
+    data.snippet.title = playList.title;
+    const response = await axios(options);
+    const id = response.data.id;
+    return { id: id };
   } catch (error) {
-    console.error(error);
-    throw new Error(error);
+    throw error;
   }
 };
 

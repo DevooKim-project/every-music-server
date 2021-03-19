@@ -56,7 +56,7 @@ const getTrack = async (id, token) => {
         const key = `artist-${track.artists[0].name}-spotify`;
         const value = track.artists[0].id;
 
-        cacheService.addCacheSet(key, value);
+        cacheService.addArtist(track.artists[0], "spotify");
       });
       options.url = data.next;
     } while (options.url);

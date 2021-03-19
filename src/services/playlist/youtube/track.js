@@ -9,7 +9,6 @@ const search = async (tracks, token) => {
       q: "",
       type: "channel",
       // topicId: "/m/04rlf",
-      videoId: 10,
     };
     const trackParams = {
       part: "id",
@@ -17,7 +16,7 @@ const search = async (tracks, token) => {
       channelId: "",
       type: "video",
       // topicId: "/m/04rlf",
-      videoId: 10,
+      videoCategoryId: 10,
     };
     const options = {
       method: "GET",
@@ -34,21 +33,26 @@ const search = async (tracks, token) => {
       const artist = track.artists[0];
       let artistIds = cacheService.getArtist(artist, "spotify"); //from google to spotify
 
+      console.log("getArtist - cache: ", artistIds);
       //아티스트 request
       if (!artistIds) {
         artistParams.q = `${artist.name} - Topic`;
-
         options.params = artistParams;
+        console.log("options: ", options);
         const response = await axios(options);
         const items = response.data.items;
         artistIds = [items[0].id.channelId];
+        console.log("search-artist: ", artistIds);
 
         //request 후 redis에 저장
         if (artistIds.length !== 0) {
-          cacheService.addArtist({
-            name: artist.name,
-            id: artistIds,
-          });
+          cacheService.addArtist(
+            {
+              name: artist.name,
+              id: artistIds,
+            },
+            "youtube"
+          );
         }
       }
 
@@ -62,7 +66,7 @@ const search = async (tracks, token) => {
         const response = await axios(options);
         const items = response.data.items;
         trackId = items[0].id.videoId;
-
+        console.log("search-track: ", trackId);
         if (trackId) {
           trackIds.push(trackId);
           break;
@@ -146,14 +150,14 @@ const getInfo = async (id, token) => {
   }
 };
 
-const create = async (id, tracks, token) => {
+const create = async (playListId, trackIds, token) => {
   try {
     const params = {
       part: "snippet",
     };
     const data = {
       snippet: {
-        playlistId: id,
+        playlistId: playListId,
         resourceId: {
           kind: "youtube#video",
           videoId: "",
@@ -162,7 +166,7 @@ const create = async (id, tracks, token) => {
     };
     const options = {
       method: "POST",
-      url: "https://www.googleapis.com/youtube/v3/playlists",
+      url: "https://www.googleapis.com/youtube/v3/playlistItems",
       headers: {
         authorization: `Bearer ${token}`,
       },
@@ -170,16 +174,14 @@ const create = async (id, tracks, token) => {
       data,
     };
 
-    const newTracks = [];
-    for (const track of tracks) {
-      data.snippet.resourceId.videoId = track.id;
+    for (const trackId of trackIds) {
+      data.snippet.resourceId.videoId = trackId;
       const response = await axios(options);
-      newTracks.push(response.data);
+      console.log("insert: ", response.data.items[0].id);
     }
 
-    return newTracks;
+    return;
   } catch (error) {
-    console.error(error);
     throw error;
   }
 };
