@@ -2,6 +2,7 @@ const axios = require("axios");
 
 const { cacheService } = require("../../database");
 
+//캐싱이 적으면 할당량 초과됨
 const search = async (tracks, token) => {
   try {
     const artistParams = {
@@ -71,6 +72,48 @@ const search = async (tracks, token) => {
           trackIds.push(trackId);
           break;
         }
+      }
+    }
+
+    return trackIds;
+  } catch (error) {
+    throw error;
+  }
+};
+
+//아티스트ID로 정확도를 높이는 대신 아티스트 + 트랙명으로 검색하여 API사용량 낮춤
+const searchLight = async (tracks, token) => {
+  try {
+    const trackParams = {
+      part: "id",
+      q: "",
+      type: "video",
+      // topicId: "/m/04rlf",
+      videoCategoryId: 10,
+    };
+    const options = {
+      method: "GET",
+      url: "https://www.googleapis.com/youtube/v3/search",
+      headers: {
+        authorization: `Bearer ${token}`,
+      },
+    };
+
+    const trackIds = [];
+    for (const track of tracks) {
+      const artistName = `${artist.name} - Topic`;
+      const trackTitle = track.title;
+      trackParams.q = artistName + trackTitle;
+
+      options.params = trackParams;
+
+      const response = await axios(options);
+      const items = response.data.items;
+      trackId = items[0].id.videoId;
+      console.log("search-track: ", trackId);
+      if (trackId) {
+        trackIds.push(trackId);
+        break;
       }
     }
 
@@ -186,7 +229,7 @@ const create = async (playListId, trackIds, token) => {
   }
 };
 
-module.exports = { search, getId, getInfo, create };
+module.exports = { search, searchLight, getId, getInfo, create };
 
 //not exports
 const parseTrackItem = (trackId) => {
