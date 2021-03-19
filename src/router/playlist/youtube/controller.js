@@ -24,7 +24,8 @@ exports.getAccessToken = async (req, res, next) => {
 exports.searchPlayList = async (req, res) => {
   try {
     const accessToken = req.accessToken;
-    const item = await youtubeService.searchList(accessToken);
+    // const item = await youtubeService.searchList(accessToken);
+    const item = await youtubeService.playList.search(accessToken);
 
     res.json(item);
   } catch (error) {
@@ -43,7 +44,8 @@ exports.getTracks = async (req, res) => {
     const trackIds = [];
     for (const playList of playLists) {
       const id = playList.id;
-      const item = await youtubeService.getPlayListItem(id, accessToken);
+      // const item = await youtubeService.getPlayListItem(id, accessToken);
+      const item = await youtubeService.track.getId(id, accessToken);
       trackIds.push(item.trackIds);
     }
 
@@ -54,7 +56,7 @@ exports.getTracks = async (req, res) => {
       const tracks = [];
       for (const t of youtubeService.splitArray50(trackId)) {
         console.log(t.length);
-        const item = await youtubeService.getTrackInfo(t, accessToken);
+        const item = await youtubeService.track.getInfo(t, accessToken);
         tracks.push(item.trackInfos);
       }
 
@@ -83,18 +85,19 @@ exports.insertMusic = async (req, res) => {
   try {
     const accessToken = req.accessToken;
     const { playLists, tracks } = req.body;
+    const { from } = req.params;
 
     const test = [];
     // for (const i = 0; i < playLists.length, i++; ) {
     for (const i = 0; i < 1, i++; ) {
-      const newPlayList = await youtubeService.createPlayList(
+      const newPlayList = await youtubeService.playList.create(
         playLists[i],
         accessToken
       );
 
       // const artistMap =
 
-      const a = await youtubeService.insertTracks(
+      const a = await youtubeService.track.create(
         newPlayList.id,
         tracks[i],
         accessToken
