@@ -11,14 +11,14 @@ const searchList = async (token) => {
       headers: {
         authorization: `Bearer ${token}`,
       },
+      params,
     };
 
     const playLists = [];
     do {
-      const response = await axios(options, params);
+      const response = await axios(options);
       const { data } = response;
 
-      console.log(data.items);
       data.items.forEach((item) => {
         playLists.push(parsePlayList(item));
       });
@@ -48,7 +48,6 @@ const getTrack = async (id, token) => {
       const response = await axios(options);
       const { data } = response;
       data.items.forEach((item) => {
-        console.log("item: ", item);
         tracks.push(parseTrackItem(item.track));
       });
       options.url = data.next;

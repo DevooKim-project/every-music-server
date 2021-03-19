@@ -78,3 +78,48 @@ exports.getTracks = async (req, res) => {
     res.send(error);
   }
 };
+
+exports.insertMusic = async (req, res) => {
+  try {
+    const accessToken = req.accessToken;
+    const { playLists, tracks } = req.body;
+
+    const test = [];
+    // for (const i = 0; i < playLists.length, i++; ) {
+    for (const i = 0; i < 1, i++; ) {
+      const newPlayList = await youtubeService.createPlayList(
+        playLists[i],
+        accessToken
+      );
+
+      // const artistMap =
+
+      const a = await youtubeService.insertTracks(
+        newPlayList.id,
+        tracks[i],
+        accessToken
+      );
+      console.log("newTracks: ", a);
+      test.push(a);
+    }
+
+    // const standardPlayLists = [
+    //   "PL7ylSe17PUm69RPNFq1J2j9m9KFTYgJku",
+    //   "PL7ylSe17PUm4VxAr-ZpvhRwrnykvL4Rtg",
+    // ];
+
+    // const standardTracks = await youtubeService.bb(tracks, accessToken);
+
+    // const newPlayLists = await youtubeService.cc(
+    //   standardPlayLists,
+    //   standardTracks
+    // );
+
+    // res.send(newPlayLists);
+
+    res.send(test);
+  } catch (error) {
+    console.error(error);
+    res.send(error);
+  }
+};
