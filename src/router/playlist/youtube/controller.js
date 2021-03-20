@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-const { youtubeService } = require("../../../services/playlist");
+const { youtubeService, splitArray } = require("../../../services/playlist");
 const { tokenService } = require("../../../services/database");
 const { parseToken } = require("../../../middleware/auth");
 
@@ -55,7 +55,7 @@ exports.getTracks = async (req, res) => {
     for (const trackId of trackIds) {
       //한번에 최대 50개 가능
       const tracks = [];
-      for (const t of youtubeService.splitArray50(trackId)) {
+      for (const t of splitArray(trackId, 50)) {
         console.log(t.length);
         const item = await youtubeService.track.getInfo(t, accessToken);
         tracks.push(item.trackInfos);

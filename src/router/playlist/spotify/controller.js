@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-const { spotifyService } = require("../../../services/playlist");
+const { spotifyService, splitArray } = require("../../../services/playlist");
 const { tokenService } = require("../../../services/database");
 const { parseToken } = require("../../../middleware/auth");
 
@@ -76,9 +76,12 @@ exports.insertMusic = async (req, res) => {
         tracks[i],
         accessToken
       );
-      console.log("trackIds", trackIds);
+      console.log("trackIds");
 
-      await spotifyService.track.add(newPlayList.id, trackIds, accessToken);
+      //한번에 최대 100개 가능
+      for (const t of splitArray(trackIds, 100)) {
+        await spotifyService.track.add(newPlayList.id, t, accessToken);
+      }
     }
 
     res.send("finish");
