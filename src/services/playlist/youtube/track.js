@@ -39,7 +39,6 @@ const search = async (tracks, token) => {
       if (!artistIds) {
         artistParams.q = `${artist.name} - Topic`;
         options.params = artistParams;
-        console.log("options: ", options);
         const response = await axios(options);
         const items = response.data.items;
         artistIds = [items[0].id.channelId];
@@ -50,7 +49,7 @@ const search = async (tracks, token) => {
           cacheService.addArtist(
             {
               name: artist.name,
-              id: artistIds,
+              id: artistIds[0],
             },
             "youtube"
           );
@@ -195,7 +194,7 @@ const getInfo = async (id, token) => {
   }
 };
 
-const create = async (playListId, trackIds, token) => {
+const add = async (playListId, trackIds, token) => {
   try {
     const params = {
       part: "snippet",
@@ -231,7 +230,7 @@ const create = async (playListId, trackIds, token) => {
   }
 };
 
-module.exports = { search, searchLight, getId, getInfo, create };
+module.exports = { search, searchLight, getId, getInfo, add };
 
 //not exports
 const parseTrackItem = (trackId) => {

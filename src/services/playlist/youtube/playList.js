@@ -36,7 +36,7 @@ const search = async (token) => {
   }
 };
 
-const create = async (playList, token, from) => {
+const create = async (playList, token) => {
   try {
     const params = {
       part: "snippet",

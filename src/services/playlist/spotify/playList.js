@@ -33,7 +33,32 @@ const search = async (token) => {
   }
 };
 
-module.exports = { search };
+const create = async (playList, userId, token) => {
+  try {
+    const data = {
+      name: "",
+      description: "",
+      public: false,
+    };
+    const options = {
+      method: "POST",
+      url: `https://api.spotify.com/v1/users/${userId}/playlists`,
+      headers: {
+        authorization: `Bearer ${token}`,
+      },
+      data,
+    };
+
+    data.name = playList.title;
+    const response = await axios(options);
+    const id = response.data.id;
+    return { id: id };
+  } catch (error) {
+    throw error;
+  }
+};
+
+module.exports = { search, create };
 
 //not exports
 const parsePlayList = (playList) => {

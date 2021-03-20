@@ -12,7 +12,7 @@ exports.login = async (req, res) => {
     "playlist-modify-public",
     "playlist-modify-private",
     "playlist-read-private",
-    "playlist-read-collaborative",
+    // "playlist-read-collaborative",
   ];
 
   const params = {

@@ -9,11 +9,13 @@ exports.getAccessToken = async (req, res, next) => {
     const localToken = parseToken(req.headers.authorization);
     const payload = jwt.verify(localToken, process.env.JWT_SECRET);
     const userId = payload.id;
+    const providerId = payload.providerId;
     const accessToken = await tokenService.findToken(userId, {
       provider: "spotify",
       type: "access",
     });
     req.accessToken = accessToken;
+    req.providerId = providerId;
     next();
   } catch (error) {
     console.error(error);
@@ -51,6 +53,37 @@ exports.getTrack = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
+    res.send(error);
+  }
+};
+
+exports.insertMusic = async (req, res) => {
+  try {
+    const accessToken = req.accessToken;
+    const providerId = req.providerId;
+    const { playLists, tracks } = req.body;
+
+    for (let i = 0; i < playLists.length; i++) {
+      const newPlayList = await spotifyService.playList.create(
+        playLists[i],
+        providerId,
+        accessToken
+      );
+      // const newPlayList = { id: "3PaR6AIx3FaCb9k9XwMRjp" };
+      console.log("createPlayList: ", newPlayList);
+
+      const trackIds = await spotifyService.track.search(
+        tracks[i],
+        accessToken
+      );
+      console.log("trackIds", trackIds);
+
+      await spotifyService.track.add(newPlayList.id, trackIds, accessToken);
+    }
+
+    res.send("finish");
+  } catch (error) {
+    console.log(error);
     res.send(error);
   }
 };

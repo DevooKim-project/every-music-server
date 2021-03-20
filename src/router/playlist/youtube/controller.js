@@ -14,6 +14,7 @@ exports.getAccessToken = async (req, res, next) => {
       type: "access",
     });
     req.accessToken = accessToken;
+    req.userId = userId;
     next();
   } catch (error) {
     console.error(error);
@@ -105,7 +106,7 @@ exports.insertMusic = async (req, res) => {
         accessToken
       );
       console.log("trackIds", trackIds);
-      await youtubeService.track.create(newPlayList.id, trackIds, accessToken);
+      await youtubeService.track.add(newPlayList.id, trackIds, accessToken);
     }
 
     res.send("finish");

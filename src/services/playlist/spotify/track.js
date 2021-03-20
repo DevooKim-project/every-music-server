@@ -36,7 +36,69 @@ const get = async (id, token) => {
   }
 };
 
-module.exports = { get };
+const search = async (tracks, token) => {
+  try {
+    const params = {
+      q: "",
+      type: "track",
+      limit: 1,
+    };
+    const options = {
+      method: "GET",
+      url: "https://api.spotify.com/v1/search",
+      headers: {
+        authorization: `Bearer ${token}`,
+      },
+      params,
+    };
+
+    const trackIds = [];
+    for (const track of tracks) {
+      const artist = track.artists[0];
+      console.log(`track: ${artist.name} - ${track.title}`);
+
+      const query = `${track.title} artist: "${artist.name}"`;
+      params.q = query;
+      const response = await axios(options);
+      const items = response.data.tracks.items;
+      if (items.length !== 0) {
+        const trackId = items[0].id;
+        trackIds.push(`spotify:track:${trackId}`);
+        console.log("getTrack: ", trackId);
+      } else {
+        console.log("not found");
+      }
+    }
+
+    return trackIds;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const add = async (playListId, trackIds, token) => {
+  try {
+    const data = {
+      uris: trackIds,
+    };
+    const options = {
+      method: "POST",
+      url: `https://api.spotify.com/v1/playlists/${playListId}/tracks`,
+      headers: {
+        authorization: `Bearer ${token}`,
+      },
+      data,
+    };
+
+    await axios(options);
+
+    return;
+  } catch (error) {
+    throw error;
+  }
+};
+
+module.exports = { get, search, add };
 
 const parseTrackItem = (track) => {
   const artists = [];
