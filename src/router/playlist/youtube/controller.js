@@ -88,11 +88,13 @@ exports.insertMusic = async (req, res) => {
     // const { from } = req.params;
 
     // const newPlayList = ["PL7ylSe17PUm44SjRkrWZx2dinqM3a0Dw-"];
-    for (const i = 0; i < playLists.length; i++) {
-      // const newPlayList = await youtubeService.playList.create(
-      //   playLists[i],
-      //   accessToken
-      // );
+    for (let i = 0; i < playLists.length; i++) {
+      const newPlayList = await youtubeService.playList.create(
+        playLists[i],
+        accessToken
+      );
+      // const newPlayList = { id: "PL7ylSe17PUm6tB8UQNy3prkypifuC70YE" };
+
       console.log("createPlayList");
       // const trackIds = await youtubeService.track.search(
       //   tracks[i],
@@ -108,7 +110,7 @@ exports.insertMusic = async (req, res) => {
 
     res.send("finish");
   } catch (error) {
-    // console.error(error);
+    console.error(error);
     res.send(error);
   }
 };

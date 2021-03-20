@@ -98,10 +98,13 @@ const searchLight = async (tracks, token) => {
         authorization: `Bearer ${token}`,
       },
     };
+    // console.log("tracks: ", tracks);
 
     const trackIds = [];
     for (const track of tracks) {
-      const artistName = `${artist.name} - Topic`;
+      console.log("track: ", track);
+      const artist = track.artists[0];
+      const artistName = `${artist.name}`;
       const trackTitle = track.title;
       trackParams.q = artistName + trackTitle;
 
@@ -109,11 +112,10 @@ const searchLight = async (tracks, token) => {
 
       const response = await axios(options);
       const items = response.data.items;
-      trackId = items[0].id.videoId;
-      console.log("search-track: ", trackId);
-      if (trackId) {
+      if (items.length !== 0) {
+        trackId = items[0].id.videoId;
+        console.log("search-track: ", trackId);
         trackIds.push(trackId);
-        break;
       }
     }
 
@@ -220,7 +222,7 @@ const create = async (playListId, trackIds, token) => {
     for (const trackId of trackIds) {
       data.snippet.resourceId.videoId = trackId;
       const response = await axios(options);
-      console.log("insert: ", response.data.items[0].id);
+      // console.log("insert: ", response.data.items[0].id);
     }
 
     return;
