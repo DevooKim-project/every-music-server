@@ -112,7 +112,7 @@ const searchLight = async (tracks, token) => {
       const response = await axios(options);
       const items = response.data.items;
       if (items.length !== 0) {
-        trackId = items[0].id.videoId;
+        const trackId = items[0].id.videoId;
         console.log("search-track: ", trackId);
         trackIds.push(trackId);
       }
@@ -124,6 +124,55 @@ const searchLight = async (tracks, token) => {
   }
 };
 
+const searchCache = async (tracks, token) => {
+  try {
+    const trackParams = {
+      part: "id",
+      q: "",
+      type: "video",
+      // topicId: "/m/04rlf",
+      videoCategoryId: 10,
+    };
+    const options = {
+      method: "GET",
+      url: "https://www.googleapis.com/youtube/v3/search",
+      headers: {
+        authorization: `Bearer ${token}`,
+      },
+    };
+    const trackIds = [];
+    for (const track of tracks) {
+      console.log("track: ", track.title);
+      let trackId = await cacheService.getTrack(track, "google");
+      console.log("TrackID: ", trackId);
+
+      //캐시에 없는 경우
+      if (!trackId) {
+        console.log("not Cache");
+        const artist = track.artists[0];
+        const artistName = `${artist.name}`;
+        const trackTitle = track.title;
+        trackParams.q = artistName + trackTitle;
+
+        options.params = trackParams;
+
+        const response = await axios(options);
+        const items = response.data.items;
+        if (items.length !== 0) {
+          trackId = items[0].id.videoId;
+          console.log("search-track: ", trackId);
+        } else {
+          console.log("not found");
+        }
+      }
+      trackIds.push(trackId);
+    }
+
+    return trackIds;
+  } catch (error) {
+    throw error;
+  }
+};
 const getId = async (id, token) => {
   try {
     const params = {
@@ -182,7 +231,8 @@ const getInfo = async (id, token) => {
         trackInfos.push(track);
 
         //insert data to redis
-        cacheService.addArtist(track.artists[0], "google");
+        // cacheService.addArtist(track.artists[0], "google");
+        cacheService.addTrack(track, "google");
       });
 
       params.pageToken = data.nextPageToken;
@@ -221,7 +271,7 @@ const add = async (playListId, trackIds, token) => {
     for (const trackId of trackIds) {
       data.snippet.resourceId.videoId = trackId;
       const response = await axios(options);
-      // console.log("insert: ", response.data.items[0].id);
+      console.log("insert: ", response.data.snippet.title);
     }
 
     return;
@@ -230,7 +280,7 @@ const add = async (playListId, trackIds, token) => {
   }
 };
 
-module.exports = { search, searchLight, getId, getInfo, add };
+module.exports = { search, searchLight, searchCache, getId, getInfo, add };
 
 //not exports
 const parseTrackItem = (trackId) => {
