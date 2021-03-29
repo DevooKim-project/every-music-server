@@ -2,7 +2,7 @@ const axios = require("axios");
 
 const { cacheService } = require("../../database");
 
-const getIdFromPlayList = async (id, token) => {
+const getFromPlayList = async (id, token) => {
   try {
     const options = {
       method: "GET",
@@ -103,7 +103,7 @@ const add = async (playListId, trackIds, token) => {
   }
 };
 
-module.exports = { getIdFromPlayList, searchIdFromProvider, add };
+module.exports = { getFromPlayList, searchIdFromProvider, add };
 
 const parseTrackItem = (track) => {
   const artists = [];

@@ -43,7 +43,7 @@ exports.getTrack = async (req, res) => {
 
     const tracks = [];
     for (const playList of playLists) {
-      const item = await spotifyService.track.getIdFromPlayList(
+      const item = await spotifyService.track.getFromPlayList(
         playList.id,
         accessToken
       );
