@@ -2,7 +2,7 @@ const axios = require("axios");
 
 const { cacheService } = require("../../database");
 
-const get = async (id, token) => {
+const getIdFromPlayList = async (id, token) => {
   try {
     const options = {
       method: "GET",
@@ -21,10 +21,8 @@ const get = async (id, token) => {
         tracks.push(track);
 
         //insert data to redis
-        const key = `artist-${track.artists[0].name}-spotify`;
-        const value = track.artists[0].id;
-
-        cacheService.addArtist(track.artists[0], "spotify");
+        // cacheService.addArtist(track.artists[0], "spotify");
+        cacheService.addTrack(track, "spotify");
       });
       options.url = data.next;
     } while (options.url);
@@ -36,7 +34,7 @@ const get = async (id, token) => {
   }
 };
 
-const search = async (tracks, token) => {
+const searchIdFromProvider = async (tracks, token) => {
   try {
     const params = {
       q: "",
@@ -54,20 +52,27 @@ const search = async (tracks, token) => {
 
     const trackIds = [];
     for (const track of tracks) {
-      const artist = track.artists[0];
-      console.log(`track: ${artist.name} - ${track.title}`);
+      // console.log(`track: ${artist.name} - ${track.title}`);
+      console.log(`track:  - ${track.title}`);
+      let trackId = await cacheService.getTrack(track, "spotify");
+      console.log("TrackID: ", trackId);
+      //캐시에 없는 경우
+      if (!trackId) {
+        console.log("not Cache");
+        const artist = track.artists[0];
 
-      const query = `${track.title} artist: "${artist.name}"`;
-      params.q = query;
-      const response = await axios(options);
-      const items = response.data.tracks.items;
-      if (items.length !== 0) {
-        const trackId = items[0].id;
-        trackIds.push(`spotify:track:${trackId}`);
-        console.log("getTrack: ", trackId);
-      } else {
-        console.log("not found");
+        const query = `${track.title} artist: "${artist.name}"`;
+        params.q = query;
+        const response = await axios(options);
+        const items = response.data.tracks.items;
+        if (items.length !== 0) {
+          trackId = items[0].id;
+          // console.log("getTrack: ", trackId);
+        } else {
+          console.log("not found");
+        }
       }
+      trackIds.push(`spotify:track:${trackId}`);
     }
 
     return trackIds;
@@ -98,7 +103,7 @@ const add = async (playListId, trackIds, token) => {
   }
 };
 
-module.exports = { get, search, add };
+module.exports = { getIdFromPlayList, searchIdFromProvider, add };
 
 const parseTrackItem = (track) => {
   const artists = [];

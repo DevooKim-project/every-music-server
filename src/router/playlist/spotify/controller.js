@@ -43,7 +43,10 @@ exports.getTrack = async (req, res) => {
 
     const tracks = [];
     for (const playList of playLists) {
-      const item = await spotifyService.track.get(playList.id, accessToken);
+      const item = await spotifyService.track.getIdFromPlayList(
+        playList.id,
+        accessToken
+      );
       tracks.push(item.tracks);
     }
 
@@ -70,13 +73,13 @@ exports.insertMusic = async (req, res) => {
         accessToken
       );
       // const newPlayList = { id: "3PaR6AIx3FaCb9k9XwMRjp" };
-      console.log("createPlayList: ", newPlayList);
+      console.log("createPlayList ok");
 
-      const trackIds = await spotifyService.track.search(
+      const trackIds = await spotifyService.track.searchIdFromProvider(
         tracks[i],
         accessToken
       );
-      console.log("trackIds");
+      console.log("get trackIds ok");
 
       //한번에 최대 100개 가능
       for (const t of splitArray(trackIds, 100)) {
