@@ -23,4 +23,13 @@ const findArtist = async (name) => {
   }
 };
 
-module.exports = { storeArtist, findArtist };
+const updateArtist = async (name, providerId) => {
+  try {
+    const artist = await Artist.updateOne({ name }, { providerId });
+    return artist;
+  } catch (error) {
+    throw error;
+  }
+};
+
+module.exports = { storeArtist, findArtist, updateArtist };

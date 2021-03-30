@@ -4,7 +4,7 @@ const search = async (token) => {
   try {
     const params = {
       part: "snippet",
-      maxResults: 5,
+      maxResults: 50,
       mine: true,
       pageToken: "",
     };
@@ -81,7 +81,7 @@ const parsePlayList = (playList) => {
   return {
     id: playList.id,
     title: playList.snippet.title,
-    thumbnail: playList.snippet.thumbnails.default,
+    thumbnail: playList.snippet.thumbnails.default.url,
     description: playList.snippet.description,
     owner: {
       name: playList.snippet.channelTitle,

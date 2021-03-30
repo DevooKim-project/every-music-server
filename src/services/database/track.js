@@ -23,4 +23,13 @@ const findTrack = async (title, artistId) => {
   }
 };
 
-module.exports = { storeTrack, findTrack };
+const updateTrack = async (title, providerId) => {
+  try {
+    const track = await Track.updateOne({ title }, { providerId });
+    return track;
+  } catch (error) {
+    throw error;
+  }
+};
+
+module.exports = { storeTrack, findTrack, updateTrack };
