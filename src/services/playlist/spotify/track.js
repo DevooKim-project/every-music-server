@@ -50,17 +50,23 @@ const searchIdFromProvider = async (tracks, token) => {
     };
 
     const trackIds = [];
-    for (const track of tracks) {
-      // console.log(`track: ${artist.name} - ${track.title}`);
-      console.log(`track:  - ${track.title}`);
-      let trackId = await cacheService.getTrack(track, "spotify");
-      console.log("TrackID: ", trackId);
-      //캐시에 없는 경우
-      if (!trackId) {
-        console.log("not Cache");
-        const artist = track.artists[0];
+    for (const t of tracks) {
+      //1. 아티스트 로컬 Id와 트랙 명으로 캐시에서 트랙 검색 (트랙과 아티스트는 모두 로컬id를 가지고 있음)
+      //2. 트랙의 서비스 id가 있는지 확인
+      //3. 있는 경우 그대로 저장
+      //4. 없는 경우 요청 보내고 저장
 
-        const query = `${track.title} artist: "${artist.name}"`;
+      const artist = t.artist;
+      let track = await trackService.findTrack(t.title, artist.ids.local);
+      let trackId = "";
+      if (track.providerId.spotify) {
+        console.log("cached");
+        trackId = track.providerId.spotify;
+      } else {
+        console.log("not Cache");
+        // const artist = t.artists[0];
+
+        const query = `${t.title} artist: "${artist.name}"`;
         params.q = query;
         const response = await axios(options);
         const items = response.data.tracks.items;
@@ -71,6 +77,7 @@ const searchIdFromProvider = async (tracks, token) => {
           console.log("not found");
         }
       }
+
       trackIds.push(`spotify:track:${trackId}`);
     }
 
