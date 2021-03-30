@@ -87,5 +87,6 @@ const parsePlayList = (playList) => {
       name: playList.snippet.channelTitle,
       id: playList.snippet.channelId,
     },
+    provider: "youtube",
   };
 };

@@ -71,5 +71,6 @@ const parsePlayList = (playList) => {
       name: playList.owner.display_name,
       id: playList.owner.id,
     },
+    provider: "spotify",
   };
 };

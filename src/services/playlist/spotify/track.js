@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-const { cacheService } = require("../../database");
+const { cacheService, artistService, trackService } = require("../../database");
 
 const getFromPlayList = async (id, token) => {
   try {
@@ -16,21 +16,20 @@ const getFromPlayList = async (id, token) => {
     do {
       const response = await axios(options);
       const { data } = response;
-      data.items.forEach((item) => {
-        const track = parseTrackItem(item.track);
-        tracks.push(track);
+      // data.items.forEach(async (item) => {
+      for (const item of data.items) {
+        let track = parseTrackItem(item.track);
+        //db 저장
+        track = await storeData(track);
 
-        //insert data to redis
-        // cacheService.addArtist(track.artists[0], "spotify");
-        cacheService.addTrack(track, "spotify");
-      });
+        tracks.push(track);
+      }
       options.url = data.next;
     } while (options.url);
 
     return { tracks };
   } catch (error) {
-    console.error(error);
-    throw new Error(error);
+    throw error;
   }
 };
 
@@ -105,24 +104,60 @@ const add = async (playListId, trackIds, token) => {
 
 module.exports = { getFromPlayList, searchIdFromProvider, add };
 
+const storeData = async (trackData) => {
+  try {
+    //1. artist 확인 후 저장
+    //2. artist local Id 객체에 저장
+    //3. track title과 artist providerId로 확인 후 저장
+    //4. 객체에 track local Id 객체에 저장
+    let artist = await artistService.findArtist(trackData.artist.name);
+    let artistId = "";
+    // console.log("artist: ", artist);
+
+    if (!artist) {
+      console.log("store artist");
+      artist = await artistService.storeArtist(trackData.artist);
+    }
+    artistId = {
+      local: artist._id,
+      ...artist.providerId,
+    };
+
+    let track = await trackService.findTrack(trackData.title, artistId.local);
+    let trackId = "";
+
+    if (!track) {
+      console.log("store track");
+      track = await trackService.storeTrack(trackData, artistId.local);
+    }
+    trackId = {
+      local: track._id,
+      ...track.providerId,
+    };
+
+    trackData.artist.ids = artistId;
+    trackData.ids = trackId;
+
+    return trackData;
+  } catch (error) {
+    throw error;
+  }
+};
+
 const parseTrackItem = (track) => {
-  const artists = [];
-  track.artists.forEach((artist) => {
-    artists.push({
-      name: artist.name,
-      id: artist.id,
-    });
-  });
+  const artist = track.artists[0];
   return {
-    id: track.id,
     title: track.name,
-    artists: artists,
-    album: {
-      name: track.album.name,
-      id: track.album.id,
+    ids: {
+      spotify: track.id,
+    },
+    artist: {
+      name: artist.name,
+      ids: {
+        spotify: artist.id,
+      },
     },
     duration_ms: track.duration_ms,
-    track_number: track.track_number,
-    thumbnail: track.album.images[0],
+    thumbnail: track.album.images[0].url,
   };
 };
