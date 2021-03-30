@@ -154,7 +154,7 @@ const searchCache = async (tracks, token) => {
       } else {
         console.log("not Cache");
 
-        const query = `${artist} ${t.title}"`;
+        const query = `${artist.name} ${t.title}"`;
         trackParams.q = query;
         options.params = trackParams;
         const response = await axios(options);
