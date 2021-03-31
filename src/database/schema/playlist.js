@@ -16,6 +16,10 @@ const playListSchema = new Schema({
     type: Boolean,
     default: true,
   },
+  like: {
+    type: Number,
+    default: 0,
+  },
 });
 
 module.exports = mongoose.model("PlayList", playListSchema);
