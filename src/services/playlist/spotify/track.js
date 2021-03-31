@@ -50,7 +50,8 @@ const searchIdFromProvider = async (tracks, token) => {
       params,
     };
 
-    const trackIds = [];
+    const trackProviderIds = [];
+    const trackLocalIds = [];
     for (const t of tracks) {
       //1. 아티스트 로컬 Id와 트랙 명으로 캐시에서 트랙 검색 (트랙과 아티스트는 모두 로컬id를 가지고 있음)
       //2. 트랙의 서비스 id가 있는지 확인
@@ -59,10 +60,12 @@ const searchIdFromProvider = async (tracks, token) => {
 
       const artist = t.artist;
       let track = await trackService.findTrack(t.title, artist.ids.local);
-      let trackId = "";
+      const trackLocalId = track._id;
+      trackLocalIds.push(trackLocalId);
+      let trackProviderId = "";
       if (track.providerId.spotify) {
         console.log("cached");
-        trackId = track.providerId.spotify;
+        trackProviderId = track.providerId.spotify;
       } else {
         console.log("not Cache");
         // const artist = t.artists[0];
@@ -72,17 +75,18 @@ const searchIdFromProvider = async (tracks, token) => {
         const response = await axios(options);
         const items = response.data.tracks.items;
         if (items.length !== 0) {
-          trackId = items[0].id;
-          // console.log("getTrack: ", trackId);
+          trackProviderId = items[0].id;
+          // console.log("getTrack: ", trackProviderId);
         } else {
           console.log("not found");
         }
       }
 
-      trackIds.push(`spotify:track:${trackId}`);
+      trackProviderIds.push(`spotify:track:${trackProviderId}`);
     }
 
-    return trackIds;
+    // return trackProviderIds;
+    return { provider: trackProviderIds, local: trackLocalIds };
   } catch (error) {
     throw error;
   }

@@ -66,12 +66,13 @@ exports.insertMusic = async (req, res) => {
     const providerId = req.providerId;
     const { playLists, tracks } = req.body;
 
+    const trackIdData = [];
     for (let i = 0; i < playLists.length; i++) {
-      const newPlayList = await spotifyService.playList.create(
-        playLists[i],
-        providerId,
-        accessToken
-      );
+      // const newPlayList = await spotifyService.playList.create(
+      //   playLists[i],
+      //   providerId,
+      //   accessToken
+      // );
       // const newPlayList = { id: "3PaR6AIx3FaCb9k9XwMRjp" };
       console.log("createPlayList ok");
 
@@ -79,15 +80,19 @@ exports.insertMusic = async (req, res) => {
         tracks[i],
         accessToken
       );
+      const providerIds = trackIds.provider;
+      const localIds = trackIds.local;
+      trackIdData.push(localIds);
       console.log("get trackIds ok");
 
       //한번에 최대 100개 가능
-      for (const t of splitArray(trackIds, 100)) {
-        await spotifyService.track.add(newPlayList.id, t, accessToken);
-      }
+      // for (const t of splitArray(providerIds, 100)) {
+      //   await spotifyService.track.add(newPlayList.id, t, accessToken);
+      // }
     }
 
-    res.send("finish");
+    // res.send("finish");
+    res.send({ playLists, trackIds: trackIdData });
   } catch (error) {
     console.log(error);
     res.send(error);

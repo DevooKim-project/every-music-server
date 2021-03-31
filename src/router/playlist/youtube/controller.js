@@ -89,27 +89,22 @@ exports.insertMusic = async (req, res) => {
 
     const trackIdData = [];
     for (let i = 0; i < playLists.length; i++) {
-      const newPlayList = await youtubeService.playList.create(
-        playLists[i],
-        accessToken
-      );
+      // const newPlayList = await youtubeService.playList.create(
+      //   playLists[i],
+      //   accessToken
+      // );
 
       console.log("createPlayList ok");
-      // const trackIds = await youtubeService.track.search(
-      //   tracks[i],
-      //   accessToken
-      // );
-      // const trackIds = await youtubeService.track.searchLight(
-      //   tracks[i],
-      //   accessToken
-      // );
+
       const trackIds = await youtubeService.track.searchCache(
         tracks[i],
         accessToken
       );
-      trackIdData.append(trackIds);
+      const providerIds = trackIds.provider;
+      const localIds = trackIds.local;
+      trackIdData.push(localIds);
       console.log("get trackIds ok");
-      await youtubeService.track.add(newPlayList.id, trackIds, accessToken);
+      // await youtubeService.track.add(newPlayList.id, providerIds, accessToken);
     }
 
     // res.send("finish");
