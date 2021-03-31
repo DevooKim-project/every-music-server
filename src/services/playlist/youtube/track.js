@@ -1,7 +1,7 @@
 const axios = require("axios");
 
 const { cacheService, trackService } = require("../../database");
-const { storeData } = require("../common");
+const { storeArtistTrack } = require("../common");
 
 //캐싱이 적으면 할당량 초과됨
 //artist 변경
@@ -232,7 +232,7 @@ const getInfo = async (id, token) => {
       for (item of data.items) {
         let track = parseTrackInfo(item);
         //db 저장
-        track = await storeData(track, "youtube");
+        track = await storeArtistTrack(track, "youtube");
         trackInfos.push(track);
 
         //insert data to redis

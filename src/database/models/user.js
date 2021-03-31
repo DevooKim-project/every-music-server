@@ -21,15 +21,15 @@ module.exports = class User extends Sequelize.Model {
           type: DataTypes.STRING(40),
           allowNull: false,
         },
-        playList: {
-          type: DataTypes.STRING,
-          get() {
-            return this.getDataValue("playList").split(";");
-          },
-          set(val) {
-            return this.setDataValue("playList", val.join(";"));
-          },
-        },
+        // playList: {
+        //   type: DataTypes.STRING,
+        //   get() {
+        //     return this.getDataValue("playList").split(";");
+        //   },
+        //   set(val) {
+        //     return this.setDataValue("playList", val.join(";"));
+        //   },
+        // },
         provider: {
           type: DataTypes.STRING(20),
           allowNull: false,

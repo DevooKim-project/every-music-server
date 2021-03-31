@@ -4,9 +4,11 @@ const tokenService = require("./token");
 const cacheService = require("./cache");
 const trackService = require("./track");
 const artistService = require("./artist");
+const playListService = require("./playList");
 
 exports.userService = userService;
 exports.tokenService = tokenService;
 exports.cacheService = cacheService;
 exports.trackService = trackService;
 exports.artistService = artistService;
+exports.playListService = playListService;

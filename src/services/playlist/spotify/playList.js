@@ -58,7 +58,15 @@ const create = async (playList, userId, token) => {
   }
 };
 
-module.exports = { search, create };
+const store = async (playList, trackIds, userId) => {
+  try {
+    await storePlayList(playList, trackIds, userId);
+    return;
+  } catch (error) {
+    throw error;
+  }
+};
+module.exports = { search, create, store };
 
 //not exports
 const parsePlayList = (playList) => {

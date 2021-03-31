@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 
 const { youtubeService, splitArray } = require("../../../services/playlist");
-const { tokenService } = require("../../../services/database");
+const { tokenService, playListService } = require("../../../services/database");
 const { parseToken } = require("../../../middleware/auth");
 
 exports.getAccessToken = async (req, res, next) => {
@@ -87,6 +87,7 @@ exports.insertMusic = async (req, res) => {
     const accessToken = req.accessToken;
     const { playLists, tracks } = req.body;
 
+    const trackIdData = [];
     for (let i = 0; i < playLists.length; i++) {
       const newPlayList = await youtubeService.playList.create(
         playLists[i],
@@ -106,13 +107,25 @@ exports.insertMusic = async (req, res) => {
         tracks[i],
         accessToken
       );
+      trackIdData.append(trackIds);
       console.log("get trackIds ok");
       await youtubeService.track.add(newPlayList.id, trackIds, accessToken);
     }
 
-    res.send("finish");
+    // res.send("finish");
+    res.send(trackIdData);
   } catch (error) {
     console.error(error);
     res.send(error);
+  }
+};
+
+exports.savePlayList = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { playLists, trackIds } = req.body;
+    await playListService.storePlayList(playLists, trackIds, userId);
+  } catch (error) {
+    throw error;
   }
 };

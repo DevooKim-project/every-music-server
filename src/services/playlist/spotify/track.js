@@ -1,7 +1,7 @@
 const axios = require("axios");
 
 const { trackService } = require("../../database");
-const { storeData } = require("../common");
+const { storeArtistTrack } = require("../common");
 
 const getFromPlayList = async (id, token) => {
   try {
@@ -21,7 +21,7 @@ const getFromPlayList = async (id, token) => {
       for (const item of data.items) {
         let track = parseTrackItem(item.track);
         //db 저장
-        track = await storeData(track, "spotify");
+        track = await storeArtistTrack(track, "spotify");
 
         tracks.push(track);
       }

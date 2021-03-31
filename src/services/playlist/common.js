@@ -1,6 +1,6 @@
-const { artistService, trackService } = require("../database");
+const { artistService, trackService, playListService } = require("../database");
 
-exports.storeData = async (trackData, provider) => {
+exports.storeArtistTrack = async (trackData, provider) => {
   try {
     //1. artist 확인 후 저장
     //1-1. 있는데 providerId가 없으면 업데이트
@@ -55,6 +55,15 @@ exports.storeData = async (trackData, provider) => {
     trackData.ids = trackId;
 
     return trackData;
+  } catch (error) {
+    throw error;
+  }
+};
+
+exports.storePlayList = async (playList, trackIds, userId) => {
+  try {
+    await playListService(playList, trackIds, userId);
+    return;
   } catch (error) {
     throw error;
   }

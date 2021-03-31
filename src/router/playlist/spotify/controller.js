@@ -93,3 +93,13 @@ exports.insertMusic = async (req, res) => {
     res.send(error);
   }
 };
+
+exports.savePlayList = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { playLists, trackIds } = req.body;
+    await playListService.storePlayList(playLists, trackIds, userId);
+  } catch (error) {
+    throw error;
+  }
+};

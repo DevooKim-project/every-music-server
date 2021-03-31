@@ -7,13 +7,11 @@ const playListSchema = new Schema({
     required: true,
   },
   description: String,
-  snapShotId: String,
+  thumbnail: String,
   tracks: [{ type: Schema.Types.ObjectId, ref: "Track" }],
   owner: String,
-  providerId: {
-    spotify: { type: String },
-    youtube: { type: String },
-  },
+  providerId: String,
+  provider: String,
   display: {
     type: Boolean,
     default: true,
