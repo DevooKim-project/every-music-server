@@ -1,9 +1,9 @@
 const Token = require("../../database/schema/token");
 
-const storeToken = async (data, type) => {
+const storeToken = async (data, provider) => {
   try {
     const { userId, accessToken, refreshToken } = data;
-    switch (type) {
+    switch (provider) {
       case "google":
         await Token.create({
           userId,
@@ -28,41 +28,55 @@ const storeToken = async (data, type) => {
   }
 };
 
-const findRefreshToken = async (userId, type) => {
+const findToken = async (userId, { type, provider }) => {
   try {
     const token = await Token.findOne({ userId });
     console.log(token);
-    switch (type) {
+    switch (provider) {
       case "google":
-        return token.refreshTokenGoogle;
+        if (type === "access") {
+          return token.accessTokenGoogle;
+        } else if (type === "refresh") {
+          return token.refreshTokenGoogle;
+        }
+
       case "spotify":
-        return token.refreshTokenSpotify;
+        if (type === "access") {
+          return token.accessTokenSpotify;
+        } else if (type === "refresh") {
+          return token.refreshTokenSpotify;
+        }
 
       default:
-        throw new Error("refreshToken type error");
+        throw new Error("findToken argument error");
     }
   } catch (error) {
     throw new Error(error);
   }
 };
 
-const updateToken = async (data, type) => {
+const updateToken = async (data, { type, provider }) => {
   try {
     const { userId, accessToken, refreshToken } = data;
 
-    switch (type) {
+    switch (provider) {
       case "google":
-        if (refreshToken) {
+        if (type === "access") {
+          await Token.updateOne({ userId }, { accessTokenGoogle: accessToken });
+        } else if (type === "all") {
           await Token.updateOne(
             { userId },
             { accessTokenGoogle: accessToken, refreshTokenGoogle: refreshToken }
           );
-        } else {
-          await Token.updateOne({ userId }, { accessTokenGoogle: accessToken });
         }
         break;
       case "spotify":
-        if (refreshToken) {
+        if (type === "access") {
+          await Token.updateOne(
+            { userId },
+            { accessTokenSpotify: accessToken }
+          );
+        } else if (type === "all") {
           await Token.updateOne(
             { userId },
             {
@@ -70,18 +84,12 @@ const updateToken = async (data, type) => {
               refreshTokenSpotify: refreshToken,
             }
           );
-        } else {
-          await Token.updateOne(
-            { userId },
-            { accessTokenSpotify: accessToken }
-          );
         }
         break;
 
       default:
-        throw new Error("updateToken type error");
+        throw new Error("updateToken argument error");
     }
-
     return;
   } catch (error) {
     console.error(error);
@@ -98,4 +106,4 @@ const deleteToken = async (userId) => {
   }
 };
 
-module.exports = { storeToken, findRefreshToken, updateToken, deleteToken };
+module.exports = { storeToken, findToken, updateToken, deleteToken };

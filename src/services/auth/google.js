@@ -35,7 +35,10 @@ const refreshToken = async (token) => {
     const localToken = parseToken(token);
     const payload = jwt.verify(localToken, process.env.JWT_SECRET);
     const userId = payload.id;
-    const refreshToken = await tokenService.findRefreshToken(userId, "google");
+    const refreshToken = await tokenService.findToken(userId, {
+      provider: "google",
+      type: "refresh",
+    });
     console.log("find refresh: ", refreshToken);
 
     const data = {
@@ -58,7 +61,7 @@ const refreshToken = async (token) => {
         userId,
         accessToken: newToken.data.access_token,
       },
-      "google"
+      { provider: "google", type: "access" }
     );
     return;
   } catch (error) {

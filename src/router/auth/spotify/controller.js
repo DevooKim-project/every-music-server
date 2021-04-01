@@ -12,7 +12,7 @@ exports.login = async (req, res) => {
     "playlist-modify-public",
     "playlist-modify-private",
     "playlist-read-private",
-    "playlist-read-collaborative",
+    // "playlist-read-collaborative",
   ];
 
   const params = {
@@ -55,7 +55,7 @@ exports.getLocalToken = async (req, res) => {
           accessToken: access_token,
           refresh_token: refresh_token,
         },
-        "spotify"
+        { provider: "spotify", type: "all" }
       );
       return res.send(localToken);
     }

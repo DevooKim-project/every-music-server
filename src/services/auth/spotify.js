@@ -58,7 +58,10 @@ const refreshToken = async (token) => {
     const localToken = parseToken(token);
     const payload = jwt.verify(localToken, process.env.JWT_SECRET);
     const userId = payload.id;
-    const refreshToken = await tokenService.findRefreshToken(userId, "spotify");
+    const refreshToken = await tokenService.findToken(userId, {
+      provider: "spotify",
+      type: "refresh",
+    });
     console.log("find refresh: ", refreshToken);
 
     const data = {
@@ -84,7 +87,7 @@ const refreshToken = async (token) => {
         userId,
         accessToken: newToken.data.access_token,
       },
-      "spotify"
+      { provider: "spotify", type: "access" }
     );
 
     return;

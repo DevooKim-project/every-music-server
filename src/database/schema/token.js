@@ -11,6 +11,12 @@ const tokenSchema = new Schema({
     required: true,
   },
   updatedAt: { type: Date, default: Date.now },
+  display: {
+    type: Boolean,
+    default: true,
+  },
 });
 
-module.exports = mongoose.model("token", tokenSchema);
+// const Token = mongoose.model("Token", tokenSchema);
+// module.exports = Token;
+module.exports = mongoose.model("Token", tokenSchema);

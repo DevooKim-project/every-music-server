@@ -1,0 +1,110 @@
+const jwt = require("jsonwebtoken");
+
+const { spotifyService, splitArray } = require("../../../services/playlist");
+const { tokenService } = require("../../../services/database");
+const { parseToken } = require("../../../middleware/auth");
+
+exports.getAccessToken = async (req, res, next) => {
+  try {
+    const localToken = parseToken(req.headers.authorization);
+    const payload = jwt.verify(localToken, process.env.JWT_SECRET);
+    const userId = payload.id;
+    const providerId = payload.providerId;
+    const accessToken = await tokenService.findToken(userId, {
+      provider: "spotify",
+      type: "access",
+    });
+    req.accessToken = accessToken;
+    req.providerId = providerId;
+    next();
+  } catch (error) {
+    console.error(error);
+    res.send(error);
+  }
+};
+
+exports.searchPlayList = async (req, res) => {
+  try {
+    const accessToken = req.accessToken;
+    const item = await spotifyService.playList.search(accessToken);
+
+    res.json(item);
+  } catch (error) {
+    console.error(error);
+    res.send(error);
+  }
+};
+
+exports.getTrack = async (req, res) => {
+  try {
+    const accessToken = req.accessToken;
+
+    const { playLists } = req.body;
+
+    const tracks = [];
+    for (const playList of playLists) {
+      const item = await spotifyService.track.getFromPlayList(
+        playList.id,
+        accessToken
+      );
+      tracks.push(item.tracks);
+    }
+
+    res.json({
+      playLists: playLists,
+      tracks: tracks,
+    });
+  } catch (error) {
+    console.error(error);
+    res.send(error);
+  }
+};
+
+exports.insertMusic = async (req, res) => {
+  try {
+    const accessToken = req.accessToken;
+    const providerId = req.providerId;
+    const { playLists, tracks } = req.body;
+
+    const trackIdData = [];
+    for (let i = 0; i < playLists.length; i++) {
+      // const newPlayList = await spotifyService.playList.create(
+      //   playLists[i],
+      //   providerId,
+      //   accessToken
+      // );
+      // const newPlayList = { id: "3PaR6AIx3FaCb9k9XwMRjp" };
+      console.log("createPlayList ok");
+
+      const trackIds = await spotifyService.track.searchIdFromProvider(
+        tracks[i],
+        accessToken
+      );
+      const providerIds = trackIds.provider;
+      const localIds = trackIds.local;
+      trackIdData.push(localIds);
+      console.log("get trackIds ok");
+
+      //한번에 최대 100개 가능
+      // for (const t of splitArray(providerIds, 100)) {
+      //   await spotifyService.track.add(newPlayList.id, t, accessToken);
+      // }
+    }
+
+    // res.send("finish");
+    res.send({ playLists, trackIds: trackIdData });
+  } catch (error) {
+    console.log(error);
+    res.send(error);
+  }
+};
+
+exports.savePlayList = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { playLists, trackIds } = req.body;
+    await playListService.storePlayList(playLists, trackIds, userId);
+  } catch (error) {
+    throw error;
+  }
+};
