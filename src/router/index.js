@@ -2,6 +2,7 @@ const express = require("express");
 
 const authRoute = require("./auth");
 const playListRoute = require("./playlist");
+const boardRoute = require("./board");
 const test = require("./test");
 
 const router = express.Router();
@@ -12,6 +13,7 @@ router.get("/", (req, res) => {
 
 router.use("/auth", authRoute);
 router.use("/playList", playListRoute);
+router.use("/board", boardRoute);
 
 router.get("/test", async (req, res) => {
   try {
