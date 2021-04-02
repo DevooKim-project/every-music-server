@@ -3,7 +3,7 @@ const axios = require("axios");
 const { trackService } = require("../../database");
 const { storeArtistTrack } = require("../common");
 
-const getFromPlayList = async (id, token) => {
+const getFromPlaylist = async (id, token) => {
   try {
     const options = {
       method: "GET",
@@ -92,14 +92,14 @@ const searchIdFromProvider = async (tracks, token) => {
   }
 };
 
-const add = async (playListId, trackIds, token) => {
+const add = async (playlistId, trackIds, token) => {
   try {
     const data = {
       uris: trackIds,
     };
     const options = {
       method: "POST",
-      url: `https://api.spotify.com/v1/playlists/${playListId}/tracks`,
+      url: `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
       headers: {
         authorization: `Bearer ${token}`,
       },
@@ -114,7 +114,7 @@ const add = async (playListId, trackIds, token) => {
   }
 };
 
-module.exports = { getFromPlayList, searchIdFromProvider, add };
+module.exports = { getFromPlaylist, searchIdFromProvider, add };
 
 const parseTrackItem = (track) => {
   const artist = track.artists[0];

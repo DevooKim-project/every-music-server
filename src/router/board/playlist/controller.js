@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 
 const { parseToken } = require("../../../middleware/auth");
-const { playListService } = require("../../../services/database");
+const { playlistService } = require("../../../services/database");
 
 const readAllPlaylist = async (req, res) => {
   try {
@@ -11,9 +11,9 @@ const readAllPlaylist = async (req, res) => {
     const maxResult = req.params.maxResult ? req.params.maxResult : 10;
     const last_id = req.params.last_id;
 
-    const playList = await playListService.findAllPlaylist(maxResult, last_id);
+    const playlist = await playlistService.findAllPlaylist(maxResult, last_id);
 
-    res.send(playList);
+    res.send(playlist);
   } catch (error) {
     throw error;
   }
@@ -28,13 +28,13 @@ const readMyPlaylist = async (req, res) => {
     const payload = jwt.verify(localToken, process.env.JWT_SECRET);
     const userId = payload.id;
 
-    const playList = await playListService.findUserPlaylist(
+    const playlist = await playlistService.findUserPlaylist(
       maxResult,
       last_id,
       userId
     );
 
-    res.send(playList);
+    res.send(playlist);
   } catch (error) {
     throw error;
   }

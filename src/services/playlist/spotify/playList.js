@@ -1,4 +1,5 @@
 const axios = require("axios");
+const { storePlaylist } = require("../../database/playlist");
 
 const search = async (token) => {
   try {
@@ -14,26 +15,26 @@ const search = async (token) => {
       params,
     };
 
-    const playLists = [];
+    const playlists = [];
     do {
       const response = await axios(options);
       const { data } = response;
 
       data.items.forEach((item) => {
-        playLists.push(parsePlayList(item));
+        playlists.push(parsePlaylist(item));
       });
 
       options.url = data.next;
     } while (options.url);
 
-    return { playLists };
+    return { playlists };
   } catch (error) {
     console.error(error);
     throw new Error(error);
   }
 };
 
-const create = async (playList, userId, token) => {
+const create = async (playlist, userId, token) => {
   try {
     const data = {
       name: "",
@@ -49,7 +50,7 @@ const create = async (playList, userId, token) => {
       data,
     };
 
-    data.name = playList.title;
+    data.name = playlist.title;
     const response = await axios(options);
     const id = response.data.id;
     return { id: id };
@@ -58,9 +59,9 @@ const create = async (playList, userId, token) => {
   }
 };
 
-const store = async (playList, trackIds, userId) => {
+const store = async (playlist, trackIds, userId) => {
   try {
-    await storePlayList(playList, trackIds, userId);
+    await storePlaylist(playlist, trackIds, userId);
     return;
   } catch (error) {
     throw error;
@@ -69,15 +70,15 @@ const store = async (playList, trackIds, userId) => {
 module.exports = { search, create, store };
 
 //not exports
-const parsePlayList = (playList) => {
+const parsePlaylist = (playlist) => {
   return {
-    id: playList.id,
-    title: playList.name,
-    thumbnail: playList.images[0],
-    description: playList.description,
+    id: playlist.id,
+    title: playlist.name,
+    thumbnail: playlist.images[0],
+    description: playlist.description,
     owner: {
-      name: playList.owner.display_name,
-      id: playList.owner.id,
+      name: playlist.owner.display_name,
+      id: playlist.owner.id,
     },
     provider: "spotify",
   };

@@ -1,5 +1,4 @@
-const { artistService, trackService, playListService } = require("../database");
-
+const { artistService, trackService, playlistService } = require("../database");
 exports.storeArtistTrack = async (trackData, provider) => {
   try {
     //1. artist 확인 후 저장
@@ -60,9 +59,9 @@ exports.storeArtistTrack = async (trackData, provider) => {
   }
 };
 
-exports.storePlayList = async (playList, trackIds, userId) => {
+exports.storePlaylist = async (playlist, trackIds, userId) => {
   try {
-    await playListService(playList, trackIds, userId);
+    await playlistService(playlist, trackIds, userId);
     return;
   } catch (error) {
     throw error;

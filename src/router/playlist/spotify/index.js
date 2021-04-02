@@ -3,18 +3,18 @@ const express = require("express");
 const { verifyToken } = require("../../../middleware/auth");
 const {
   getAccessToken,
-  searchPlayList,
+  searchPlaylist,
   getTrack,
   insertMusic,
-  savePlayList,
+  savePlaylist,
 } = require("./controller");
 
 const router = express.Router();
 
 router.use(verifyToken, getAccessToken);
-router.get("/playLists", searchPlayList);
-router.post("/playLists", insertMusic);
-router.post("/playLists/save", savePlayList);
+router.get("/playlists", searchPlaylist);
+router.post("/playlists", insertMusic);
+router.post("/playlists/save", savePlaylist);
 router.get("/tracks", getTrack);
 
 module.exports = router;

@@ -1,7 +1,7 @@
 const express = require("express");
 
 const authRoute = require("./auth");
-const playListRoute = require("./playlist");
+const playlistRoute = require("./playlist");
 const boardRoute = require("./board");
 
 const router = express.Router();
@@ -11,7 +11,7 @@ router.get("/", (req, res) => {
 });
 
 router.use("/auth", authRoute);
-router.use("/playList", playListRoute);
+router.use("/playlist", playlistRoute);
 router.use("/board", boardRoute);
 
 router.use((req, res) => {

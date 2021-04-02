@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 const playlistLikeSchema = new Schema({
   playlist: {
     type: Schema.Types.ObjectId,
-    ref: "PlayList",
+    ref: "Playlist",
   },
   like: {
     type: Number,

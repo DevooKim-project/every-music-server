@@ -1,5 +1,5 @@
 const axios = require("axios");
-const { storePlayList } = require("../../database/playList");
+const { storePlaylist } = require("../../database/playlist");
 
 const search = async (token) => {
   try {
@@ -18,26 +18,25 @@ const search = async (token) => {
       params,
     };
 
-    const playLists = [];
+    const playlists = [];
     do {
       const response = await axios(options);
       const { data } = response;
 
       data.items.forEach((item) => {
-        playLists.push(parsePlayList(item));
+        playlists.push(parsePlaylist(item));
       });
 
       params.pageToken = data.nextPageToken;
     } while (params.pageToken);
 
-    return { playLists };
+    return { playlists };
   } catch (error) {
-    console.error(error);
-    throw new Error(error);
+    throw error;
   }
 };
 
-const create = async (playList, token) => {
+const create = async (playlist, token) => {
   try {
     const params = {
       part: "snippet",
@@ -49,7 +48,7 @@ const create = async (playList, token) => {
     };
     const options = {
       method: "POST",
-      url: "https://www.googleapis.com/youtube/v3/playlists",
+      url: "https://www.googleapis.com/youtube/v3/playLists",
       headers: {
         authorization: `Bearer ${token}`,
       },
@@ -57,15 +56,15 @@ const create = async (playList, token) => {
       data,
     };
 
-    // const newPlayLists = [];
-    // for (const playList of playLists) {
-    //   data.snippet.title = playList.title;
+    // const newPlaylists = [];
+    // for (const playlist of playlists) {
+    //   data.snippet.title = playlist.title;
     //   const response = await axios(options);
-    //   newPlayLists.push(response.data.id);
+    //   newPlaylists.push(response.data.id);
     // }
 
-    // return newPlayLists;
-    data.snippet.title = playList.title;
+    // return newPlaylists;
+    data.snippet.title = playlist.title;
     const response = await axios(options);
     const id = response.data.id;
     return { id: id };
@@ -74,9 +73,9 @@ const create = async (playList, token) => {
   }
 };
 
-const store = async (playList, trackIds, userId) => {
+const store = async (playlist, trackIds, userId) => {
   try {
-    await storePlayList(playList, trackIds, userId);
+    await storePlaylist(playlist, trackIds, userId);
     return;
   } catch (error) {
     throw error;
@@ -87,15 +86,15 @@ module.exports = { search, create, store };
 
 //not exports
 
-const parsePlayList = (playList) => {
+const parsePlaylist = (playlist) => {
   return {
-    id: playList.id,
-    title: playList.snippet.title,
-    thumbnail: playList.snippet.thumbnails.default.url,
-    description: playList.snippet.description,
+    id: playlist.id,
+    title: playlist.snippet.title,
+    thumbnail: playlist.snippet.thumbnails.default.url,
+    description: playlist.snippet.description,
     owner: {
-      name: playList.snippet.channelTitle,
-      id: playList.snippet.channelId,
+      name: playlist.snippet.channelTitle,
+      id: playlist.snippet.channelId,
     },
     provider: "youtube",
   };

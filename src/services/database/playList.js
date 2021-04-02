@@ -1,11 +1,11 @@
-const PlayList = require("../../database/schema/playlist");
-const { playList } = require("../playlist/youtube");
+const Playlist = require("../../database/schema/playlist");
+// const { playlist } = require("../playlist/youtube");
 
-const storePlayList = async (data, tracks, ownerId) => {
+const storePlaylist = async (data, tracks, ownerId) => {
   try {
     // const { title, id, description, thumbnail } = data;
     const { id } = data;
-    await PlayList.create({
+    await Playlist.create({
       ...data,
       providerId: id,
       owner: ownerId,
@@ -22,8 +22,8 @@ const storePlayList = async (data, tracks, ownerId) => {
 //2. findOne 아님
 const findOnePlaylist = async (id) => {
   try {
-    const playList = await PlayList.findOne({ id });
-    return playList;
+    // const playlist = await Playlist.find({ owner: id });
+    // return playlist;
   } catch (error) {
     throw error;
   }
@@ -33,14 +33,14 @@ const findAllPlaylist = async (limit, last_id) => {
   try {
     if (!last_id) {
       //page1
-      const playList = await PlayList.find().sort({ like: 1 }).limit(limit);
-      return playList;
+      const playlist = await Playlist.find().sort({ like: 1 }).limit(limit);
+      return playlist;
     } else {
       //page2...
-      const playList = await PlayList.find({ _id: { $gt: last_id } }).limit(
+      const playlist = await Playlist.find({ _id: { $gt: last_id } }).limit(
         limit
       );
-      return playList;
+      return playlist;
     }
   } catch (error) {
     throw error;
@@ -51,17 +51,17 @@ const findUserPlaylist = async (limit, last_id, owner) => {
   try {
     if (!last_id) {
       //page1
-      const playList = await PlayList.find({ owner: owner })
+      const playlist = await Playlist.find({ owner: owner })
         .sort({ like: 1 })
         .limit(limit);
-      return playList;
+      return playlist;
     } else {
       //page2...
-      const playList = await PlayList.find({
+      const playlist = await Playlist.find({
         _id: { $gt: last_id },
         owner: owner,
       }).limit(limit);
-      return playList;
+      return playlist;
     }
   } catch (error) {
     throw error;
@@ -69,7 +69,7 @@ const findUserPlaylist = async (limit, last_id, owner) => {
 };
 
 module.exports = {
-  storePlayList,
+  storePlaylist,
   findOnePlaylist,
   findAllPlaylist,
   findUserPlaylist,

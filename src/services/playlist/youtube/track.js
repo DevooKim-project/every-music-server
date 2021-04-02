@@ -249,14 +249,14 @@ const getInfo = async (id, token) => {
   }
 };
 
-const add = async (playListId, trackIds, token) => {
+const add = async (playlistId, trackIds, token) => {
   try {
     const params = {
       part: "snippet",
     };
     const data = {
       snippet: {
-        playlistId: playListId,
+        playlistId: playlistId,
         resourceId: {
           kind: "youtube#video",
           videoId: "",

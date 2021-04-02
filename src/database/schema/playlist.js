@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const { Schema } = mongoose;
-const playListSchema = new Schema({
+const playlistSchema = new Schema({
   title: {
     type: String,
     required: true,
@@ -17,6 +17,6 @@ const playListSchema = new Schema({
     default: true,
   },
 });
-// playListSchema.index({ like: 1 });
-playListSchema.index({ owner: 1 });
-module.exports = mongoose.model("Playlist", playListSchema);
+// playlistSchema.index({ like: 1 });
+playlistSchema.index({ owner: 1 });
+module.exports = mongoose.model("Playlist", playlistSchema);
