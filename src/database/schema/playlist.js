@@ -16,11 +16,7 @@ const playListSchema = new Schema({
     type: Boolean,
     default: true,
   },
-  like: {
-    type: Number,
-    default: 0,
-  },
 });
-playListSchema.index({ like: 1 });
+// playListSchema.index({ like: 1 });
 playListSchema.index({ owner: 1 });
-module.exports = mongoose.model("PlayList", playListSchema);
+module.exports = mongoose.model("Playlist", playListSchema);
