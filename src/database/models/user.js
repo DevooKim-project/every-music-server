@@ -49,7 +49,5 @@ module.exports = class User extends Sequelize.Model {
     );
   }
 
-  static associate(db) {
-    db.User.hasMany(db.Playlist, { foreignKey: "owner", sourceKey: "id" });
-  }
+  static associate(db) {}
 };
