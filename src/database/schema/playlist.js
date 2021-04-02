@@ -16,7 +16,11 @@ const playlistSchema = new Schema({
     type: Boolean,
     default: true,
   },
+  like: {
+    type: Number,
+    default: 0,
+  },
 });
-// playlistSchema.index({ like: 1 });
+playlistSchema.index({ like: 1 });
 playlistSchema.index({ owner: 1 });
 module.exports = mongoose.model("Playlist", playlistSchema);
