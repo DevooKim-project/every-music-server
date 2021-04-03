@@ -68,9 +68,58 @@ const findUserPlaylist = async (limit, last_id, owner) => {
   }
 };
 
+const findUserLikePlaylist = async (limit, last_id, owner) => {
+  try {
+    if (!last_id) {
+      //page1
+      const playlist = await Playlist.find({ owner: owner })
+        .sort({ like: 1 })
+        .limit(limit);
+      return playlist;
+    } else {
+      //page2...
+      const playlist = await Playlist.find({
+        _id: { $gt: last_id },
+        owner: owner,
+      }).limit(limit);
+      return playlist;
+    }
+  } catch (error) {
+    throw error;
+  }
+};
+
+const likePlaylist = async (playlistId, status) => {
+  try {
+    switch (status) {
+      case "up":
+        await Playlist.updateOne({ _id: playlistId }, { $inc: { like: 1 } });
+        return;
+      case "down":
+        await Playlist.updateOne({ _id: playlistId }, { $inc: { like: -1 } });
+        return;
+      default:
+        throw new Error("likePlaylist type error");
+    }
+  } catch (error) {
+    throw error;
+  }
+};
+
+const deletePlaylist = async (playlistId, owner) => {
+  try {
+    await Playlist.deleteOne({ _id: playlistId, owner: owner });
+    return;
+  } catch (error) {
+    throw error;
+  }
+};
+
 module.exports = {
   storePlaylist,
   findOnePlaylist,
   findAllPlaylist,
   findUserPlaylist,
+  likePlaylist,
+  deletePlaylist,
 };
