@@ -4,7 +4,7 @@ const qs = require("qs");
 const { parseToken } = require("../../../middleware/auth");
 
 const { kakaoService, localService } = require("../../../services/auth");
-const { userService, tokenService } = require("../../../services/database");
+const { userService } = require("../../../services/database");
 
 exports.login = async (req, res) => {
   try {
@@ -31,16 +31,20 @@ exports.getLocalToken = async (req, res) => {
     const { access_token, refresh_token } = tokens;
     const profile = await kakaoService.getProfile(access_token);
     console.log(access_token);
-    const exUser = await userService.findOneUser({
-      provider: {
-        provider: "kakao",
-        providerId: profile.id,
-      },
-    });
+    const provider = {
+      provider: "kakao",
+      providerId: profile.id,
+    };
+    const exUser = await userService.findOneUser({ email: profile.email });
 
     if (exUser) {
-      const localToken = localService.createToken(exUser);
-      return res.send(localToken);
+      if (exUser.provider === provider) {
+        console.log("exUser");
+        const localToken = localService.createToken(exUser);
+        return res.send(localToken);
+      } else {
+        return res.send(`${exUser.provider.provider}로 가입된 계정 입니다.`);
+      }
     }
 
     const newUser = await userService.createUser({

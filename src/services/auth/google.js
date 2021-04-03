@@ -26,25 +26,25 @@ const getToken = async (code) => {
 
     return response.data;
   } catch (error) {
-    throw new Error(error);
+    throw error;
   }
 };
 
-const refreshToken = async (token) => {
+const updateRefreshToken = async (token) => {
   try {
     const localToken = parseToken(token);
     const payload = jwt.verify(localToken, process.env.JWT_SECRET);
     const userId = payload.id;
-    const refreshToken = await tokenService.findToken(userId, {
+    const token = await tokenService.findToken({
+      user: userId,
       provider: "google",
-      type: "refresh",
     });
-    console.log("find refresh: ", refreshToken);
+    console.log("find refresh: ", token.refreshToken);
 
     const data = {
       client_id: process.env.GOOGLE_ID,
       client_secret: process.env.GOOGLE_SECRET,
-      refresh_token: refreshToken,
+      refresh_token: token.refreshToken,
       grant_type: "refresh_token",
     };
 
@@ -56,18 +56,15 @@ const refreshToken = async (token) => {
     });
 
     console.log("newToken: ", newToken.data);
-    await tokenService.updateToken(
-      {
-        userId,
-        accessToken: newToken.data.access_token,
-      },
-      { provider: "google", type: "access" }
-    );
+    await tokenService.updateToken({
+      user: userId,
+      provider: "google",
+      accessToken: newToken.data.access_token,
+    });
     return;
   } catch (error) {
-    console.error(error);
-    throw new Error(error);
+    throw error;
   }
 };
 
-module.exports = { getToken, refreshToken };
+module.exports = { getToken, updateRefreshToken };

@@ -53,7 +53,7 @@ const getProfile = async (token) => {
   }
 };
 
-const refreshToken = async (token) => {
+const updateRefreshToken = async (token) => {
   try {
     const localToken = parseToken(token);
     const payload = jwt.verify(localToken, process.env.JWT_SECRET);
@@ -97,4 +97,4 @@ const refreshToken = async (token) => {
   }
 };
 
-module.exports = { getToken, getProfile, refreshToken };
+module.exports = { getToken, getProfile, updateRefreshToken };

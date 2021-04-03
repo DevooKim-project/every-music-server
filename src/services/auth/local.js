@@ -22,7 +22,7 @@ const createToken = (user) => {
   return { accessToken, refreshToken };
 };
 
-const refreshToken = async (token) => {
+const updateRefreshToken = async (token) => {
   try {
     const localToken = parseToken(token);
     const data = jwt.verify(localToken, process.env.JWT_SECRET);
@@ -39,4 +39,4 @@ const refreshToken = async (token) => {
   }
 };
 
-module.exports = { createToken, refreshToken };
+module.exports = { createToken, updateRefreshToken };

@@ -25,7 +25,7 @@ exports.login = async (req, res) => {
   return res.redirect(`${url}?${qs.stringify(params)}`);
 };
 
-exports.getServiceToken = async (req, res, next) => {
+exports.getProviderToken = async (req, res, next) => {
   try {
     const tokens = await spotifyService.getToken(req.query.code);
     req.tokens = tokens;
@@ -41,27 +41,29 @@ exports.getLocalToken = async (req, res) => {
     const { access_token, refresh_token } = req.tokens;
     console.log("refresh_token: ", refresh_token);
     const profile = await spotifyService.getProfile(access_token);
+    const provider = {
+      provider: "spotify",
+      providerId: profile.id,
+    };
 
-    const exUser = await userService.findOneUser({
-      provider: {
-        provider: "spotify",
-        providerId: profile.id,
-      },
-    });
+    const exUser = await userService.findOneUser({ email: profile.email });
 
     if (exUser) {
-      const localToken = localService.createToken(exUser);
-      await tokenService.updateToken(
-        {
-          userId: exUser.id,
+      if (exUser.provider === provider) {
+        console.log("exUser");
+        const localToken = localService.createToken(exUser);
+        await tokenService.updateToken({
+          user: exUser.id,
           accessToken: access_token,
-          refresh_token: refresh_token,
-        },
-        { provider: "spotify", type: "all" }
-      );
-      return res.send(localToken);
+          provider: "spotify",
+        });
+        return res.send(localToken);
+      } else {
+        return res.send(`${exUser.provider.provider}로 가입된 계정 입니다.`);
+      }
     }
 
+    console.log("newUser");
     const newUser = await userService.createUser({
       email: profile.email,
       nick: profile.display_name,
@@ -73,35 +75,32 @@ exports.getLocalToken = async (req, res) => {
 
     const localToken = localService.createToken(newUser);
 
-    await tokenService.storeToken(
-      {
-        userId: newUser.id,
-        accessToken: access_token,
-        refreshToken: refresh_token,
-      },
-      "spotify"
-    );
+    await tokenService.storeToken({
+      user: newUser.id,
+      provider: "spotify",
+      accessToken: access_token,
+      refreshToken: refresh_token,
+    });
 
     return res.send(localToken);
   } catch (error) {
-    console.error(error);
     return res.send(error);
   }
 };
 
-exports.refreshToken = async (req, res) => {
+exports.updateRefreshToken = async (req, res) => {
   try {
     const type = req.params.type;
 
     switch (type) {
       case "local":
-        const newToken = await localService.refreshToken(
+        const newToken = await localService.updateRefreshToken(
           req.headers.authorization
         );
         return res.send(newToken);
 
       case "provider":
-        await spotifyService.refreshToken(req.headers.authorization);
+        await spotifyService.updateRefreshToken(req.headers.authorization);
         return res.send("spotify refresh ok");
 
       default:

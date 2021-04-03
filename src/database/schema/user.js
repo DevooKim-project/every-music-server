@@ -18,6 +18,7 @@ const userSchema = new Schema({
     providerId: String,
   },
   likePlaylist: [{ type: Schema.Types.ObjectId, ref: "Playlist" }],
+  // token: { type: Schema.Types.ObjectId, ref: "Token" },
 });
 
 module.exports = mongoose.model("User", userSchema);

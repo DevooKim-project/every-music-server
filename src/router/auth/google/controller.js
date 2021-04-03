@@ -28,13 +28,12 @@ exports.login = async (req, res) => {
   return res.redirect(`${url}?${qs.stringify(params)}`);
 };
 
-exports.getServiceToken = async (req, res, next) => {
+exports.getProviderToken = async (req, res, next) => {
   try {
     const tokens = await googleService.getToken(req.query.code);
     req.tokens = tokens;
     next();
   } catch (error) {
-    console.error(error);
     res.send(error);
   }
 };
@@ -46,25 +45,26 @@ exports.getLocalToken = async (req, res) => {
     //refresh_token은 최초 1회 발급
     const { access_token, refresh_token, id_token } = tokens;
     const profile = jwt.decode(id_token);
+    const provider = {
+      provider: "google",
+      providerId: profile.id,
+    };
 
-    const exUser = await userService.findOneUser({
-      provider: {
-        provider: "google",
-        providerId: profile.sub,
-      },
-    });
+    const exUser = await userService.findOneUser({ email: profile.email });
 
     if (exUser) {
-      const localToken = localService.createToken(exUser);
-      await tokenService.updateToken(
-        {
-          userId: exUser.id,
+      if (exUser.provider === provider) {
+        console.log("exUser");
+        const localToken = localService.createToken(exUser);
+        await tokenService.updateToken({
+          user: exUser.id,
           accessToken: access_token,
-        },
-        { provider: "google", type: "access" }
-      );
-      console.log("exUser");
-      return res.send(localToken);
+          provider: "google",
+        });
+        return res.send(localToken);
+      } else {
+        return res.send(`${exUser.provider.provider}로 가입된 계정 입니다.`);
+      }
     }
 
     console.log("newUser");
@@ -82,35 +82,35 @@ exports.getLocalToken = async (req, res) => {
     const localToken = localService.createToken(newUser);
 
     //access토큰, refresh토큰 저장
-    await tokenService.storeToken(
-      {
-        userId: newUser.id,
-        accessToken: access_token,
-        refreshToken: refresh_token,
-      },
-      "google"
-    );
+    await tokenService.storeToken({
+      user: newUser.id,
+      provider: "google",
+      accessToken: access_token,
+      refreshToken: refresh_token,
+    });
 
     return res.send(localToken);
   } catch (error) {
-    console.error(error);
+    if (error.code === 11000) {
+      return res.send("이미 가입된 유저");
+    }
     return res.send(error);
   }
 };
 
-exports.refreshToken = async (req, res) => {
+exports.updateRefreshToken = async (req, res) => {
   try {
     const type = req.params.type;
 
     switch (type) {
       case "local":
-        const newToken = await localService.refreshToken(
+        const newToken = await localService.updateRefreshToken(
           req.headers.authorization
         );
         return res.send(newToken);
 
       case "provider":
-        await googleService.refreshToken(req.headers.authorization);
+        await googleService.updateRefreshToken(req.headers.authorization);
         return res.send("google refresh ok");
 
       default:
@@ -128,16 +128,15 @@ exports.singout = async (req, res) => {
     const payload = jwt.verify(localToken, process.env.JWT_SECRET);
     const userId = payload.id;
 
-    //refresh 토큰 검색
-    const refreshToken = await tokenService.findToken(userId, {
+    //토큰 검색
+    const token = await tokenService.findToken({
+      userId: userId,
       provider: "google",
-      type: "refresh",
     });
 
     const params = {
-      token: refreshToken,
+      token: token.refreshToken,
     };
-
     const options = {
       method: "POST",
       url: "https://oauth2.googleapis.com/revoke",
@@ -152,7 +151,6 @@ exports.singout = async (req, res) => {
 
     return res.send("signout ok");
   } catch (error) {
-    console.error(error);
     return res.send(error);
   }
 };
