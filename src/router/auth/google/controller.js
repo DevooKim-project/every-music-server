@@ -48,8 +48,10 @@ exports.getLocalToken = async (req, res) => {
     const profile = jwt.decode(id_token);
 
     const exUser = await userService.findOneUser({
-      provider: "google",
-      providerId: profile.sub,
+      provider: {
+        provider: "google",
+        providerId: profile.sub,
+      },
     });
 
     if (exUser) {
@@ -70,8 +72,10 @@ exports.getLocalToken = async (req, res) => {
     const newUser = await userService.createUser({
       email: profile.email,
       nick: profile.name,
-      providerId: profile.sub,
-      provider: "google",
+      provider: {
+        provider: "google",
+        providerId: profile.sub,
+      },
     });
 
     //로컬 토큰 발급
@@ -130,25 +134,21 @@ exports.singout = async (req, res) => {
       type: "refresh",
     });
 
+    const params = {
+      token: refreshToken,
+    };
+
     const options = {
       method: "POST",
       url: "https://oauth2.googleapis.com/revoke",
-      params: {
-        token: refreshToken,
-      },
+      params,
     };
 
     Promise.all([
       axios(options),
       tokenService.deleteToken(userId),
-      userService.destroyUser({ id: userId }),
+      userService.destroyUser(userId),
     ]);
-    // //토큰 만료 요청 보냄
-    // await axios(options);
-    // //토큰 제거
-    // await tokenService.deleteToken(userId);
-    // //유저 제거
-    // await userService.destroyUser({ id: userId });
 
     return res.send("signout ok");
   } catch (error) {

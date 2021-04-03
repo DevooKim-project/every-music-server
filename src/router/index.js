@@ -6,7 +6,9 @@ const boardRoute = require("./board");
 
 const router = express.Router();
 
+const user = require("../database/schema/user");
 router.get("/", (req, res) => {
+  user.create({ email: "123123", provider: { provider: "KAKAO" } });
   res.send("home");
 });
 

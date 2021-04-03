@@ -10,7 +10,11 @@ const userSchema = new Schema({
     type: String,
   },
   provider: {
-    provider: { type: String, enum: ["kakao", "google", "spotify"] },
+    provider: {
+      type: String,
+      enum: ["kakao", "google", "spotify"],
+      lowercase: true,
+    },
     providerId: String,
   },
   likePlaylist: [{ type: Schema.Types.ObjectId, ref: "Playlist" }],

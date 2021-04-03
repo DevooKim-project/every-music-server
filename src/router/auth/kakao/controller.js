@@ -32,8 +32,10 @@ exports.getLocalToken = async (req, res) => {
     const profile = await kakaoService.getProfile(access_token);
     console.log(access_token);
     const exUser = await userService.findOneUser({
-      provider: "kakao",
-      providerId: profile.id,
+      provider: {
+        provider: "kakao",
+        providerId: profile.id,
+      },
     });
 
     if (exUser) {
@@ -44,8 +46,10 @@ exports.getLocalToken = async (req, res) => {
     const newUser = await userService.createUser({
       email: profile.kakao_account.email,
       nick: profile.kakao_account.profile.nickname,
-      providerId: profile.id,
-      provider: "kakao",
+      provider: {
+        provider: "kakao",
+        providerId: profile.id,
+      },
     });
 
     const localToken = localService.createToken(newUser);
@@ -80,20 +84,17 @@ exports.signout = async (req, res) => {
       target_id_type: "user_id",
       target_id: payload.providerId,
     };
-
-    const response = await axios({
+    const options = {
       method: "POST",
       url: "https://kapi.kakao.com/v1/user/unlink",
       headers: {
         Authorization: `KakaoAK ${process.env.KAKAO_ADMIN}`,
       },
       params,
-    });
+    };
 
-    await userService.destroyUser({
-      provider: "kakao",
-      providerId: response.data.id,
-    });
+    Promise.all([axios(options), userService.destroyUser(payload.id)]);
+
     return res.send("signout ok");
   } catch (error) {
     console.error(error);

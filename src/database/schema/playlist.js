@@ -9,7 +9,7 @@ const playlistSchema = new Schema({
   description: String,
   thumbnail: String,
   tracks: [{ type: Schema.Types.ObjectId, ref: "Track" }],
-  owner: String,
+  owner: { type: Schema.Types.ObjectId, ref: "User" },
   providerId: String,
   provider: String,
   display: {

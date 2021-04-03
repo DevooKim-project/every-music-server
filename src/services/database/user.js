@@ -1,34 +1,30 @@
-const User = require("../../database/models/user");
+const User = require("../../database/schema/user");
+const Playlist = require("../../database/schema/playlist");
 
 const createUser = async (data) => {
   try {
     const user = await User.create(data);
     return user;
   } catch (error) {
-    throw new Error(error);
+    throw error;
   }
 };
 
-const findOneUser = async (param) => {
+const findOneUser = async (data) => {
   try {
-    const user = await User.findOne({
-      where: { ...param },
-    });
-
+    const user = await User.findOne(data);
     return user;
   } catch (error) {
-    throw new Error(error);
+    throw error;
   }
 };
 
-const destroyUser = async (param) => {
+const destroyUser = async (userId) => {
   try {
-    await User.destroy({
-      where: { ...param },
-    });
-    return;
+    await Playlist.deleteMany({ owner: userId });
+    User.deleteOne({ _id: userId });
   } catch (error) {
-    throw new Error(error);
+    throw error;
   }
 };
 

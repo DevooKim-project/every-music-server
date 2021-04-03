@@ -43,8 +43,10 @@ exports.getLocalToken = async (req, res) => {
     const profile = await spotifyService.getProfile(access_token);
 
     const exUser = await userService.findOneUser({
-      provider: "spotify",
-      providerId: profile.id,
+      provider: {
+        provider: "spotify",
+        providerId: profile.id,
+      },
     });
 
     if (exUser) {
@@ -63,8 +65,10 @@ exports.getLocalToken = async (req, res) => {
     const newUser = await userService.createUser({
       email: profile.email,
       nick: profile.display_name,
-      providerId: profile.id,
-      provider: "spotify",
+      provider: {
+        provider: "spotify",
+        providerId: profile.id,
+      },
     });
 
     const localToken = localService.createToken(newUser);
@@ -118,7 +122,7 @@ exports.signout = async (req, res) => {
     //사용자가 스포티파이에서 직접 토큰 제거해야함(프론트에서 링크 연결) 서버에서는 db에서만 제거
     Promise.all([
       tokenService.deleteToken(userId),
-      userService.destroyUser({ id: userId }),
+      userService.destroyUser(userId),
     ]);
 
     return res.send("signout ok");
