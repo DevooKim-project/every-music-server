@@ -21,8 +21,10 @@ const findOneUser = async (data) => {
 
 const destroyUser = async (userId) => {
   try {
-    await Playlist.deleteMany({ owner: userId });
-    User.deleteOne({ _id: userId });
+    Promise.all([
+      Playlist.deleteMany({ owner: userId }),
+      User.deleteOne({ _id: userId }),
+    ]);
   } catch (error) {
     throw error;
   }
