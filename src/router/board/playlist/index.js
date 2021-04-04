@@ -1,18 +1,26 @@
 const express = require("express");
+const { verifyToken } = require("../../../middleware/auth");
 const {
   getUserId,
   readAllPlaylist,
-  readMyPlaylist,
+  readUserPlaylist,
   likePlaylist,
 } = require("./controller");
 
 const router = express.Router();
 
+router.use((req, res, next) => {
+  if (req.headers.authorization) {
+  }
+});
 router.get("/read", readAllPlaylist);
-
-//로그인 필요
-router.use("/", getUserId);
-router.get("/read/my", readMyPlaylist);
+router.get("/read/:playlistId");
+router.get("/read/:userId", (req, res, next) => {
+  if (req.headers.authorization) {
+    verifyToken(req, res, next);
+  }
+  readUserPlaylist(req, res);
+});
 router.get("/like/:status", likePlaylist);
 
 module.exports = router;

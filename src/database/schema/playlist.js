@@ -12,9 +12,9 @@ const playlistSchema = new Schema({
   owner: { type: Schema.Types.ObjectId, ref: "User" },
   providerId: String,
   provider: String,
-  display: {
+  private: {
     type: Boolean,
-    default: true,
+    default: false,
   },
   like: {
     type: Number,

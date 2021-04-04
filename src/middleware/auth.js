@@ -19,7 +19,10 @@ exports.isNotLoggedIn = (req, res, next) => {
 
 exports.verifyToken = (req, res, next) => {
   try {
-    const token = this.parseToken(req.headers.authorization);
+    const authorization = req.headers.authorization
+      ? req.headers.authorization
+      : "";
+    const token = this.parseToken(authorization);
 
     const user = jwt.verify(token, process.env.JWT_SECRET);
     req.user = user;

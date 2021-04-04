@@ -17,7 +17,11 @@ const userSchema = new Schema({
     },
     providerId: String,
   },
-  likePlaylist: [{ type: Schema.Types.ObjectId, ref: "Playlist" }],
+  likePlaylists: [{ type: Schema.Types.ObjectId, ref: "Playlist" }],
+  private: {
+    type: Boolean,
+    default: false,
+  },
   // token: { type: Schema.Types.ObjectId, ref: "Token" },
 });
 

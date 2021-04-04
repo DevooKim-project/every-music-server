@@ -1,4 +1,5 @@
 const Playlist = require("../../database/schema/playlist");
+const User = require("../../database/schema/user");
 // const { playlist } = require("../playlist/youtube");
 
 const storePlaylist = async (data, tracks, ownerId) => {
@@ -29,17 +30,22 @@ const findOnePlaylist = async (id) => {
   }
 };
 
-const findAllPlaylist = async (limit, last_id) => {
+const findAllPlaylist = async (limit, lastId) => {
   try {
-    if (!last_id) {
+    if (!lastId) {
       //page1
-      const playlist = await Playlist.find().sort({ like: 1 }).limit(limit);
+      const playlist = await Playlist.find({ display: true })
+        .sort({ like: 1 })
+        .limit(limit);
       return playlist;
     } else {
       //page2...
-      const playlist = await Playlist.find({ _id: { $gt: last_id } }).limit(
-        limit
-      );
+      const playlist = await Playlist.find({
+        _id: { $gt: lastId },
+        display: true,
+      })
+        .sort({ like: 1 })
+        .limit(limit);
       return playlist;
     }
   } catch (error) {
@@ -47,19 +53,28 @@ const findAllPlaylist = async (limit, last_id) => {
   }
 };
 
-const findUserPlaylist = async (limit, last_id, owner) => {
+const findUserPlaylist = async (limit, lastId, data) => {
   try {
-    if (!last_id) {
+    let privateQuery = {};
+    if (data.isMine) {
+      privateQuery = { $or: [{ private: true }, { private: false }] };
+    } else {
+      privateQuery = { private: true };
+    }
+
+    if (!lastId) {
       //page1
-      const playlist = await Playlist.find({ owner: owner })
-        .sort({ like: 1 })
-        .limit(limit);
+      const playlist = await Playlist.find({
+        owner: owner,
+        ...privateQuery,
+      }).limit(limit);
       return playlist;
     } else {
       //page2...
       const playlist = await Playlist.find({
-        _id: { $gt: last_id },
+        _id: { $gt: lastId },
         owner: owner,
+        ...privateQuery,
       }).limit(limit);
       return playlist;
     }
@@ -68,39 +83,43 @@ const findUserPlaylist = async (limit, last_id, owner) => {
   }
 };
 
-const findUserLikePlaylist = async (limit, last_id, owner) => {
+const findUserLibrary = async (data) => {
   try {
-    if (!last_id) {
-      //page1
-      const playlist = await Playlist.find({ owner: owner })
-        .sort({ like: 1 })
-        .limit(limit);
-      return playlist;
-    } else {
-      //page2...
-      const playlist = await Playlist.find({
-        _id: { $gt: last_id },
-        owner: owner,
-      }).limit(limit);
-      return playlist;
-    }
+    const userData = await User.findOne({ _id: data.owner }).populate(
+      "likePlaylists"
+    );
+    const library = userData.likePlaylists;
+    return library;
   } catch (error) {
     throw error;
   }
 };
 
-const likePlaylist = async (playlistId, status) => {
+const likePlaylist = async (playlistId, user, status) => {
   try {
     switch (status) {
       case "up":
+        await User.updateOne({ _id: user }, { $addToSet: { t: playlistId } });
         await Playlist.updateOne({ _id: playlistId }, { $inc: { like: 1 } });
         return;
       case "down":
+        await User.updateOne({ _id: user }, { $pullAll: { t: [playlistId] } });
         await Playlist.updateOne({ _id: playlistId }, { $inc: { like: -1 } });
         return;
       default:
         throw new Error("likePlaylist type error");
     }
+  } catch (error) {
+    throw error;
+  }
+};
+
+const changePrivatePlaylist = async (playlistId, data, owner) => {
+  try {
+    await Playlist.updateOne(
+      { _id: playlistId, owner: owner },
+      { private: data.private }
+    );
   } catch (error) {
     throw error;
   }
@@ -120,6 +139,8 @@ module.exports = {
   findOnePlaylist,
   findAllPlaylist,
   findUserPlaylist,
+  findUserLibrary,
   likePlaylist,
+  changePrivatePlaylist,
   deletePlaylist,
 };

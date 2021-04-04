@@ -6,23 +6,22 @@ const boardRoute = require("./board");
 
 const router = express.Router();
 
-const { Test1, Test2 } = require("../database/schema/test1");
+const { Test, Test2 } = require("../database/schema/test");
 router.get("/", async (req, res) => {
-  const test1 = await Test1.create({ name: "test1" });
-  const test2 = await Test2.create({ name: "test2" });
-  await Test1.updateOne({ name: "test1" }, { t1: test2._id });
+  const t1 = await Test.create({ num: 1 });
+  const t2 = await Test2.create({ num: 123 });
+  const t3 = await Test2.create({ num: 456 });
+  const t4 = await Test2.create({ num: 789 });
+  await Test.updateOne(
+    { _id: t1._id },
+    { $addToSet: { t: { $each: [t2._id, t3._id, t4._id] } } }
+  );
 
-  const a1 = await Test1.findOne({ name: "test1" });
-  const a2 = await Test2.findOne({ name: "test2" });
-  console.log(a1);
-  console.log(a2);
+  await Test.updateOne({ _id: t1._id }, { $pullAll: { t: [t3._id] } });
 
-  const b1 = await Test1.findOne({ name: "test1" }).populate("t1");
-  console.log(b1);
-
-  const c2 = await Test2.updateOne({ _id: b1.t1._id }, { name: "change" });
-  console.log(c2);
-
+  const b = await Test.findOne({ _id: t1._id }).populate("t");
+  console.log(b);
+  console.log(b.t);
   res.send("home");
 });
 
