@@ -33,7 +33,7 @@ exports.getLocalToken = async (req, res) => {
     console.log(access_token);
     const provider = {
       provider: "kakao",
-      providerId: profile.id,
+      provider_id: profile.id,
     };
     const exUser = await userService.findOneUser({ email: profile.email });
 
@@ -52,7 +52,7 @@ exports.getLocalToken = async (req, res) => {
       nick: profile.kakao_account.profile.nickname,
       provider: {
         provider: "kakao",
-        providerId: profile.id,
+        provider_id: profile.id,
       },
     });
 
@@ -86,7 +86,7 @@ exports.signout = async (req, res) => {
     const payload = jwt.verify(localToken, process.env.JWT_SECRET);
     const params = {
       target_id_type: "user_id",
-      target_id: payload.providerId,
+      target_id: payload.provider_id,
     };
     const options = {
       method: "POST",

@@ -1,11 +1,32 @@
 const axios = require("axios");
-const jwt = require("jsonwebtoken");
 const qs = require("qs");
 
-const { parseToken } = require("../../middleware/auth");
-const { tokenService } = require("../database");
+const { tokenService, userService } = require("../database");
 
-const getToken = async (code) => {
+exports.obtainOAuthCredentials = async () => {
+  const url = "https://accounts.google.com/o/oauth2/v2/auth";
+  const scopes = [
+    "https://www.googleapis.com/auth/userinfo.email",
+    "https://www.googleapis.com/auth/userinfo.profile",
+    "https://www.googleapis.com/auth/youtube.readonly",
+    "https://www.googleapis.com/auth/youtube.upload",
+    "https://www.googleapis.com/auth/youtube.force-ssl",
+    "https://www.googleapis.com/auth/youtube",
+  ];
+
+  const params = {
+    client_id: process.env.GOOGLE_ID,
+    redirect_uri: "http://localhost:5000/auth/google/callback",
+    response_type: "code",
+    access_type: "offline",
+    scope: scopes.join(" "),
+  };
+
+  const endpoint = await `${url}?${qs.stringify(params)}`;
+  return endpoint;
+};
+
+exports.OAuthRedirect = async (code) => {
   try {
     const data = {
       code,
@@ -17,12 +38,9 @@ const getToken = async (code) => {
 
     const response = await axios({
       method: "POST",
-      // url: "https://accounts.gogle.com/o/oauth2/token",
       url: "https://oauth2.googleapis.com/token",
       data: qs.stringify(data),
     });
-
-    console.log("Google: ", response.data);
 
     return response.data;
   } catch (error) {
@@ -30,36 +48,33 @@ const getToken = async (code) => {
   }
 };
 
-const updateRefreshToken = async (token) => {
+exports.updateRefreshToken = async (user_id) => {
   try {
-    const localToken = parseToken(token);
-    const payload = jwt.verify(localToken, process.env.JWT_SECRET);
-    const userId = payload.id;
     const token = await tokenService.findToken({
-      user: userId,
+      user: user_id,
       provider: "google",
     });
-    console.log("find refresh: ", token.refreshToken);
+    console.log("find refresh: ", token.refresh_token);
 
     const data = {
       client_id: process.env.GOOGLE_ID,
       client_secret: process.env.GOOGLE_SECRET,
-      refresh_token: token.refreshToken,
+      refresh_token: token.refresh_token,
       grant_type: "refresh_token",
     };
 
-    const newToken = await axios({
+    const response = await axios({
       method: "POST",
 
       url: "https://oauth2.googleapis.com/token",
       data: qs.stringify(data),
     });
 
-    console.log("newToken: ", newToken.data);
+    console.log("newToken: ", response.data);
     await tokenService.updateToken({
-      user: userId,
+      user: user_id,
       provider: "google",
-      accessToken: newToken.data.access_token,
+      access_token: response.data.access_token,
     });
     return;
   } catch (error) {
@@ -67,4 +82,28 @@ const updateRefreshToken = async (token) => {
   }
 };
 
-module.exports = { getToken, updateRefreshToken };
+exports.signOut = async (user_id) => {
+  try {
+    const token = await tokenService.findToken({
+      user: user_id,
+      provider: "google",
+    });
+    console.log("token: ", token);
+    const params = {
+      token: token.refresh_token,
+    };
+    const options = {
+      method: "POST",
+      url: "https://oauth2.googleapis.com/revoke",
+      params,
+    };
+
+    Promise.all([
+      axios(options),
+      tokenService.deleteToken(user_id),
+      userService.destroyUser(user_id),
+    ]);
+  } catch (error) {
+    throw error;
+  }
+};

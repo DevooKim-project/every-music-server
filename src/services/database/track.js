@@ -5,7 +5,7 @@ const storeTrack = async (data, artistId) => {
     // const { title, ids, artist, duration_ms, thumbnail } = data;
     const response = await Track.create({
       ...data,
-      providerId: data.ids,
+      provider_id: data.ids,
       artist: artistId,
     });
     return response;
@@ -23,9 +23,13 @@ const findTrack = async (title, artistId) => {
   }
 };
 
-const updateTrack = async (title, providerId) => {
+const updateTrack = async (title, provider_id) => {
   try {
-    const track = await Track.updateOne({ title }, { providerId });
+    const track = await Track.findOneAndUpdate(
+      { title },
+      { provider_id },
+      { returnNewDocument: true }
+    );
     return track;
   } catch (error) {
     throw error;

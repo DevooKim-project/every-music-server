@@ -9,17 +9,17 @@ const storeToken = async (data) => {
 
 const updateToken = async (data) => {
   try {
-    const { user, provider, accessToken, refreshToken } = data;
+    const { user, provider, access_token, refresh_token } = data;
 
-    if (!refreshToken) {
+    if (!refresh_token) {
       await Token.updateOne(
         { user: user, provider: provider },
-        { tokens: { accessToken: accessToken, refreshToken: refreshToken } }
+        { tokens: { access_token: access_token, refresh_token: refresh_token } }
       );
     } else {
       await Token.updateOne(
         { user: user, provider: provider },
-        { tokens: { accessToken: accessToken } }
+        { tokens: { access_token: access_token } }
       );
     }
   } catch (error) {

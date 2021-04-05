@@ -5,7 +5,7 @@ const storeArtist = async (data) => {
     const { name, ids } = data;
     const response = await Artist.create({
       name,
-      providerId: ids,
+      provider_id: ids,
     });
 
     return response;
@@ -23,9 +23,9 @@ const findArtist = async (name) => {
   }
 };
 
-const updateArtist = async (name, providerId) => {
+const updateArtist = async (name, provider_id) => {
   try {
-    const artist = await Artist.updateOne({ name }, { providerId });
+    const artist = await Artist.updateOne({ name }, { provider_id });
     return artist;
   } catch (error) {
     throw error;

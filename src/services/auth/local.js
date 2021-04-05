@@ -3,23 +3,20 @@ const { parseToken } = require("../../middleware/auth");
 const { userService } = require("../database");
 
 const createToken = (user) => {
-  const { id, nick, providerId, provider } = user;
-  const accessToken = jwt.sign(
-    { id, nick, providerId, provider },
+  const { id, nick, provider } = user;
+  const access_token = jwt.sign(
+    { id, nick, provider },
     process.env.JWT_SECRET,
     {
-      // expiresIn: "10m", //50분
+      // expiresIn: "10m", //60분
     }
   );
 
-  const refreshToken = jwt.sign({ id }, process.env.JWT_SECRET, {
+  const refresh_token = jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: "1w",
   });
 
-  console.log("local-access: ", accessToken);
-  console.log("refresh-access: ", refreshToken);
-
-  return { accessToken, refreshToken };
+  return { access_token, refresh_token };
 };
 
 const updateRefreshToken = async (token) => {

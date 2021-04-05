@@ -34,7 +34,7 @@ module.exports = class User extends Sequelize.Model {
           type: DataTypes.STRING(20),
           allowNull: false,
         },
-        providerId: {
+        provider_id: {
           type: DataTypes.STRING(255),
           allowNull: false,
         },

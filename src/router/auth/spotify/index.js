@@ -1,7 +1,7 @@
 const express = require("express");
 const { verifyToken } = require("../../../middleware/auth");
 const {
-  login,
+  oAuth,
   getProviderToken,
   getLocalToken,
   updateRefreshToken,
@@ -9,7 +9,7 @@ const {
 } = require("./controller");
 
 const router = express.Router();
-router.get("/", login);
+router.get("/", oAuth);
 router.get("/callback", getProviderToken, getLocalToken);
 router.get("/refresh/:type", verifyToken, updateRefreshToken);
 router.get("/signout", signout);

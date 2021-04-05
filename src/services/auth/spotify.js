@@ -53,20 +53,25 @@ const getProfile = async (token) => {
   }
 };
 
-const updateRefreshToken = async (token) => {
+const updateRefreshToken = async (user_id) => {
   try {
-    const localToken = parseToken(token);
-    const payload = jwt.verify(localToken, process.env.JWT_SECRET);
-    const userId = payload.id;
-    const refreshToken = await tokenService.findToken(userId, {
-      provider: "spotify",
-      type: "refresh",
-    });
-    console.log("find refresh: ", refreshToken);
+    // const localToken = parseToken(token);
+    // const payload = jwt.verify(localToken, process.env.JWT_SECRET);
+    // const userId = payload.id;
+    const refresh_token = await tokenService.findToken(
+      {
+        user: user_id,
+      },
+      {
+        provider: "spotify",
+        type: "refresh",
+      }
+    );
+    console.log("find refresh: ", refresh_token);
 
     const data = {
       grant_type: "refresh_token",
-      refresh_token: refreshToken,
+      refresh_token: refresh_token,
     };
 
     const key = base64Encode(
@@ -85,7 +90,7 @@ const updateRefreshToken = async (token) => {
     await tokenService.updateToken(
       {
         userId,
-        accessToken: newToken.data.access_token,
+        access_token: newToken.data.access_token,
       },
       { provider: "spotify", type: "access" }
     );

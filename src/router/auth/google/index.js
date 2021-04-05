@@ -1,22 +1,33 @@
 const express = require("express");
 
-const { verifyToken } = require("../../../middleware/auth");
 const {
-  login,
+  verifyToken,
+  isAccessToken,
+  isRefreshToken,
+  createLocalToken,
+} = require("../../../middleware/auth");
+const {
+  obtainOAuth,
   getProviderToken,
-  getLocalToken,
-  updateRefreshToken,
-  singout,
+  login,
+  signOut,
 } = require("./controller");
 
 const router = express.Router();
 
-router.get("/", login);
-router.get("/callback", getProviderToken, getLocalToken);
+router.get("/", obtainOAuth);
+router.get(
+  "/callback",
+  getProviderToken,
+  login,
+  createLocalToken,
+  (req, res) => {
+    res.send(req.local_access_token);
+  }
+);
 
-// router.use(verifyToken)
-router.get("/refresh/:type", verifyToken, updateRefreshToken);
-router.get("/signout", verifyToken, singout);
+// router.get("/refresh/:type", isRefreshToken, verifyToken);
+router.get("/signout", isAccessToken, verifyToken, signOut);
 
 //로그아웃은 클라이언트에서 jwt제거
 

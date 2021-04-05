@@ -13,12 +13,12 @@ exports.storeArtistTrack = async (trackData, provider) => {
     let artistId = "";
 
     if (artist) {
-      if (!hasProviderId(artist.providerId, provider)) {
-        const providerId = {
-          ...artist.providerId,
+      if (!hasProviderId(artist.provider_id, provider)) {
+        const provider_id = {
+          ...artist.provider_id,
           ...trackData.artist.ids,
         };
-        artist = artistService.updateArtist(trackData.artist.name, providerId);
+        artist = artistService.updateArtist(trackData.artist.name, provider_id);
       }
     } else {
       console.log("store artist");
@@ -26,7 +26,7 @@ exports.storeArtistTrack = async (trackData, provider) => {
     }
     artistId = {
       local: artist._id,
-      ...artist.providerId,
+      ...artist.provider_id,
     };
 
     //Track
@@ -34,12 +34,12 @@ exports.storeArtistTrack = async (trackData, provider) => {
     let trackId = "";
 
     if (track) {
-      if (!hasProviderId(track.providerId, provider)) {
-        const providerId = {
-          ...track.providerId,
+      if (!hasProviderId(track.provider_id, provider)) {
+        const provider_id = {
+          ...track.provider_id,
           ...trackData.ids,
         };
-        artist = trackService.updateTrack(trackData.title, providerId);
+        artist = trackService.updateTrack(trackData.title, provider_id);
       }
     } else {
       console.log("store track");
@@ -47,7 +47,7 @@ exports.storeArtistTrack = async (trackData, provider) => {
     }
     trackId = {
       local: track._id,
-      ...track.providerId,
+      ...track.provider_id,
     };
 
     trackData.artist.ids = artistId;
@@ -68,13 +68,13 @@ exports.storePlaylist = async (playlist, trackIds, userId) => {
   }
 };
 
-const hasProviderId = (providerId, provider) => {
+const hasProviderId = (provider_id, provider) => {
   switch (provider) {
     case "youtube":
-      if (providerId.youtube) return true;
+      if (provider_id.youtube) return true;
       else return false;
     case "spotify":
-      if (providerId.spotify) return true;
+      if (provider_id.spotify) return true;
       else return false;
     default:
       throw new Error("checkProviderId type error");

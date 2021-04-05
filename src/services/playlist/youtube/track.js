@@ -148,9 +148,9 @@ const searchCache = async (tracks, token) => {
       const artist = t.artist;
       let track = await trackService.findTrack(t.title, artist.ids.local);
       let trackId = "";
-      if (track.providerId.youtube) {
+      if (track.provider_id.youtube) {
         console.log("cached");
-        trackId = track.providerId.youtube;
+        trackId = track.provider_id.youtube;
       } else {
         console.log("not Cache");
 

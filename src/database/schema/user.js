@@ -4,20 +4,20 @@ const { Schema } = mongoose;
 const userSchema = new Schema({
   email: {
     type: String,
-    unique: true,
+    // unique: true,
   },
   nick: {
     type: String,
   },
   provider: {
-    provider: {
+    name: {
       type: String,
       enum: ["kakao", "google", "spotify"],
       lowercase: true,
     },
-    providerId: String,
+    id: String,
   },
-  likePlaylists: [{ type: Schema.Types.ObjectId, ref: "Playlist" }],
+  like_playlists: [{ type: Schema.Types.ObjectId, ref: "Playlist" }],
   private: {
     type: Boolean,
     default: false,

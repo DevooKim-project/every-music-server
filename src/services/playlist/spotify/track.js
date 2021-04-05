@@ -63,9 +63,9 @@ const searchIdFromProvider = async (tracks, token) => {
       const trackLocalId = track._id;
       trackLocalIds.push(trackLocalId);
       let trackProviderId = "";
-      if (track.providerId.spotify) {
+      if (track.provider_id.spotify) {
         console.log("cached");
-        trackProviderId = track.providerId.spotify;
+        trackProviderId = track.provider_id.spotify;
       } else {
         console.log("not Cache");
         // const artist = t.artists[0];

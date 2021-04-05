@@ -5,7 +5,7 @@ const { spotifyService, localService } = require("../../../services/auth");
 const { userService, tokenService } = require("../../../services/database");
 const { parseToken } = require("../../../middleware/auth");
 
-exports.login = async (req, res) => {
+exports.oAuth = async (req, res) => {
   const url = "https://accounts.spotify.com/authorize";
   const scopes = [
     "user-read-email",
@@ -27,8 +27,8 @@ exports.login = async (req, res) => {
 
 exports.getProviderToken = async (req, res, next) => {
   try {
-    const tokens = await spotifyService.getToken(req.query.code);
-    req.tokens = tokens;
+    const token = await spotifyService.getToken(req.query.code);
+    req.token = token;
     next();
   } catch (error) {
     console.error(error);
@@ -38,12 +38,12 @@ exports.getProviderToken = async (req, res, next) => {
 
 exports.getLocalToken = async (req, res) => {
   try {
-    const { access_token, refresh_token } = req.tokens;
+    const { access_token, refresh_token } = req.token;
     console.log("refresh_token: ", refresh_token);
     const profile = await spotifyService.getProfile(access_token);
     const provider = {
       provider: "spotify",
-      providerId: profile.id,
+      provider_id: profile.id,
     };
 
     const exUser = await userService.findOneUser({ email: profile.email });
@@ -54,7 +54,7 @@ exports.getLocalToken = async (req, res) => {
         const localToken = localService.createToken(exUser);
         await tokenService.updateToken({
           user: exUser.id,
-          accessToken: access_token,
+          access_token: access_token,
           provider: "spotify",
         });
         return res.send(localToken);
@@ -69,7 +69,7 @@ exports.getLocalToken = async (req, res) => {
       nick: profile.display_name,
       provider: {
         provider: "spotify",
-        providerId: profile.id,
+        provider_id: profile.id,
       },
     });
 
@@ -78,8 +78,8 @@ exports.getLocalToken = async (req, res) => {
     await tokenService.storeToken({
       user: newUser.id,
       provider: "spotify",
-      accessToken: access_token,
-      refreshToken: refresh_token,
+      access_token: access_token,
+      refresh_token: refresh_token,
     });
 
     return res.send(localToken);

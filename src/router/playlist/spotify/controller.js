@@ -9,13 +9,13 @@ exports.getAccessToken = async (req, res, next) => {
     const localToken = parseToken(req.headers.authorization);
     const payload = jwt.verify(localToken, process.env.JWT_SECRET);
     const userId = payload.id;
-    const providerId = payload.providerId;
-    const accessToken = await tokenService.findToken(userId, {
+    const provider_id = payload.provider_id;
+    const access_token = await tokenService.findToken(userId, {
       provider: "spotify",
       type: "access",
     });
-    req.accessToken = accessToken;
-    req.providerId = providerId;
+    req.access_token = access_token;
+    req.provider_id = provider_id;
     next();
   } catch (error) {
     console.error(error);
@@ -25,8 +25,8 @@ exports.getAccessToken = async (req, res, next) => {
 
 exports.searchPlaylist = async (req, res) => {
   try {
-    const accessToken = req.accessToken;
-    const item = await spotifyService.playlist.search(accessToken);
+    const access_token = req.access_token;
+    const item = await spotifyService.playlist.search(access_token);
 
     res.json(item);
   } catch (error) {
@@ -37,7 +37,7 @@ exports.searchPlaylist = async (req, res) => {
 
 exports.getTrack = async (req, res) => {
   try {
-    const accessToken = req.accessToken;
+    const access_token = req.access_token;
 
     const { playlists } = req.body;
 
@@ -45,7 +45,7 @@ exports.getTrack = async (req, res) => {
     for (const playlist of playlists) {
       const item = await spotifyService.track.getFromPlaylist(
         playlist.id,
-        accessToken
+        access_token
       );
       tracks.push(item.tracks);
     }
@@ -62,23 +62,23 @@ exports.getTrack = async (req, res) => {
 
 exports.insertMusic = async (req, res) => {
   try {
-    const accessToken = req.accessToken;
-    const providerId = req.providerId;
+    const access_token = req.access_token;
+    const provider_id = req.provider_id;
     const { playlists, tracks } = req.body;
 
     const trackIdData = [];
     for (let i = 0; i < playlists.length; i++) {
       // const newPlaylist = await spotifyService.playlist.create(
       //   playlists[i],
-      //   providerId,
-      //   accessToken
+      //   provider_id,
+      //   access_token
       // );
       // const newPlaylist = { id: "3PaR6AIx3FaCb9k9XwMRjp" };
       console.log("createPlaylist ok");
 
       const trackIds = await spotifyService.track.searchIdFromProvider(
         tracks[i],
-        accessToken
+        access_token
       );
       const providerIds = trackIds.provider;
       const localIds = trackIds.local;
@@ -87,7 +87,7 @@ exports.insertMusic = async (req, res) => {
 
       //한번에 최대 100개 가능
       // for (const t of splitArray(providerIds, 100)) {
-      //   await spotifyService.track.add(newPlaylist.id, t, accessToken);
+      //   await spotifyService.track.add(newPlaylist.id, t, access_token);
       // }
     }
 

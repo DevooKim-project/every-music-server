@@ -15,7 +15,12 @@ const findOneUser = async (data) => {
     const user = await User.findOne(data);
     return user;
   } catch (error) {
+    console.log(error);
     throw error;
+    if (error.code === 110000) {
+      //유저에서 이메일로 먼저 가입된 서비스명 제공
+      throw new Error({ code: "AlreadyExistUser", message });
+    }
   }
 };
 

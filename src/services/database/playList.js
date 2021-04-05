@@ -8,7 +8,7 @@ const storePlaylist = async (data, tracks, ownerId) => {
     const { id } = data;
     await Playlist.create({
       ...data,
-      providerId: id,
+      provider_id: id,
       owner: ownerId,
       tracks,
     });
@@ -86,9 +86,9 @@ const findUserPlaylist = async (limit, lastId, data) => {
 const findUserLibrary = async (data) => {
   try {
     const userData = await User.findOne({ _id: data.owner }).populate(
-      "likePlaylists"
+      "like_playlistss"
     );
-    const library = userData.likePlaylists;
+    const library = userData.like_playlistss;
     return library;
   } catch (error) {
     throw error;

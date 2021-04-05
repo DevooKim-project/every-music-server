@@ -26,7 +26,7 @@ exports.getProfile = async (code) => {
     console.log("id_token: ", id_token);
     const profile = {
       email: id_token.email,
-      providerId: id_token.sub,
+      provider_id: id_token.sub,
       nick: "testNick",
       provider: "google",
     };

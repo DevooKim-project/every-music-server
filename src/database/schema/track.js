@@ -7,7 +7,7 @@ const trackSchema = new Schema({
   artist: { type: Schema.Types.ObjectId, ref: "Artist" },
   thumbnail: String,
   duration_ms: String,
-  providerId: {
+  provider_id: {
     spotify: { type: String },
     youtube: { type: String },
   },
