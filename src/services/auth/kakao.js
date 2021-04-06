@@ -2,7 +2,20 @@ const axios = require("axios");
 const qs = require("qs");
 const { userService } = require("../database");
 
-const getToken = async (code) => {
+exports.obtainOAuthCredentials = async () => {
+  const url = "https://kauth.kakao.com/oauth/authorize";
+  const params = {
+    client_id: process.env.KAKAO_ID,
+    redirect_uri: "http://localhost:5000/auth/kakao/callback",
+    response_type: "code",
+    // state: "", //CSRF 공격 보호를 위한 임의의 문자열
+  };
+
+  const endpoint = await `${url}?${qs.stringify(params)}`;
+  return endpoint;
+};
+
+exports.OAuthRedirect = async (code) => {
   try {
     const data = {
       code,
@@ -20,12 +33,11 @@ const getToken = async (code) => {
 
     return response.data;
   } catch (error) {
-    console.error(error);
-    throw new Error(error);
+    throw error;
   }
 };
 
-const getProfile = async (token) => {
+exports.getProfile = async (token) => {
   try {
     const profile = await axios({
       method: "POST",
@@ -42,4 +54,39 @@ const getProfile = async (token) => {
   }
 };
 
-module.exports = { getToken, getProfile };
+exports.logout = async () => {
+  try {
+    const url = "https://kauth.kakao.com/oauth/logout";
+    const params = {
+      client_id: process.env.KAKAO_ID,
+      logout_redirect_uri: "http://localhost:5000/",
+    };
+
+    const endpoint = await `${url}?${qs.stringify(params)}`;
+    return endpoint;
+  } catch (error) {
+    throw error;
+  }
+};
+
+exports.signOut = async (provider_id) => {
+  try {
+    const params = {
+      target_id_type: "user_id",
+      target_id: provider_id,
+    };
+    const options = {
+      method: "POST",
+      url: "https://kapi.kakao.com/v1/user/unlink",
+      headers: {
+        Authorization: `KakaoAK ${process.env.KAKAO_ADMIN}`,
+      },
+      params,
+    };
+
+    Promise.all([axios(options), userService.destroyUser(payload.id)]);
+    return;
+  } catch (error) {
+    throw error;
+  }
+};

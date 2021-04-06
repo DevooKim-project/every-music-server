@@ -1,11 +1,32 @@
 const express = require("express");
-const { login, getLocalToken, logout, signout } = require("./controller");
+
+const {
+  verifyToken,
+  isAccessToken,
+  isRefreshToken,
+  createLocalToken,
+} = require("../../../middleware/auth");
+const {
+  obtainOAuth,
+  getProviderToken,
+  login,
+  logout,
+  signOut,
+} = require("./controller");
 
 const router = express.Router();
 
-router.get("/", login);
-router.get("/callback", getLocalToken);
+router.get("/", obtainOAuth);
+router.get(
+  "/callback",
+  getProviderToken,
+  login,
+  createLocalToken,
+  (req, res) => {
+    res.send(req.local_access_token);
+  }
+);
 router.get("/logout", logout);
-router.get("/signout", signout);
+router.get("/signOut", isAccessToken, verifyToken, signOut);
 
 module.exports = router;

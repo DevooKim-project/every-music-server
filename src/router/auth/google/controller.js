@@ -4,8 +4,12 @@ const { googleService, verifyUser } = require("../../../services/auth");
 const { userService, tokenService } = require("../../../services/database");
 
 exports.obtainOAuth = async (req, res) => {
-  const endpoint = await googleService.obtainOAuthCredentials();
-  return res.redirect(endpoint);
+  try {
+    const endpoint = await googleService.obtainOAuthCredentials();
+    return res.redirect(endpoint);
+  } catch (error) {
+    return res.send(error);
+  }
 };
 
 exports.getProviderToken = async (req, res, next) => {
