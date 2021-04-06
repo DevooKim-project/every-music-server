@@ -48,6 +48,8 @@ exports.OAuthRedirect = async (code) => {
   }
 };
 
+//에러처리: 리프레시 토큰이 만료된 경우
+//google은 만료 안됨
 exports.updateRefreshToken = async (user_id) => {
   try {
     const token = await tokenService.findToken({
@@ -70,12 +72,12 @@ exports.updateRefreshToken = async (user_id) => {
       data: qs.stringify(data),
     });
 
-    console.log("newToken: ", response.data);
     await tokenService.updateToken({
       user: user_id,
       provider: "google",
       access_token: response.data.access_token,
     });
+    console.log("google new_access_token: ", response.data.access_token);
     return;
   } catch (error) {
     throw error;

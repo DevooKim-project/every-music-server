@@ -34,15 +34,23 @@ exports.login = async (req, res, next) => {
     console.log("google refresh_token: ", refresh_token);
 
     //기존 유저 확인
-    const exist_user = await verifyUser(user_data);
+    const exist_user = await verifyUser({ email: profile.email });
     if (exist_user) {
       //provider 토큰 업데이트
       console.log("exist_user");
-      await tokenService.updateToken({
+      const token_data = {
         user: exist_user.id,
         provider: "google",
         access_token: access_token,
-      });
+      };
+
+      //구글의 refresh_token은 최초 1회만 발급
+      //특정 조건에서
+      if (refresh_token) {
+        token_data.refresh_token = refresh_token;
+      }
+      await tokenService.updateToken(token_data);
+
       req.user_id = exist_user._id;
     } else {
       //신규 유저 생성

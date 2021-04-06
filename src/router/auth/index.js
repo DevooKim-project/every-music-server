@@ -20,7 +20,10 @@ router.get(
   isRefreshToken,
   verifyToken,
   refreshToken,
-  createLocalToken
+  createLocalToken,
+  (req, res) => {
+    res.send("local refresh Ok");
+  }
 );
 
 module.exports = router;

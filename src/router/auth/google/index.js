@@ -27,7 +27,7 @@ router.get(
 );
 
 // router.get("/refresh/:type", isRefreshToken, verifyToken);
-router.get("/signout", isAccessToken, verifyToken, signOut);
+router.get("/signOut", isAccessToken, verifyToken, signOut);
 
 //로그아웃은 클라이언트에서 jwt제거
 

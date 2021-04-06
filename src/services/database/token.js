@@ -11,18 +11,22 @@ const updateToken = async (data) => {
   try {
     const { user, provider, access_token, refresh_token } = data;
 
-    if (!refresh_token) {
+    if (refresh_token) {
       await Token.updateOne(
         { user: user, provider: provider },
-        { tokens: { access_token: access_token, refresh_token: refresh_token } }
+        { access_token: access_token, refresh_token: refresh_token },
+        { upsert: true }
       );
     } else {
       await Token.updateOne(
         { user: user, provider: provider },
-        { tokens: { access_token: access_token } }
+        { access_token: access_token },
+        { upsert: true }
       );
     }
+    return;
   } catch (error) {
+    console.log(error);
     throw error;
   }
 };

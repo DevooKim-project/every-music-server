@@ -13,7 +13,7 @@ exports.isAccessToken = (req, res, next) => {
     req.authorization = authorization;
     next();
   } else {
-    res.status(419).status("유효하지 않은 access token");
+    res.status(419).send("유효하지 않은 access token");
   }
 };
 
@@ -64,24 +64,30 @@ exports.refreshToken = async (req, res, next) => {
         break;
       case "local":
         next();
+        break;
       default:
         throw new Error({ code: "", message: "refresh Token Type Error" });
     }
   } catch (error) {
+    console.log(error);
     res.send(error);
   }
 };
 
 exports.createLocalToken = async (req, res, next) => {
   try {
-    // const { id } = req.payload;
-    const user_id = req.user_id;
+    const payload = req.payload;
+    // const { id } = req.payload;  //4/6 로컬 토큰 변화 문
+    console.log("1", payload);
+    console.log("2", req.user_id);
+    const user_id = payload ? payload.id : req.user_id;
     console.log("user_id: ", user_id);
     const user = await userService.findOneUser({ _id: user_id });
     const local_token = await localService.createToken(user);
     console.log("local access_token: ", local_token.access_token);
     console.log("local refresh_token: ", local_token.refresh_token);
 
+    res.clearCookie("refresh_token");
     res.cookie("refresh_token", local_token.refresh_token, {
       // httpOnly: true, //JS에서 쿠키 접근 불가능
       // secure: true, //https에서만 쿠키 생성
@@ -91,6 +97,7 @@ exports.createLocalToken = async (req, res, next) => {
     req.local_access_token = local_token.access_token;
     next();
   } catch (error) {
+    console.log(error);
     res.send(error);
   }
 };

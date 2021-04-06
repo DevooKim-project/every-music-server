@@ -8,7 +8,7 @@ const createToken = (user) => {
     { id, nick, provider },
     process.env.JWT_SECRET,
     {
-      // expiresIn: "10m", //60분
+      expiresIn: "10m", //60분
     }
   );
 
