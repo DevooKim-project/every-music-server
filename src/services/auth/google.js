@@ -3,20 +3,14 @@ const qs = require("qs");
 
 const { tokenService, userService } = require("../database");
 
-exports.obtainOAuthCredentials = async () => {
+exports.obtainOAuthCredentials = async (OAuth_params) => {
   const url = "https://accounts.google.com/o/oauth2/v2/auth";
-  const scopes = [
-    "https://www.googleapis.com/auth/userinfo.email",
-    "https://www.googleapis.com/auth/userinfo.profile",
-    "https://www.googleapis.com/auth/youtube.readonly",
-    "https://www.googleapis.com/auth/youtube.upload",
-    "https://www.googleapis.com/auth/youtube.force-ssl",
-    "https://www.googleapis.com/auth/youtube",
-  ];
+
+  const { scopes, redirect_uri } = OAuth_params;
 
   const params = {
     client_id: process.env.GOOGLE_ID,
-    redirect_uri: "http://localhost:5000/auth/google/callback",
+    redirect_uri: redirect_uri,
     response_type: "code",
     access_type: "offline",
     scope: scopes.join(" "),
@@ -26,13 +20,15 @@ exports.obtainOAuthCredentials = async () => {
   return endpoint;
 };
 
-exports.OAuthRedirect = async (code) => {
+exports.OAuthRedirect = async (code, OAuth_params) => {
   try {
+    const { redirect_uri } = OAuth_params;
+
     const data = {
       code,
       client_id: process.env.GOOGLE_ID,
       client_secret: process.env.GOOGLE_SECRET,
-      redirect_uri: "http://localhost:5000/auth/google/callback",
+      redirect_uri: redirect_uri,
       grant_type: "authorization_code",
     };
 

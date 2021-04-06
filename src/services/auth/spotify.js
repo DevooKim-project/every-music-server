@@ -4,20 +4,14 @@ const { Base64 } = require("js-base64");
 
 const { userService, tokenService } = require("../database");
 
-exports.obtainOAuthCredentials = async () => {
+exports.obtainOAuthCredentials = async (OAuth_params) => {
   const url = "https://accounts.spotify.com/authorize";
-  const scopes = [
-    "user-read-email",
-    "playlist-modify-public",
-    "playlist-modify-private",
-    "playlist-read-private",
-    // "playlist-read-collaborative",
-  ];
+  const { scopes, redirect_uri } = OAuth_params;
 
   const params = {
     response_type: "code",
     client_id: process.env.SPOTIFY_ID,
-    redirect_uri: "http://localhost:5000/auth/spotify/callback",
+    redirect_uri: redirect_uri,
     scope: scopes.join(" "),
   };
 
@@ -25,12 +19,14 @@ exports.obtainOAuthCredentials = async () => {
   return endpoint;
 };
 
-exports.OAuthRedirect = async (code) => {
+exports.OAuthRedirect = async (code, OAuth_params) => {
   try {
+    const { redirect_uri } = OAuth_params;
+
     const data = {
       code,
       grant_type: "authorization_code",
-      redirect_uri: "http://localhost:5000/auth/spotify/callback",
+      redirect_uri: redirect_uri,
     };
 
     const key = Base64.encode(

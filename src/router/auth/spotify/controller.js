@@ -1,6 +1,29 @@
 const { spotifyService, verifyUser } = require("../../../services/auth");
 const { userService, tokenService } = require("../../../services/database");
 
+exports.withLogin = (req, res, next) => {
+  const scopes = [
+    "user-read-email",
+    "playlist-modify-public",
+    "playlist-modify-private",
+    "playlist-read-private",
+  ];
+  const redirect_uri = "http://localhost:5000/auth/spotify/callback";
+  req.OAuth_params = { scopes, redirect_uri };
+  next();
+};
+
+exports.withoutLogin = (req, res, next) => {
+  const scopes = [
+    "playlist-modify-public",
+    "playlist-modify-private",
+    "playlist-read-private",
+  ];
+  const redirect_uri = "http://localhost:5000/auth/spotify/callback2";
+  req.OAuth_params = { scopes, redirect_uri };
+  next();
+};
+
 exports.obtainOAuth = async (req, res) => {
   try {
     const endpoint = await spotifyService.obtainOAuthCredentials();
@@ -61,6 +84,22 @@ exports.login = async (req, res, next) => {
       req.user_id = new_user._id;
     }
     next();
+  } catch (error) {
+    console.log(error);
+    res.send(error);
+  }
+};
+
+exports.saveTokenWithoutLogin = async (req, res) => {
+  try {
+    const { access_token, refresh_token } = req.provider_token;
+    const user_id = req.payload.id;
+    await tokenService.storeToken({
+      user: user_id,
+      access_token: access_token,
+      refresh_token: refresh_token,
+    });
+    res.send("saveTokenWithoutLogin spotify ok");
   } catch (error) {
     console.log(error);
     res.send(error);

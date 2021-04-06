@@ -3,9 +3,37 @@ const jwt = require("jsonwebtoken");
 const { googleService, verifyUser } = require("../../../services/auth");
 const { userService, tokenService } = require("../../../services/database");
 
+exports.withLogin = (req, res, next) => {
+  const scopes = [
+    "https://www.googleapis.com/auth/userinfo.email",
+    "https://www.googleapis.com/auth/userinfo.profile",
+    "https://www.googleapis.com/auth/youtube.readonly",
+    "https://www.googleapis.com/auth/youtube.upload",
+    "https://www.googleapis.com/auth/youtube.force-ssl",
+    "https://www.googleapis.com/auth/youtube",
+  ];
+  const redirect_uri = `http://localhost:5000/auth/google/callback`;
+  req.OAuth_params = { scopes, redirect_uri };
+  next();
+};
+
+exports.withoutLogin = (req, res, next) => {
+  const scopes = [
+    "https://www.googleapis.com/auth/youtube.readonly",
+    "https://www.googleapis.com/auth/youtube.upload",
+    "https://www.googleapis.com/auth/youtube.force-ssl",
+    "https://www.googleapis.com/auth/youtube",
+  ];
+  const redirect_uri = `http://localhost:5000/auth/google/callback2`;
+  req.OAuth_params = { scopes, redirect_uri };
+  next();
+};
+
 exports.obtainOAuth = async (req, res) => {
   try {
-    const endpoint = await googleService.obtainOAuthCredentials();
+    const endpoint = await googleService.obtainOAuthCredentials(
+      req.OAuth_params
+    );
     return res.redirect(endpoint);
   } catch (error) {
     return res.send(error);
@@ -14,7 +42,10 @@ exports.obtainOAuth = async (req, res) => {
 
 exports.getProviderToken = async (req, res, next) => {
   try {
-    const token = await googleService.OAuthRedirect(req.query.code);
+    const token = await googleService.OAuthRedirect(
+      req.query.code,
+      req.OAuth_params
+    );
     req.provider_token = token;
     next();
   } catch (error) {
@@ -70,6 +101,22 @@ exports.login = async (req, res, next) => {
     }
     next();
   } catch (error) {
+    res.send(error);
+  }
+};
+
+exports.saveTokenWithoutLogin = async (req, res) => {
+  try {
+    const { access_token, refresh_token } = req.provider_token;
+    const user_id = req.payload.id;
+    await tokenService.storeToken({
+      user: user_id,
+      access_token: access_token,
+      refresh_token: refresh_token,
+    });
+    res.send("saveTokenWithoutLogin google ok");
+  } catch (error) {
+    console.log(error);
     res.send(error);
   }
 };
