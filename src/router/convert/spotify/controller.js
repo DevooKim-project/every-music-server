@@ -95,7 +95,11 @@ exports.storePlaylist = async (req, res) => {
   try {
     const user_id = req.payload.user_id;
     const { playlists, track_ids } = req.body;
-    await spotifyService.playlist.store(playlists, track_ids, user_id);
+    await spotifyService.playlist.store({
+      playlists: playlists,
+      track_ids: track_ids,
+      user_id: user_id,
+    });
   } catch (error) {
     res.send(error);
   }
