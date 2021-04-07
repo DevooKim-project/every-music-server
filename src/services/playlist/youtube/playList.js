@@ -1,7 +1,7 @@
 const axios = require("axios");
 const { storePlaylist } = require("../../database/playlist");
 
-const search = async (token) => {
+exports.search = async (token) => {
   try {
     const params = {
       part: "snippet",
@@ -36,7 +36,7 @@ const search = async (token) => {
   }
 };
 
-const create = async (playlist, token) => {
+exports.create = async (playlist, token) => {
   try {
     const params = {
       part: "snippet",
@@ -56,14 +56,6 @@ const create = async (playlist, token) => {
       data,
     };
 
-    // const newPlaylists = [];
-    // for (const playlist of playlists) {
-    //   data.snippet.title = playlist.title;
-    //   const response = await axios(options);
-    //   newPlaylists.push(response.data.id);
-    // }
-
-    // return newPlaylists;
     data.snippet.title = playlist.title;
     const response = await axios(options);
     const id = response.data.id;
@@ -73,18 +65,14 @@ const create = async (playlist, token) => {
   }
 };
 
-const store = async (playlist, trackIds, userId) => {
+exports.store = async (playlist, track_ids, user_id) => {
   try {
-    await storePlaylist(playlist, trackIds, userId);
+    await storePlaylist(playlist, track_ids, user_id);
     return;
   } catch (error) {
     throw error;
   }
 };
-
-module.exports = { search, create, store };
-
-//not exports
 
 const parsePlaylist = (playlist) => {
   return {

@@ -41,9 +41,9 @@ const findToken = async (data) => {
   }
 };
 
-const deleteToken = async (userId) => {
+const deleteToken = async (user_id) => {
   try {
-    await Token.deleteMany({ user: userId });
+    await Token.deleteMany({ user: user_id });
     return;
   } catch (error) {
     throw new Error(error);

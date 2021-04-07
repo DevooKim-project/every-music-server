@@ -92,10 +92,10 @@ const searchIdFromProvider = async (tracks, token) => {
   }
 };
 
-const add = async (playlistId, trackIds, token) => {
+const add = async (playlistId, track_ids, token) => {
   try {
     const data = {
-      uris: trackIds,
+      uris: track_ids,
     };
     const options = {
       method: "POST",

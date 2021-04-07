@@ -1,17 +1,9 @@
 const youtubeService = require("./youtube");
 const spotifyService = require("./spotify");
-
-exports.splitArray = (array, offset) => {
-  let start = 0;
-  let end = offset;
-  const result = [];
-  while (start < array.length) {
-    result.push(array.slice(start, end));
-    start = end;
-    end += offset;
-  }
-  return result;
-};
+const { storeArtistTrack, storePlaylist, splitArray } = require("./common");
 
 exports.youtubeService = youtubeService;
 exports.spotifyService = spotifyService;
+exports.storeArtistTrack = storeArtistTrack;
+exports.storePlaylist = storePlaylist;
+exports.splitArray = splitArray;

@@ -3,88 +3,7 @@ const axios = require("axios");
 const { cacheService, trackService } = require("../../database");
 const { storeArtistTrack } = require("../common");
 
-//캐싱이 적으면 할당량 초과됨
-//artist 변경
-const search = async (tracks, token) => {
-  try {
-    const artistParams = {
-      part: "id",
-      q: "",
-      type: "channel",
-      // topicId: "/m/04rlf",
-    };
-    const trackParams = {
-      part: "id",
-      q: "",
-      channelId: "",
-      type: "video",
-      // topicId: "/m/04rlf",
-      videoCategoryId: 10,
-    };
-    const options = {
-      method: "GET",
-      url: "https://www.googleapis.com/youtube/v3/search",
-      headers: {
-        authorization: `Bearer ${token}`,
-      },
-    };
-
-    const trackIds = [];
-    for (const track of tracks) {
-      //아티스트 이름으로 아티스트id 가져온다.
-      //redis에서 검색
-      const artist = track.artists[0];
-      let artistIds = cacheService.getArtist(artist, "spotify"); //from google to spotify
-
-      console.log("getArtist - cache: ", artistIds);
-      //아티스트 request
-      if (!artistIds) {
-        artistParams.q = `${artist.name} - Topic`;
-        options.params = artistParams;
-        const response = await axios(options);
-        const items = response.data.items;
-        artistIds = [items[0].id.channelId];
-        console.log("search-artist: ", artistIds);
-
-        //request 후 redis에 저장
-        if (artistIds.length !== 0) {
-          cacheService.addArtist(
-            {
-              name: artist.name,
-              id: artistIds[0],
-            },
-            "youtube"
-          );
-        }
-      }
-
-      //캐시에 같은 이름의 아티스트가 있는 경우
-      //아티스트id + 트랙명으로 트랙id 가져온다.
-      for (const id of artistIds) {
-        trackParams.q = track.title;
-        trackParams.channelId = id;
-        options.params = trackParams;
-
-        const response = await axios(options);
-        const items = response.data.items;
-        trackId = items[0].id.videoId;
-        console.log("search-track: ", trackId);
-        if (trackId) {
-          trackIds.push(trackId);
-          break;
-        }
-      }
-    }
-
-    return trackIds;
-  } catch (error) {
-    throw error;
-  }
-};
-
-//아티스트ID로 정확도를 높이는 대신 아티스트 + 트랙명으로 검색하여 API사용량 낮춤
-//artist 변경
-const searchLight = async (tracks, token) => {
+exports.search = async (tracks, token) => {
   try {
     const trackParams = {
       part: "id",
@@ -100,50 +19,7 @@ const searchLight = async (tracks, token) => {
         authorization: `Bearer ${token}`,
       },
     };
-    // console.log("tracks: ", tracks);
-
-    const trackIds = [];
-    for (const track of tracks) {
-      console.log("track: ", track);
-      const artist = track.artists[0];
-      const artistName = `${artist.name}`;
-      const trackTitle = track.title;
-      trackParams.q = artistName + trackTitle;
-
-      options.params = trackParams;
-
-      const response = await axios(options);
-      const items = response.data.items;
-      if (items.length !== 0) {
-        const trackId = items[0].id.videoId;
-        console.log("search-track: ", trackId);
-        trackIds.push(trackId);
-      }
-    }
-
-    return trackIds;
-  } catch (error) {
-    throw error;
-  }
-};
-
-const searchCache = async (tracks, token) => {
-  try {
-    const trackParams = {
-      part: "id",
-      q: "",
-      type: "video",
-      // topicId: "/m/04rlf",
-      videoCategoryId: 10,
-    };
-    const options = {
-      method: "GET",
-      url: "https://www.googleapis.com/youtube/v3/search",
-      headers: {
-        authorization: `Bearer ${token}`,
-      },
-    };
-    const trackIds = [];
+    const track_ids = [];
     for (const t of tracks) {
       const artist = t.artist;
       let track = await trackService.findTrack(t.title, artist.ids.local);
@@ -166,15 +42,15 @@ const searchCache = async (tracks, token) => {
           console.log("not found");
         }
       }
-      trackIds.push(trackId);
+      track_ids.push(trackId);
     }
 
-    return trackIds;
+    return track_ids;
   } catch (error) {
     throw error;
   }
 };
-const getId = async (id, token) => {
+exports.getId = async (id, token) => {
   try {
     const params = {
       part: "contentDetails",
@@ -190,26 +66,26 @@ const getId = async (id, token) => {
       params,
     };
 
-    const trackIds = [];
+    const track_ids = [];
     do {
       const response = await axios(options);
       const { data } = response;
       data.items.forEach((item) => {
         let trackId = parseTrackItem(item);
-        trackIds.push(trackId);
+        track_ids.push(trackId);
       });
 
       params.pageToken = data.nextPageToken;
     } while (params.pageToken);
 
-    return { trackIds };
+    return { track_ids };
   } catch (error) {
     // console.error(error);
     throw error;
   }
 };
 
-const getInfo = async (id, token) => {
+exports.getInfo = async (id, token) => {
   try {
     const params = {
       part: "snippet",
@@ -249,7 +125,7 @@ const getInfo = async (id, token) => {
   }
 };
 
-const add = async (playlistId, trackIds, token) => {
+exports.insert = async (playlistId, track_ids, token) => {
   try {
     const params = {
       part: "snippet",
@@ -273,7 +149,7 @@ const add = async (playlistId, trackIds, token) => {
       data,
     };
 
-    for (const trackId of trackIds) {
+    for (const trackId of track_ids) {
       data.snippet.resourceId.videoId = trackId;
       const response = await axios(options);
       console.log("insert: ", response.data.snippet.title);
@@ -284,10 +160,6 @@ const add = async (playlistId, trackIds, token) => {
     throw error;
   }
 };
-
-module.exports = { search, searchLight, searchCache, getId, getInfo, add };
-
-//not exports
 
 const parseTrackItem = (trackId) => {
   return trackId.contentDetails.videoId;

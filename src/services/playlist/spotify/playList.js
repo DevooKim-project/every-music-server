@@ -34,7 +34,7 @@ const search = async (token) => {
   }
 };
 
-const create = async (playlist, userId, token) => {
+const create = async (playlist, user_id, token) => {
   try {
     const data = {
       name: "",
@@ -43,7 +43,7 @@ const create = async (playlist, userId, token) => {
     };
     const options = {
       method: "POST",
-      url: `https://api.spotify.com/v1/users/${userId}/playlists`,
+      url: `https://api.spotify.com/v1/users/${user_id}/playlists`,
       headers: {
         authorization: `Bearer ${token}`,
       },
@@ -59,9 +59,9 @@ const create = async (playlist, userId, token) => {
   }
 };
 
-const store = async (playlist, trackIds, userId) => {
+const store = async (playlist, track_ids, user_id) => {
   try {
-    await storePlaylist(playlist, trackIds, userId);
+    await storePlaylist(playlist, track_ids, user_id);
     return;
   } catch (error) {
     throw error;

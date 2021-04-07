@@ -59,13 +59,25 @@ exports.storeArtistTrack = async (trackData, provider) => {
   }
 };
 
-exports.storePlaylist = async (playlist, trackIds, userId) => {
+exports.storePlaylist = async (playlist, track_ids, user_id) => {
   try {
-    await playlistService(playlist, trackIds, userId);
+    await playlistService(playlist, track_ids, user_id);
     return;
   } catch (error) {
     throw error;
   }
+};
+
+exports.splitArray = (array, offset) => {
+  let start = 0;
+  let end = offset;
+  const result = [];
+  while (start < array.length) {
+    result.push(array.slice(start, end));
+    start = end;
+    end += offset;
+  }
+  return result;
 };
 
 const hasProviderId = (provider_id, provider) => {

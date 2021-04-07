@@ -15,7 +15,7 @@ router.use((req, res, next) => {
 });
 router.get("/read", readAllPlaylist);
 router.get("/read/:playlistId");
-router.get("/read/:userId", (req, res, next) => {
+router.get("/read/:user_id", (req, res, next) => {
   if (req.headers.authorization) {
     verifyToken(req, res, next);
   }

@@ -7,8 +7,8 @@ exports.getUserId = async (req, res, next) => {
   try {
     const localToken = parseToken(req.headers.authorization);
     const payload = jwt.verify(localToken, process.env.JWT_SECRET);
-    const userId = payload.user_id;
-    req.userId = userId;
+    const user_id = payload.user_id;
+    req.user_id = user_id;
     next();
   } catch (error) {
     console.error(error);
@@ -39,10 +39,10 @@ exports.readUserPlaylist = async (req, res) => {
     // maxResult: default 10
     const maxResult = req.params.maxResult ? req.params.maxResult : 10;
     const lastId = req.params.lastId;
-    const userId = req.userId;
+    const user_id = req.user_id;
     const data = {
-      owner: userId,
-      isMine: userId === req.user,
+      owner: user_id,
+      isMine: user_id === req.user,
     };
 
     const playlist = await playlistService.findUserPlaylist(
@@ -60,10 +60,10 @@ exports.readUserPlaylist = async (req, res) => {
 //내가 좋아요 누른 플레이리스트(라이브러리)
 exports.readMyLibrary = async (req, res) => {
   try {
-    const userId = req.userId;
+    const user_id = req.user_id;
     const data = {
-      owner: userId,
-      isMine: userId === req.user,
+      owner: user_id,
+      isMine: user_id === req.user,
     };
     const playlist = await playlistService.findUserLibrary(data);
 
