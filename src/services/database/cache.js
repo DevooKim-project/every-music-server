@@ -1,12 +1,12 @@
 const redis = require("redis");
 const util = require("util");
 
-const client = redis.createClient(
+exports.client = redis.createClient(
   process.env.REDIS_PORT,
   process.env.REDIS_HOST
 );
 
-const addArtist = (artist, service) => {
+exports.addArtist = (artist, service) => {
   const key = `artist-${artist.name}-${service}`;
   const value = artist.id;
   client.sadd(key, value, (err, data) => {
@@ -15,7 +15,7 @@ const addArtist = (artist, service) => {
   });
 };
 
-const getArtist = (artist, service) => {
+exports.getArtist = (artist, service) => {
   console.log("artist: ", artist);
   const key = `artist-${artist.name}-${service}`;
   client.smembers(key, (err, data) => {
@@ -24,7 +24,7 @@ const getArtist = (artist, service) => {
   });
 };
 
-const addTrack = (track, service) => {
+exports.addTrack = (track, service) => {
   // const key = `artist-${artist.name}-${service}`;
   let artist = track.artists[0].name.toUpperCase();
   let title = track.title.toUpperCase();
@@ -41,7 +41,7 @@ const addTrack = (track, service) => {
   });
 };
 
-const getTrack = async (track, service) => {
+exports.getTrack = async (track, service) => {
   try {
     let artist = track.artists[0].name.toUpperCase();
     let title = track.title.toUpperCase();
@@ -57,5 +57,3 @@ const getTrack = async (track, service) => {
     throw error;
   }
 };
-
-module.exports = { addArtist, getArtist, addTrack, getTrack };

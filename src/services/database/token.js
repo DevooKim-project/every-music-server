@@ -1,5 +1,5 @@
 const Token = require("../../database/schema/token");
-const storeToken = async (data) => {
+exports.storeToken = async (data) => {
   try {
     await Token.create(data);
   } catch (error) {
@@ -7,7 +7,7 @@ const storeToken = async (data) => {
   }
 };
 
-const updateToken = async (data) => {
+exports.updateToken = async (data) => {
   try {
     const { user, provider, access_token, refresh_token } = data;
 
@@ -31,7 +31,7 @@ const updateToken = async (data) => {
   }
 };
 
-const findToken = async (data) => {
+exports.findToken = async (data) => {
   try {
     const token = await Token.findOne(data);
     console.log(token);
@@ -41,7 +41,7 @@ const findToken = async (data) => {
   }
 };
 
-const deleteToken = async (user_id) => {
+exports.deleteToken = async (user_id) => {
   try {
     await Token.deleteMany({ user: user_id });
     return;
@@ -49,5 +49,3 @@ const deleteToken = async (user_id) => {
     throw new Error(error);
   }
 };
-
-module.exports = { storeToken, findToken, updateToken, deleteToken };

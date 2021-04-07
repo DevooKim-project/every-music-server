@@ -1,7 +1,7 @@
 const User = require("../../database/schema/user");
 const Playlist = require("../../database/schema/playlist");
 
-const createUser = async (data) => {
+exports.createUser = async (data) => {
   try {
     const user = await User.create(data);
     return user;
@@ -10,7 +10,7 @@ const createUser = async (data) => {
   }
 };
 
-const findOneUser = async (data) => {
+exports.findOneUser = async (data) => {
   try {
     const user = await User.findOne(data);
     return user;
@@ -24,7 +24,7 @@ const findOneUser = async (data) => {
   }
 };
 
-const destroyUser = async (user_id) => {
+exports.destroyUser = async (user_id) => {
   try {
     Promise.all([
       Playlist.deleteMany({ owner: user_id }),
@@ -34,5 +34,3 @@ const destroyUser = async (user_id) => {
     throw error;
   }
 };
-
-module.exports = { createUser, findOneUser, destroyUser };
