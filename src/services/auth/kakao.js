@@ -37,6 +37,37 @@ exports.OAuthRedirect = async (code) => {
   }
 };
 
+exports.login = async (token) => {
+  try {
+    const { access_token, refresh_token } = token;
+    const profile = await this.getProfile(access_token);
+    const account = profile.kakao_account;
+
+    console.log("kakao access_token: ", access_token);
+    console.log("kakao refresh_token: ", refresh_token);
+
+    const exist_user = await userService.findOneUser({ email: account.email });
+
+    if (exist_user) {
+      console.log("exist_user");
+      return exist_user._id;
+    } else {
+      console.log("new_user");
+      const new_user = await userService.createUser({
+        email: account.email,
+        nick: account.profile.name,
+        provider: {
+          name: "kakao",
+          id: profile.id,
+        },
+      });
+      return new_user._id;
+    }
+  } catch (error) {
+    throw error;
+  }
+};
+
 exports.getProfile = async (token) => {
   try {
     const profile = await axios({

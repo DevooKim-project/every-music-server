@@ -11,27 +11,19 @@ router.get(
   controller.withLogin,
   controller.getProviderToken,
   controller.login,
-  auth.createLocalToken,
-  (req, res) => {
-    res.send(req.local_access_token);
-  }
+  auth.createLocalToken
 );
 
 router.get("/token", controller.withoutLogin, controller.obtainOAuth);
 router.get(
   "/callback2",
   auth.isAccessToken,
-  auth.verifyToken,
   controller.withoutLogin,
+  controller.getProviderToken,
   controller.saveTokenWithoutLogin
 );
 
-router.get(
-  "/signOut",
-  auth.isAccessToken,
-  auth.verifyToken,
-  controller.signOut
-);
+router.get("/signOut", auth.isAccessToken, controller.signOut);
 
 //로그아웃은 클라이언트에서 jwt제거
 

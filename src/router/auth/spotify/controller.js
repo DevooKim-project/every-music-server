@@ -2,31 +2,20 @@ const { spotifyService, verifyUser } = require("../../../services/auth");
 const { userService, tokenService } = require("../../../services/database");
 
 exports.withLogin = (req, res, next) => {
-  const scopes = [
-    "user-read-email",
-    "playlist-modify-public",
-    "playlist-modify-private",
-    "playlist-read-private",
-  ];
-  const redirect_uri = "http://localhost:5000/auth/spotify/callback";
-  req.OAuth_params = { scopes, redirect_uri };
+  req.OAuth_params = spotifyService.OAuthParams.withLogin;
   next();
 };
 
 exports.withoutLogin = (req, res, next) => {
-  const scopes = [
-    "playlist-modify-public",
-    "playlist-modify-private",
-    "playlist-read-private",
-  ];
-  const redirect_uri = "http://localhost:5000/auth/spotify/callback2";
-  req.OAuth_params = { scopes, redirect_uri };
+  req.OAuth_params = spotifyService.OAuthParams.withOutLogin;
   next();
 };
 
 exports.obtainOAuth = async (req, res) => {
   try {
-    const endpoint = await spotifyService.obtainOAuthCredentials();
+    const endpoint = await spotifyService.obtainOAuthCredentials(
+      req.OAuth_params
+    );
     return res.redirect(endpoint);
   } catch (error) {
     return res.send(error);
@@ -35,7 +24,10 @@ exports.obtainOAuth = async (req, res) => {
 
 exports.getProviderToken = async (req, res, next) => {
   try {
-    const token = await spotifyService.OAuthRedirect(req.query.code);
+    const token = await spotifyService.OAuthRedirect(
+      req.query.code,
+      req.OAuth_params
+    );
     req.provider_token = token;
     next();
   } catch (error) {
@@ -46,43 +38,8 @@ exports.getProviderToken = async (req, res, next) => {
 
 exports.login = async (req, res, next) => {
   try {
-    const { access_token, refresh_token } = req.provider_token;
-    const profile = await spotifyService.getProfile(access_token);
-    const user_data = {
-      email: profile.email,
-      nick: profile.display_name,
-      provider: {
-        name: "spotify",
-        id: profile.id,
-      },
-    };
-    console.log("spotify access_token: ", access_token);
-    console.log("spotify refresh_token: ", refresh_token);
-
-    //기존 유저 확인
-    const exist_user = await verifyUser({ email: profile.email });
-    if (exist_user) {
-      //provider 토큰 업데이트
-      console.log("exist_user");
-      await tokenService.updateToken({
-        user: exist_user.id,
-        provider: "spotify",
-        access_token: access_token,
-        refresh_token: refresh_token,
-      });
-      req.user_id = exist_user._id;
-    } else {
-      //신규 유저 생성
-      console.log("new_user");
-      const new_user = await userService.createUser(user_data);
-      await tokenService.storeToken({
-        user: new_user.id,
-        provider: "spotify",
-        access_token: access_token,
-        refresh_token: refresh_token,
-      });
-      req.user_id = new_user._id;
-    }
+    const user_id = await spotifyService.login(req.provider_token);
+    req.user_id = user_id;
     next();
   } catch (error) {
     console.log(error);

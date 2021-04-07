@@ -5,13 +5,14 @@ const {
   googleService,
   spotifyService,
 } = require("../services/auth");
-const { userService, tokenService } = require("../services/database");
+const { userService } = require("../services/database");
 
 exports.isAccessToken = (req, res, next) => {
   const authorization = req.headers.authorization;
   if (authorization) {
     req.authorization = authorization;
-    next();
+    this.verifyToken(req, res, next);
+    // return next();
   } else {
     res.status(419).send("유효하지 않은 access token");
   }
@@ -23,7 +24,8 @@ exports.isRefreshToken = (req, res, next) => {
   const authorization = cookie.refresh_token;
   if (authorization) {
     req.authorization = authorization;
-    return next();
+    this.verifyToken(req, res, next);
+    // return next();
   } else {
     return res.status(419).send("유효하지 않은 refresh token");
   }
@@ -38,7 +40,7 @@ exports.verifyToken = (req, res, next) => {
     console.log(payload);
     req.payload = payload;
 
-    next();
+    return next();
   } catch (error) {
     if (error.name === "TokenExpiredError") {
       return res.status(419).send("토큰 만료");
@@ -51,37 +53,35 @@ exports.verifyToken = (req, res, next) => {
 exports.refreshToken = async (req, res, next) => {
   try {
     const type = req.params.type.toLowerCase();
-    const user_id = req.payload.user_id;
-    console.log("type: ", type);
-    switch (type) {
-      case "google":
-        await googleService.updateRefreshToken(user_id);
-        res.status(201).send("google access_token refresh ok");
-        break;
-      case "spotify":
-        await spotifyService.updateRefreshToken(user_id);
-        res.status(201).send("spotify access_token refresh ok");
-        break;
-      case "local":
-        next();
-        break;
-      default:
-        throw new Error({ code: "", message: "refresh Token Type Error" });
+    const user_id = req.payload.id;
+
+    if (type === "google") {
+      await googleService.updateRefreshToken(user_id);
+      return res.status(201).send("google access_token refresh ok");
     }
+    if (type === "spotify") {
+      await spotifyService.updateRefreshToken(user_id);
+      return res.status(201).send("spotify access_token refresh ok");
+    }
+    if (type === "local") {
+      return next();
+    }
+    return res.status(404).json({ message: "refresh Token Type Error" });
   } catch (error) {
-    console.log(error);
-    res.send(error);
+    res.status(error.code).json(error.message);
+    // res.send(error);
+    // console.error(error);
+    // return next(err);
   }
 };
 
 exports.createLocalToken = async (req, res, next) => {
   try {
     const payload = req.payload;
-    // const { id } = req.payload;  //4/6 로컬 토큰 변화 문
-    const user_id = payload ? payload.user_id : req.user_id;
-    console.log("user_id: ", user_id);
+    const user_id = payload ? payload.id : req.user_id;
     const user = await userService.findOneUser({ _id: user_id });
     const local_token = await localService.createToken(user);
+
     console.log("local access_token: ", local_token.access_token);
     console.log("local refresh_token: ", local_token.refresh_token);
 
@@ -93,9 +93,11 @@ exports.createLocalToken = async (req, res, next) => {
       // signed: true,
     });
     req.local_access_token = local_token.access_token;
-    next();
+    //TODO: redirect 고려
+    res.send(local_token.access_token);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.send(error);
+    // return next(err);
   }
 };

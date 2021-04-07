@@ -34,7 +34,6 @@ exports.updateToken = async (data) => {
 exports.findToken = async (data) => {
   try {
     const token = await Token.findOne(data);
-    console.log(token);
     return token;
   } catch (error) {
     throw error;

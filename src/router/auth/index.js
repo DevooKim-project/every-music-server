@@ -15,15 +15,6 @@ router.use("/google", googleRoute);
 router.use("/kakao", kakaoRoute);
 router.use("/spotify", spotifyRoute);
 
-router.get(
-  "/refresh/:type",
-  isRefreshToken,
-  verifyToken,
-  refreshToken,
-  createLocalToken,
-  (req, res) => {
-    res.send("local refresh Ok");
-  }
-);
+router.get("/refresh/:type", isRefreshToken, refreshToken, createLocalToken);
 
 module.exports = router;
