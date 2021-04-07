@@ -1,7 +1,7 @@
 const axios = require("axios");
 const { storePlaylist } = require("../../database/playlist");
 
-const search = async (token) => {
+exports.search = async (access_token) => {
   try {
     const params = {
       limit: 50,
@@ -10,7 +10,7 @@ const search = async (token) => {
       method: "GET",
       url: "https://api.spotify.com/v1/me/playlists",
       headers: {
-        authorization: `Bearer ${token}`,
+        authorization: `Bearer ${access_token}`,
       },
       params,
     };
@@ -34,7 +34,7 @@ const search = async (token) => {
   }
 };
 
-const create = async (playlist, user_id, token) => {
+exports.create = async (playlist, user_id, access_token) => {
   try {
     const data = {
       name: "",
@@ -45,7 +45,7 @@ const create = async (playlist, user_id, token) => {
       method: "POST",
       url: `https://api.spotify.com/v1/users/${user_id}/playlists`,
       headers: {
-        authorization: `Bearer ${token}`,
+        authorization: `Bearer ${access_token}`,
       },
       data,
     };
@@ -59,7 +59,7 @@ const create = async (playlist, user_id, token) => {
   }
 };
 
-const store = async (playlist, track_ids, user_id) => {
+exports.store = async (playlist, track_ids, user_id) => {
   try {
     await storePlaylist(playlist, track_ids, user_id);
     return;
@@ -67,7 +67,6 @@ const store = async (playlist, track_ids, user_id) => {
     throw error;
   }
 };
-module.exports = { search, create, store };
 
 //not exports
 const parsePlaylist = (playlist) => {

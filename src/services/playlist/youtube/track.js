@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-const { cacheService, trackService } = require("../../database");
+const { trackService } = require("../../database");
 const { storeArtistTrack } = require("../common");
 
 exports.search = async (tracks, token) => {
@@ -23,10 +23,10 @@ exports.search = async (tracks, token) => {
     for (const t of tracks) {
       const artist = t.artist;
       let track = await trackService.findTrack(t.title, artist.ids.local);
-      let trackId = "";
+      let track_id = "";
       if (track.provider_id.youtube) {
         console.log("cached");
-        trackId = track.provider_id.youtube;
+        track_id = track.provider_id.youtube;
       } else {
         console.log("not Cache");
 
@@ -37,12 +37,12 @@ exports.search = async (tracks, token) => {
         const items = response.data.items;
 
         if (items.length !== 0) {
-          trackId = items[0].id.videoId;
+          track_id = items[0].id.videoId;
         } else {
           console.log("not found");
         }
       }
-      track_ids.push(trackId);
+      track_ids.push(track_id);
     }
 
     return track_ids;
@@ -71,8 +71,8 @@ exports.getId = async (id, token) => {
       const response = await axios(options);
       const { data } = response;
       data.items.forEach((item) => {
-        let trackId = parseTrackItem(item);
-        track_ids.push(trackId);
+        let track_id = parseTrackItem(item);
+        track_ids.push(track_id);
       });
 
       params.pageToken = data.nextPageToken;
@@ -125,14 +125,14 @@ exports.getInfo = async (id, token) => {
   }
 };
 
-exports.insert = async (playlistId, track_ids, token) => {
+exports.insert = async (playlist_id, track_ids, token) => {
   try {
     const params = {
       part: "snippet",
     };
     const data = {
       snippet: {
-        playlistId: playlistId,
+        playlistId: playlist_id,
         resourceId: {
           kind: "youtube#video",
           videoId: "",
@@ -149,8 +149,8 @@ exports.insert = async (playlistId, track_ids, token) => {
       data,
     };
 
-    for (const trackId of track_ids) {
-      data.snippet.resourceId.videoId = trackId;
+    for (const track_id of track_ids) {
+      data.snippet.resourceId.videoId = track_id;
       const response = await axios(options);
       console.log("insert: ", response.data.snippet.title);
     }
@@ -161,8 +161,8 @@ exports.insert = async (playlistId, track_ids, token) => {
   }
 };
 
-const parseTrackItem = (trackId) => {
-  return trackId.contentDetails.videoId;
+const parseTrackItem = (track_id) => {
+  return track_id.contentDetails.videoId;
 };
 
 const parseTrackInfo = (track) => {

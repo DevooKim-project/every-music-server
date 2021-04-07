@@ -1,5 +1,5 @@
 const { youtubeService, splitArray } = require("../../../services/playlist");
-const { tokenService, playlistService } = require("../../../services/database");
+const { tokenService } = require("../../../services/database");
 
 exports.getProviderTokenFromDB = async (req, res, next) => {
   try {
@@ -85,7 +85,6 @@ exports.getTracks = async (req, res) => {
 
 exports.insertMusic = async (req, res) => {
   try {
-    // const access_token = req.access_token;
     const provider_token = req.provider_token;
     const { playlists, tracks } = req.body;
 
@@ -95,7 +94,6 @@ exports.insertMusic = async (req, res) => {
       //   playlists[i],
       //   provider_token.access_token
       // );
-
       console.log("createPlaylist ok");
 
       const track_ids = await youtubeService.track.search(
@@ -110,7 +108,7 @@ exports.insertMusic = async (req, res) => {
     }
 
     // res.send("finish");
-    res.send(playlist_items);
+    res.send({ playlists, track_ids: playlist_items });
   } catch (error) {
     res.send(error);
   }
@@ -120,8 +118,8 @@ exports.storePlaylist = async (req, res) => {
   try {
     const user_id = req.payload.user_id;
     const { playlists, track_ids } = req.body;
-    await playlistService.storePlaylist(playlists, track_ids, user_id);
+    await youtubeService.playlist.store(playlists, track_ids, user_id);
   } catch (error) {
-    throw error;
+    res.send(error);
   }
 };

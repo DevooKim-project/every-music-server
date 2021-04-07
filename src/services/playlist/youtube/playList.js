@@ -1,7 +1,7 @@
 const axios = require("axios");
 const { storePlaylist } = require("../../database/playlist");
 
-exports.search = async (token) => {
+exports.search = async (access_token) => {
   try {
     const params = {
       part: "snippet",
@@ -13,7 +13,7 @@ exports.search = async (token) => {
       method: "GET",
       url: "https://www.googleapis.com/youtube/v3/playlists",
       headers: {
-        authorization: `Bearer ${token}`,
+        authorization: `Bearer ${access_token}`,
       },
       params,
     };
@@ -36,7 +36,7 @@ exports.search = async (token) => {
   }
 };
 
-exports.create = async (playlist, token) => {
+exports.create = async (playlist, access_token) => {
   try {
     const params = {
       part: "snippet",
@@ -50,7 +50,7 @@ exports.create = async (playlist, token) => {
       method: "POST",
       url: "https://www.googleapis.com/youtube/v3/playLists",
       headers: {
-        authorization: `Bearer ${token}`,
+        authorization: `Bearer ${access_token}`,
       },
       params,
       data,

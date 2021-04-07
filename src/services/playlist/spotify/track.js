@@ -3,7 +3,7 @@ const axios = require("axios");
 const { trackService } = require("../../database");
 const { storeArtistTrack } = require("../common");
 
-const getFromPlaylist = async (id, token) => {
+exports.getFromPlaylist = async (id, token) => {
   try {
     const options = {
       method: "GET",
@@ -34,7 +34,7 @@ const getFromPlaylist = async (id, token) => {
   }
 };
 
-const searchIdFromProvider = async (tracks, token) => {
+exports.searchIdFromProvider = async (tracks, token) => {
   try {
     const params = {
       q: "",
@@ -50,8 +50,8 @@ const searchIdFromProvider = async (tracks, token) => {
       params,
     };
 
-    const trackProviderIds = [];
-    const trackLocalIds = [];
+    const provider_track_ids = [];
+    const local_track_ids = [];
     for (const t of tracks) {
       //1. 아티스트 로컬 Id와 트랙 명으로 캐시에서 트랙 검색 (트랙과 아티스트는 모두 로컬id를 가지고 있음)
       //2. 트랙의 서비스 id가 있는지 확인
@@ -60,12 +60,12 @@ const searchIdFromProvider = async (tracks, token) => {
 
       const artist = t.artist;
       let track = await trackService.findTrack(t.title, artist.ids.local);
-      const trackLocalId = track._id;
-      trackLocalIds.push(trackLocalId);
-      let trackProviderId = "";
+      const local_track_id = track._id;
+      local_track_ids.push(local_track_id);
+      let provider_track_id = "";
       if (track.provider_id.spotify) {
         console.log("cached");
-        trackProviderId = track.provider_id.spotify;
+        provider_track_id = track.provider_id.spotify;
       } else {
         console.log("not Cache");
         // const artist = t.artists[0];
@@ -75,31 +75,31 @@ const searchIdFromProvider = async (tracks, token) => {
         const response = await axios(options);
         const items = response.data.tracks.items;
         if (items.length !== 0) {
-          trackProviderId = items[0].id;
-          // console.log("getTrack: ", trackProviderId);
+          provider_track_id = items[0].id;
+          // console.log("getTrack: ", provider_track_id);
         } else {
           console.log("not found");
         }
       }
 
-      trackProviderIds.push(`spotify:track:${trackProviderId}`);
+      provider_track_ids.push(`spotify:track:${provider_track_id}`);
     }
 
-    // return trackProviderIds;
-    return { provider: trackProviderIds, local: trackLocalIds };
+    // return provider_track_ids;
+    return { provider: provider_track_ids, local: local_track_ids };
   } catch (error) {
     throw error;
   }
 };
 
-const add = async (playlistId, track_ids, token) => {
+exports.insert = async (playlist_id, track_ids, token) => {
   try {
     const data = {
       uris: track_ids,
     };
     const options = {
       method: "POST",
-      url: `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
+      url: `https://api.spotify.com/v1/playlists/${playlist_id}/tracks`,
       headers: {
         authorization: `Bearer ${token}`,
       },
@@ -113,8 +113,6 @@ const add = async (playlistId, track_ids, token) => {
     throw error;
   }
 };
-
-module.exports = { getFromPlaylist, searchIdFromProvider, add };
 
 const parseTrackItem = (track) => {
   const artist = track.artists[0];

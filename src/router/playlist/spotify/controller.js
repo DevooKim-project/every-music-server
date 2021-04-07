@@ -1,20 +1,14 @@
-const jwt = require("jsonwebtoken");
-
 const { spotifyService, splitArray } = require("../../../services/playlist");
 const { tokenService } = require("../../../services/database");
-const { parseToken } = require("../../../middleware/auth");
 
-exports.getAccessToken = async (req, res, next) => {
+exports.getProviderTokenFromDB = async (req, res, next) => {
   try {
-    const localToken = parseToken(req.headers.authorization);
-    const payload = jwt.verify(localToken, process.env.JWT_SECRET);
-    const user_id = payload.user_id;
-    const provider_id = payload.provider_id;
-    const access_token = await tokenService.findToken(user_id, {
+    const { user_id, provider_id } = req.payload;
+    const provider_token = await tokenService.findToken({
       provider: "spotify",
-      type: "access",
+      user: user_id,
     });
-    req.access_token = access_token;
+    req.provider_token = provider_token;
     req.provider_id = provider_id;
     next();
   } catch (error) {
@@ -25,8 +19,10 @@ exports.getAccessToken = async (req, res, next) => {
 
 exports.searchPlaylist = async (req, res) => {
   try {
-    const access_token = req.access_token;
-    const item = await spotifyService.playlist.search(access_token);
+    const provider_token = req.provider_token;
+    const item = await spotifyService.playlist.search(
+      provider_token.access_token
+    );
 
     res.json(item);
   } catch (error) {
@@ -37,15 +33,14 @@ exports.searchPlaylist = async (req, res) => {
 
 exports.getTrack = async (req, res) => {
   try {
-    const access_token = req.access_token;
-
+    const provider_token = req.provider_token;
     const { playlists } = req.body;
 
     const tracks = [];
     for (const playlist of playlists) {
       const item = await spotifyService.track.getFromPlaylist(
         playlist.id,
-        access_token
+        provider_token.access_token
       );
       tracks.push(item.tracks);
     }
@@ -62,49 +57,48 @@ exports.getTrack = async (req, res) => {
 
 exports.insertMusic = async (req, res) => {
   try {
-    const access_token = req.access_token;
-    const provider_id = req.provider_id;
+    const provider_token = req.provider_token;
+    const provider_id = req.payload.provider_id;
     const { playlists, tracks } = req.body;
 
-    const trackIdData = [];
+    const playlist_items = [];
     for (let i = 0; i < playlists.length; i++) {
-      // const newPlaylist = await spotifyService.playlist.create(
+      // const new_playlist = await spotifyService.playlist.create(
       //   playlists[i],
       //   provider_id,
-      //   access_token
+      //   provider_token.access_token
       // );
-      // const newPlaylist = { id: "3PaR6AIx3FaCb9k9XwMRjp" };
       console.log("createPlaylist ok");
 
       const track_ids = await spotifyService.track.searchIdFromProvider(
         tracks[i],
-        access_token
+        provider_token.access_token
       );
-      const provider_ids = track_ids.provider;
-      const localIds = track_ids.local;
-      trackIdData.push(localIds);
+      const provider_track_ids = track_ids.provider;
+      const local_track_ids = track_ids.local;
+      playlist_items.push(local_track_ids);
       console.log("get track_ids ok");
 
       //한번에 최대 100개 가능
-      // for (const t of splitArray(provider_ids, 100)) {
-      //   await spotifyService.track.add(newPlaylist.id, t, access_token);
+      // for (const t of splitArray(provider_track_ids, 100)) {
+      //   await spotifyService.track.insert(new_playlist.id, t, provider_token.access_token);
       // }
     }
 
     // res.send("finish");
-    res.send({ playlists, track_ids: trackIdData });
+    res.send({ playlists, track_ids: playlist_items });
   } catch (error) {
     console.log(error);
     res.send(error);
   }
 };
 
-exports.savePlaylist = async (req, res) => {
+exports.storePlaylist = async (req, res) => {
   try {
-    const user_id = req.user_id;
+    const user_id = req.payload.user_id;
     const { playlists, track_ids } = req.body;
-    await playlistService.storePlaylist(playlists, track_ids, user_id);
+    await spotifyService.playlist.store(playlists, track_ids, user_id);
   } catch (error) {
-    throw error;
+    res.send(error);
   }
 };
