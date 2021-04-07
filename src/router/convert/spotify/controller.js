@@ -1,15 +1,13 @@
-const { spotifyService, splitArray } = require("../../../services/playlist");
+const { spotifyService, splitArray } = require("../../../services/convert");
 const { tokenService } = require("../../../services/database");
 
 exports.getProviderTokenFromDB = async (req, res, next) => {
   try {
-    const { user_id, provider_id } = req.payload;
     const provider_token = await tokenService.findToken({
       provider: "spotify",
-      user: user_id,
+      user: req.payload.user_id,
     });
     req.provider_token = provider_token;
-    req.provider_id = provider_id;
     next();
   } catch (error) {
     console.error(error);

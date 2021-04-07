@@ -1,21 +1,15 @@
 const express = require("express");
 
-const { verifyToken, isAccessToken } = require("../../../middleware/auth");
-const {
-  getProviderTokenFromDB,
-  searchPlaylist,
-  getTracks,
-  insertMusic,
-  storePlaylist,
-} = require("./controller");
+const auth = require("../../../middleware/auth");
+const controller = require("./controller");
 
 const router = express.Router();
 
 // router.use(verifyToken, getAccessToken);
-router.use(isAccessToken, verifyToken, getProviderTokenFromDB);
-router.get("/playlists/search", searchPlaylist);
-router.post("/playlists/insert", insertMusic);
-router.post("/playlists/store", storePlaylist);
-router.get("/tracks", getTracks);
+router.use(auth.isAccessToken, controller.getProviderTokenFromDB);
+router.get("/playlists", controller.searchPlaylist);
+router.post("/playlists", controller.insertMusic);
+router.post("/playlists/store", controller.storePlaylist);
+router.get("/tracks", controller.getTracks);
 
 module.exports = router;

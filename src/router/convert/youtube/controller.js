@@ -1,15 +1,13 @@
-const { youtubeService, splitArray } = require("../../../services/playlist");
+const { youtubeService, splitArray } = require("../../../services/convert");
 const { tokenService } = require("../../../services/database");
 
 exports.getProviderTokenFromDB = async (req, res, next) => {
   try {
-    const user_id = req.payload.user_id;
     const provider_token = await tokenService.findToken({
       provider: "google",
-      user: user_id,
+      user: req.payload.user_id,
     });
     req.provider_token = provider_token;
-    req.user_id = user_id;
     next();
   } catch (error) {
     console.error(error);
