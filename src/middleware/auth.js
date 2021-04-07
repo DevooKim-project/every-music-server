@@ -51,7 +51,7 @@ exports.verifyToken = (req, res, next) => {
 exports.refreshToken = async (req, res, next) => {
   try {
     const type = req.params.type.toLowerCase();
-    const user_id = req.payload.id;
+    const user_id = req.payload.user_id;
     console.log("type: ", type);
     switch (type) {
       case "google":
@@ -78,9 +78,7 @@ exports.createLocalToken = async (req, res, next) => {
   try {
     const payload = req.payload;
     // const { id } = req.payload;  //4/6 로컬 토큰 변화 문
-    console.log("1", payload);
-    console.log("2", req.user_id);
-    const user_id = payload ? payload.id : req.user_id;
+    const user_id = payload ? payload.user_id : req.user_id;
     console.log("user_id: ", user_id);
     const user = await userService.findOneUser({ _id: user_id });
     const local_token = await localService.createToken(user);

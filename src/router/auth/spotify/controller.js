@@ -93,7 +93,7 @@ exports.login = async (req, res, next) => {
 exports.saveTokenWithoutLogin = async (req, res) => {
   try {
     const { access_token, refresh_token } = req.provider_token;
-    const user_id = req.payload.id;
+    const user_id = req.payload.user_id;
     await tokenService.storeToken({
       user: user_id,
       access_token: access_token,
@@ -108,7 +108,7 @@ exports.saveTokenWithoutLogin = async (req, res) => {
 
 exports.signOut = async (req, res) => {
   try {
-    await spotifyService.signOut(req.payload.id);
+    await spotifyService.signOut(req.payload.user_id);
 
     return res.send("signout ok");
   } catch (error) {

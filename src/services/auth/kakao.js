@@ -84,7 +84,7 @@ exports.signOut = async (provider_id) => {
       params,
     };
 
-    Promise.all([axios(options), userService.destroyUser(payload.id)]);
+    Promise.all([axios(options), userService.destroyUser(payload.user_id)]);
     return;
   } catch (error) {
     throw error;

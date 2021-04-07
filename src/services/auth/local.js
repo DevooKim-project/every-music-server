@@ -2,10 +2,17 @@ const jwt = require("jsonwebtoken");
 const { parseToken } = require("../../middleware/auth");
 const { userService } = require("../database");
 
-const createToken = (user) => {
+exports.createToken = (user) => {
   const { id, nick, provider } = user;
   const access_token = jwt.sign(
-    { id, nick, provider },
+    // { id, nick, provider },
+    {
+      iss: "everyMusic.com",
+      user_name: nick,
+      user_id: id,
+      provider_name: provider.name,
+      provider_id: provider.id,
+    },
     process.env.JWT_SECRET,
     {
       // expiresIn: "10m", //60분
@@ -19,7 +26,7 @@ const createToken = (user) => {
   return { access_token, refresh_token };
 };
 
-const updateRefreshToken = async (token) => {
+exports.updateRefreshToken = async (token) => {
   try {
     const localToken = parseToken(token);
     const data = jwt.verify(localToken, process.env.JWT_SECRET);
@@ -27,7 +34,7 @@ const updateRefreshToken = async (token) => {
     console.log(data);
     const user = await userService.findOneUser({ id: data.id });
     console.log(user);
-    const newToken = createToken(user);
+    const newToken = this.createToken(user);
 
     console.log("local-newAccess: ", newToken);
     return newToken;
@@ -35,5 +42,3 @@ const updateRefreshToken = async (token) => {
     throw new Error(error);
   }
 };
-
-module.exports = { createToken, updateRefreshToken };

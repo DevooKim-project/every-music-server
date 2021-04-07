@@ -8,7 +8,7 @@ exports.getAccessToken = async (req, res, next) => {
   try {
     const localToken = parseToken(req.headers.authorization);
     const payload = jwt.verify(localToken, process.env.JWT_SECRET);
-    const userId = payload.id;
+    const userId = payload.user_id;
     const access_token = await tokenService.findToken(userId, {
       provider: "google",
       type: "access",

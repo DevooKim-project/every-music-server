@@ -7,7 +7,7 @@ exports.getUserId = async (req, res, next) => {
   try {
     const localToken = parseToken(req.headers.authorization);
     const payload = jwt.verify(localToken, process.env.JWT_SECRET);
-    const userId = payload.id;
+    const userId = payload.user_id;
     req.userId = userId;
     next();
   } catch (error) {
