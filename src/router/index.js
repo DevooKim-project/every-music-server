@@ -1,17 +1,18 @@
 const express = require("express");
 
 const authRoute = require("./auth");
-const playlistRoute = require("./playlist");
+const convertRoute = require("./convert");
 const boardRoute = require("./board");
 
 const router = express.Router();
 
 router.get("/", (req, res) => {
+  res.cookie("name", "test", { signed: true });
   res.send("dd");
 });
 
 router.use("/auth", authRoute);
-router.use("/playlist", playlistRoute);
+router.use("/convert", convertRoute);
 router.use("/board", boardRoute);
 
 router.use((req, res) => {

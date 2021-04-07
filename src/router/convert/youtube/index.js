@@ -13,8 +13,8 @@ const router = express.Router();
 
 // router.use(verifyToken, getAccessToken);
 router.use(isAccessToken, verifyToken, getProviderTokenFromDB);
-router.get("/playlists", searchPlaylist);
-router.post("/playlists", insertMusic);
+router.get("/playlists/search", searchPlaylist);
+router.post("/playlists/insert", insertMusic);
 router.post("/playlists/store", storePlaylist);
 router.get("/tracks", getTracks);
 

@@ -1,7 +1,6 @@
 const express = require("express");
-const { verifyToken } = require("../../../middleware/auth");
+const { verifyToken, isAccessToken } = require("../../../middleware/auth");
 const {
-  getUserId,
   readAllPlaylist,
   readUserPlaylist,
   likePlaylist,
@@ -14,10 +13,12 @@ router.use((req, res, next) => {
   }
 });
 router.get("/read", readAllPlaylist);
-router.get("/read/:playlistId");
-router.get("/read/:user_id", (req, res, next) => {
+router.get("/read/playlist/:playlistId");
+router.get("/read/");
+router.get("/read/:user_id/:max_result/:last_id", (req, res, next) => {
   if (req.headers.authorization) {
-    verifyToken(req, res, next);
+    isAccessToken(req, res, next);
+    // verifyToken(req, res, next);
   }
   readUserPlaylist(req, res);
 });

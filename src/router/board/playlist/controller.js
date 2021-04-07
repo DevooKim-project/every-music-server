@@ -3,29 +3,29 @@ const jwt = require("jsonwebtoken");
 const { parseToken } = require("../../../middleware/auth");
 const { playlistService, userService } = require("../../../services/database");
 
-exports.getUserId = async (req, res, next) => {
-  try {
-    const localToken = parseToken(req.headers.authorization);
-    const payload = jwt.verify(localToken, process.env.JWT_SECRET);
-    const user_id = payload.user_id;
-    req.user_id = user_id;
-    next();
-  } catch (error) {
-    console.error(error);
-    res.send(error);
-  }
-};
+// exports.getUserId = async (req, res, next) => {
+//   try {
+//     const localToken = parseToken(req.headers.authorization);
+//     const payload = jwt.verify(localToken, process.env.JWT_SECRET);
+//     const user_id = payload.user_id;
+//     req.user_id = user_id;
+//     next();
+//   } catch (error) {
+//     console.error(error);
+//     res.send(error);
+//   }
+// };
 
 //private: false인 모든 플레이리스트
 exports.readAllPlaylist = async (req, res) => {
   try {
     //skip의 성능은 좋지 않다. 따라서 마지막 id값을 이용하여 기능을 구현한다.
 
-    // maxResult: default 10
-    const maxResult = req.params.maxResult ? req.params.maxResult : 10;
+    // max_result: default 10
+    const max_result = req.params.max_result ? req.params.max_result : 10;
     const last_id = req.params.last_id;
 
-    const playlist = await playlistService.findAllPlaylist(maxResult, last_id);
+    const playlist = await playlistService.findAllPlaylist(max_result, last_id);
 
     res.send(playlist);
   } catch (error) {
@@ -36,8 +36,8 @@ exports.readAllPlaylist = async (req, res) => {
 //특정 유저가 올린 플레이리스트
 exports.readUserPlaylist = async (req, res) => {
   try {
-    // maxResult: default 10
-    const maxResult = req.params.maxResult ? req.params.maxResult : 10;
+    // max_result: default 10
+    const max_result = req.params.max_result || 10;
     const lastId = req.params.lastId;
     const user_id = req.user_id;
     const data = {
@@ -46,7 +46,7 @@ exports.readUserPlaylist = async (req, res) => {
     };
 
     const playlist = await playlistService.findUserPlaylist(
-      maxResult,
+      max_result,
       lastId,
       data
     );
@@ -76,10 +76,10 @@ exports.readMyLibrary = async (req, res) => {
 //좋아요 버튼 기능
 exports.likePlaylist = async (req, res) => {
   try {
-    const { playlistId } = req.body;
-    const user = req.user;
+    const { playlist_id } = req.body;
+    const user_id = req.payload.user_id;
     const status = req.params.status;
-    await playlistService.likePlaylist(playlistId, user, status);
+    await playlistService.likePlaylist(playlist_id, user_id, status);
     res.send("like playlist ok");
     // const playlist =
   } catch (error) {
@@ -89,13 +89,13 @@ exports.likePlaylist = async (req, res) => {
 
 exports.changePrivatePlaylist = async (req, res) => {
   try {
-    const { playlistId, private } = req.body;
-    const user = req.user;
+    const { playlist_id, private } = req.body;
+    const user_id = req.payload.user_id;
     const altPrivate = !private;
     await playlistService.changePrivatePlaylist(
-      playlistId,
+      playlist_id,
       { private: altPrivate },
-      user
+      user_id
     );
     res.send("change private playlist ok");
   } catch (error) {
@@ -105,9 +105,9 @@ exports.changePrivatePlaylist = async (req, res) => {
 
 exports.deletePlaylist = async (req, res) => {
   try {
-    const { playlistId } = req.body;
-    const user = req.user;
-    await playlistService.deletePlaylist(playlistId, user);
+    const { playlist_id } = req.body;
+    const user_id = req.payload.user_id;
+    await playlistService.deletePlaylist(playlist_id, user_id);
     res.send("delete playlist ok");
   } catch (error) {
     res.send(error);
