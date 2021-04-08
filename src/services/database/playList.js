@@ -24,8 +24,7 @@ exports.findTrackOfPlaylist = async (data) => {
   try {
     const playlist = await Playlist.findOne({
       _id: data.playlist_id,
-    }).populate(tracks);
-
+    }).populate("tracks");
     return playlist.tracks;
   } catch (error) {
     throw error;
