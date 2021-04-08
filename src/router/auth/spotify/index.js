@@ -1,17 +1,25 @@
 const express = require("express");
-const { verifyToken } = require("../../../middleware/auth");
-const {
-  login,
-  getServiceToken,
-  getLocalToken,
-  refreshToken,
-  signout,
-} = require("./controller");
+const auth = require("../../../middleware/auth");
+const controller = require("./controller");
 
 const router = express.Router();
-router.get("/", login);
-router.get("/callback", getServiceToken, getLocalToken);
-router.get("/refresh/:type", verifyToken, refreshToken);
-router.get("/signout", signout);
+
+router.get("/", controller.withLogin, controller.obtainOAuth);
+router.get(
+  "/callback",
+  controller.withLogin,
+  controller.getProviderToken,
+  controller.login,
+  auth.createLocalToken
+);
+
+router.get("/token", controller.withoutLogin, controller.obtainOAuth);
+router.get(
+  "/callback2",
+  auth.isAccessToken,
+  controller.withoutLogin,
+  controller.saveTokenWithoutLogin
+);
+router.get("/signOut", auth.isAccessToken, controller.signOut);
 
 module.exports = router;

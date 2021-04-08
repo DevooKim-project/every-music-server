@@ -21,20 +21,20 @@ module.exports = class User extends Sequelize.Model {
           type: DataTypes.STRING(40),
           allowNull: false,
         },
-        // playList: {
-        //   type: DataTypes.STRING,
-        //   get() {
-        //     return this.getDataValue("playList").split(";");
-        //   },
-        //   set(val) {
-        //     return this.setDataValue("playList", val.join(";"));
-        //   },
-        // },
+        likePlaylist: {
+          type: DataTypes.STRING,
+          get() {
+            return this.getDataValue("playlist").split(";");
+          },
+          set(val) {
+            return this.setDataValue("playlist", val.join(";"));
+          },
+        },
         provider: {
           type: DataTypes.STRING(20),
           allowNull: false,
         },
-        providerId: {
+        provider_id: {
           type: DataTypes.STRING(255),
           allowNull: false,
         },
@@ -49,7 +49,5 @@ module.exports = class User extends Sequelize.Model {
     );
   }
 
-  static associate(db) {
-    db.User.hasMany(db.Playlist, { foreignKey: "owner", sourceKey: "id" });
-  }
+  static associate(db) {}
 };

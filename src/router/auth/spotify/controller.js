@@ -1,125 +1,71 @@
-const qs = require("qs");
-const jwt = require("jsonwebtoken");
-
-const { spotifyService, localService } = require("../../../services/auth");
+const { spotifyService, verifyUser } = require("../../../services/auth");
 const { userService, tokenService } = require("../../../services/database");
-const { parseToken } = require("../../../middleware/auth");
 
-exports.login = async (req, res) => {
-  const url = "https://accounts.spotify.com/authorize";
-  const scopes = [
-    "user-read-email",
-    "playlist-modify-public",
-    "playlist-modify-private",
-    "playlist-read-private",
-    // "playlist-read-collaborative",
-  ];
-
-  const params = {
-    response_type: "code",
-    client_id: process.env.SPOTIFY_ID,
-    redirect_uri: "http://localhost:5000/auth/spotify/callback",
-    scope: scopes.join(" "),
-  };
-
-  return res.redirect(`${url}?${qs.stringify(params)}`);
+exports.withLogin = (req, res, next) => {
+  req.OAuth_params = spotifyService.OAuthParams.withLogin;
+  next();
 };
 
-exports.getServiceToken = async (req, res, next) => {
+exports.withoutLogin = (req, res, next) => {
+  req.OAuth_params = spotifyService.OAuthParams.withOutLogin;
+  next();
+};
+
+exports.obtainOAuth = async (req, res) => {
   try {
-    const tokens = await spotifyService.getToken(req.query.code);
-    req.tokens = tokens;
+    const endpoint = await spotifyService.obtainOAuthCredentials(
+      req.OAuth_params
+    );
+    return res.redirect(endpoint);
+  } catch (error) {
+    return res.send(error);
+  }
+};
+
+exports.getProviderToken = async (req, res, next) => {
+  try {
+    const token = await spotifyService.OAuthRedirect(
+      req.query.code,
+      req.OAuth_params
+    );
+    req.provider_token = token;
     next();
   } catch (error) {
     console.error(error);
-    res.send(error); //확인 필요
+    res.send(error);
   }
 };
 
-exports.getLocalToken = async (req, res) => {
+exports.login = async (req, res, next) => {
   try {
-    const { access_token, refresh_token } = req.tokens;
-    console.log("refresh_token: ", refresh_token);
-    const profile = await spotifyService.getProfile(access_token);
-
-    const exUser = await userService.findOneUser({
-      provider: "spotify",
-      providerId: profile.id,
-    });
-
-    if (exUser) {
-      const localToken = localService.createToken(exUser);
-      await tokenService.updateToken(
-        {
-          userId: exUser.id,
-          accessToken: access_token,
-          refresh_token: refresh_token,
-        },
-        { provider: "spotify", type: "all" }
-      );
-      return res.send(localToken);
-    }
-
-    const newUser = await userService.createUser({
-      email: profile.email,
-      nick: profile.display_name,
-      providerId: profile.id,
-      provider: "spotify",
-    });
-
-    const localToken = localService.createToken(newUser);
-
-    await tokenService.storeToken(
-      {
-        userId: newUser.id,
-        accessToken: access_token,
-        refreshToken: refresh_token,
-      },
-      "spotify"
-    );
-
-    return res.send(localToken);
+    const user_id = await spotifyService.login(req.provider_token);
+    req.user_id = user_id;
+    next();
   } catch (error) {
-    console.error(error);
-    return res.send(error);
+    console.log(error);
+    res.send(error);
   }
 };
 
-exports.refreshToken = async (req, res) => {
+exports.saveTokenWithoutLogin = async (req, res) => {
   try {
-    const type = req.params.type;
-
-    switch (type) {
-      case "local":
-        const newToken = await localService.refreshToken(
-          req.headers.authorization
-        );
-        return res.send(newToken);
-
-      case "provider":
-        await spotifyService.refreshToken(req.headers.authorization);
-        return res.send("spotify refresh ok");
-
-      default:
-        throw new Error("token type error");
-    }
+    const { access_token, refresh_token } = req.provider_token;
+    const user_id = req.payload.user_id;
+    await tokenService.storeToken({
+      user: user_id,
+      access_token: access_token,
+      refresh_token: refresh_token,
+    });
+    res.send("saveTokenWithoutLogin spotify ok");
   } catch (error) {
-    console.error(error);
-    return res.send(error);
+    console.log(error);
+    res.send(error);
   }
 };
 
-exports.signout = async (req, res) => {
+exports.signOut = async (req, res) => {
   try {
-    const localToken = parseToken(req.headers.authorization);
-    const payload = jwt.verify(localToken, process.env.JWT_SECRET);
-    const userId = payload.id;
-
-    //사용자가 스포티파이에서 직접 토큰 제거해야함(프론트에서 링크 연결) 서버에서는 db에서만 제거
-    Promise.all([
-      tokenService.deleteToken(userId),
-      userService.destroyUser({ id: userId }),
-    ]);
+    await spotifyService.signOut(req.payload.user_id);
 
     return res.send("signout ok");
   } catch (error) {

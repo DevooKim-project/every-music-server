@@ -7,3 +7,8 @@ exports.googleService = googleService;
 exports.localService = localService;
 exports.kakaoService = kakaoService;
 exports.spotifyService = spotifyService;
+
+exports.parseToken = (token) => {
+  const newToken = token.replace(/^Bearer\s+/, "");
+  return newToken;
+};

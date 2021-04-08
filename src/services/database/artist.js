@@ -1,11 +1,11 @@
 const Artist = require("../../database/schema/artist");
 
-const storeArtist = async (data) => {
+exports.storeArtist = async (data) => {
   try {
     const { name, ids } = data;
     const response = await Artist.create({
       name,
-      providerId: ids,
+      provider_id: ids,
     });
 
     return response;
@@ -14,7 +14,7 @@ const storeArtist = async (data) => {
   }
 };
 
-const findArtist = async (name) => {
+exports.findArtist = async (name) => {
   try {
     const artist = await Artist.findOne({ name });
     return artist;
@@ -23,13 +23,11 @@ const findArtist = async (name) => {
   }
 };
 
-const updateArtist = async (name, providerId) => {
+exports.updateArtist = async (name, provider_id) => {
   try {
-    const artist = await Artist.updateOne({ name }, { providerId });
+    const artist = await Artist.updateOne({ name }, { provider_id });
     return artist;
   } catch (error) {
     throw error;
   }
 };
-
-module.exports = { storeArtist, findArtist, updateArtist };

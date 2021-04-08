@@ -1,7 +1,7 @@
-const playList = require("./playList");
+const playlist = require("./playlist");
 const track = require("./track");
 
 module.exports = {
-  playList,
+  playlist,
   track,
 };

@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const { Schema } = mongoose;
-const playListSchema = new Schema({
+const playlistSchema = new Schema({
   title: {
     type: String,
     required: true,
@@ -9,17 +9,18 @@ const playListSchema = new Schema({
   description: String,
   thumbnail: String,
   tracks: [{ type: Schema.Types.ObjectId, ref: "Track" }],
-  owner: String,
-  providerId: String,
+  owner: { type: Schema.Types.ObjectId, ref: "User" },
+  provider_id: String,
   provider: String,
-  display: {
+  private: {
     type: Boolean,
-    default: true,
+    default: false,
   },
   like: {
     type: Number,
     default: 0,
   },
 });
-
-module.exports = mongoose.model("PlayList", playListSchema);
+playlistSchema.index({ like: 1 });
+playlistSchema.index({ owner: 1 });
+module.exports = mongoose.model("Playlist", playlistSchema);

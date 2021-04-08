@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 const artistSchema = new Schema({
   name: String,
-  providerId: {
+  provider_id: {
     spotify: { type: String },
     youtube: { type: String },
   },

@@ -2,19 +2,15 @@ const mongoose = require("mongoose");
 
 const { Schema } = mongoose;
 const tokenSchema = new Schema({
-  accessTokenGoogle: String,
-  accessTokenSpotify: String,
-  refreshTokenGoogle: String,
-  refreshTokenSpotify: String,
-  userId: {
+  provider: {
     type: String,
-    required: true,
+    enum: ["kakao", "google", "spotify"],
+    lowercase: true,
   },
+  access_token: String,
+  refresh_token: String,
+  user: { type: Schema.Types.ObjectId, ref: "User" },
   updatedAt: { type: Date, default: Date.now },
-  display: {
-    type: Boolean,
-    default: true,
-  },
 });
 
 // const Token = mongoose.model("Token", tokenSchema);

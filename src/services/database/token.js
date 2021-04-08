@@ -1,109 +1,50 @@
 const Token = require("../../database/schema/token");
-
-const storeToken = async (data, provider) => {
+exports.storeToken = async (data) => {
   try {
-    const { userId, accessToken, refreshToken } = data;
-    switch (provider) {
-      case "google":
-        await Token.create({
-          userId,
-          accessTokenGoogle: accessToken,
-          refreshTokenGoogle: refreshToken,
-        });
-        return;
-
-      case "spotify":
-        await Token.create({
-          userId,
-          accessTokenSpotify: accessToken,
-          refreshTokenSpotify: refreshToken,
-        });
-        return;
-
-      default:
-        throw new Error("storeToken type error");
-    }
+    await Token.create(data);
   } catch (error) {
-    throw new Error(error);
+    throw error;
   }
 };
 
-const findToken = async (userId, { type, provider }) => {
+exports.updateToken = async (data) => {
   try {
-    const token = await Token.findOne({ userId });
-    console.log(token);
-    switch (provider) {
-      case "google":
-        if (type === "access") {
-          return token.accessTokenGoogle;
-        } else if (type === "refresh") {
-          return token.refreshTokenGoogle;
-        }
+    const { user, provider, access_token, refresh_token } = data;
 
-      case "spotify":
-        if (type === "access") {
-          return token.accessTokenSpotify;
-        } else if (type === "refresh") {
-          return token.refreshTokenSpotify;
-        }
-
-      default:
-        throw new Error("findToken argument error");
-    }
-  } catch (error) {
-    throw new Error(error);
-  }
-};
-
-const updateToken = async (data, { type, provider }) => {
-  try {
-    const { userId, accessToken, refreshToken } = data;
-
-    switch (provider) {
-      case "google":
-        if (type === "access") {
-          await Token.updateOne({ userId }, { accessTokenGoogle: accessToken });
-        } else if (type === "all") {
-          await Token.updateOne(
-            { userId },
-            { accessTokenGoogle: accessToken, refreshTokenGoogle: refreshToken }
-          );
-        }
-        break;
-      case "spotify":
-        if (type === "access") {
-          await Token.updateOne(
-            { userId },
-            { accessTokenSpotify: accessToken }
-          );
-        } else if (type === "all") {
-          await Token.updateOne(
-            { userId },
-            {
-              accessTokenSpotify: accessToken,
-              refreshTokenSpotify: refreshToken,
-            }
-          );
-        }
-        break;
-
-      default:
-        throw new Error("updateToken argument error");
+    if (refresh_token) {
+      await Token.updateOne(
+        { user: user, provider: provider },
+        { access_token: access_token, refresh_token: refresh_token },
+        { upsert: true }
+      );
+    } else {
+      await Token.updateOne(
+        { user: user, provider: provider },
+        { access_token: access_token },
+        { upsert: true }
+      );
     }
     return;
   } catch (error) {
-    console.error(error);
-    throw new Error(error);
+    console.log(error);
+    throw error;
   }
 };
 
-const deleteToken = async (userId) => {
+exports.findToken = async (data) => {
   try {
-    await Token.deleteOne({ userId });
+    const token = await Token.findOne(data);
+    return token;
+  } catch (error) {
+    throw error;
+  }
+};
+
+exports.deleteToken = async (user_id) => {
+  try {
+    await Token.deleteMany({ user: user_id });
     return;
   } catch (error) {
     throw new Error(error);
   }
 };
-
-module.exports = { storeToken, findToken, updateToken, deleteToken };

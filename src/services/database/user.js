@@ -1,35 +1,36 @@
-const User = require("../../database/models/user");
+const User = require("../../database/schema/user");
+const Playlist = require("../../database/schema/playlist");
 
-const createUser = async (data) => {
+exports.createUser = async (data) => {
   try {
     const user = await User.create(data);
     return user;
   } catch (error) {
-    throw new Error(error);
+    throw error;
   }
 };
 
-const findOneUser = async (param) => {
+exports.findOneUser = async (data) => {
   try {
-    const user = await User.findOne({
-      where: { ...param },
-    });
-
+    const user = await User.findOne(data);
     return user;
   } catch (error) {
-    throw new Error(error);
+    console.log(error);
+    throw error;
+    if (error.code === 110000) {
+      //유저에서 이메일로 먼저 가입된 서비스명 제공
+      throw new Error({ code: "AlreadyExistUser", message });
+    }
   }
 };
 
-const destroyUser = async (param) => {
+exports.destroyUser = async (user_id) => {
   try {
-    await User.destroy({
-      where: { ...param },
-    });
-    return;
+    Promise.all([
+      Playlist.deleteMany({ owner: user_id }),
+      User.deleteOne({ _id: user_id }),
+    ]);
   } catch (error) {
-    throw new Error(error);
+    throw error;
   }
 };
-
-module.exports = { createUser, findOneUser, destroyUser };

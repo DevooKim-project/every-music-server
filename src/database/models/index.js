@@ -10,20 +10,16 @@ const sequelize = new Sequelize(
 );
 
 const User = require("./user");
-const Playlist = require("./playlist");
 
 module.exports = () => {
   const db = {};
 
   db.sequelize = sequelize;
   db.User = User;
-  db.Playlist = Playlist;
 
   User.init(sequelize);
-  Playlist.init(sequelize);
 
   User.associate(db);
-  Playlist.associate(db);
 
   sequelize
     .sync({ force: false })

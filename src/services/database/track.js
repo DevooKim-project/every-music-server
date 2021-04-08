@@ -1,11 +1,11 @@
 const Track = require("../../database/schema/track");
 
-const storeTrack = async (data, artistId) => {
+exports.storeTrack = async (data, artistId) => {
   try {
     // const { title, ids, artist, duration_ms, thumbnail } = data;
     const response = await Track.create({
       ...data,
-      providerId: data.ids,
+      provider_id: data.ids,
       artist: artistId,
     });
     return response;
@@ -14,7 +14,7 @@ const storeTrack = async (data, artistId) => {
   }
 };
 
-const findTrack = async (title, artistId) => {
+exports.findTrack = async (title, artistId) => {
   try {
     const track = await Track.findOne({ title, artist: artistId });
     return track;
@@ -23,13 +23,15 @@ const findTrack = async (title, artistId) => {
   }
 };
 
-const updateTrack = async (title, providerId) => {
+exports.updateTrack = async (title, provider_id) => {
   try {
-    const track = await Track.updateOne({ title }, { providerId });
+    const track = await Track.findOneAndUpdate(
+      { title },
+      { provider_id },
+      { returnNewDocument: true }
+    );
     return track;
   } catch (error) {
     throw error;
   }
 };
-
-module.exports = { storeTrack, findTrack, updateTrack };
