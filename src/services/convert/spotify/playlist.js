@@ -74,7 +74,7 @@ const parsePlaylist = (playlist) => {
   return {
     id: playlist.id,
     title: playlist.name,
-    thumbnail: playlist.images[0],
+    thumbnail: playlist.images[0].url,
     description: playlist.description,
     owner: {
       name: playlist.owner.display_name,

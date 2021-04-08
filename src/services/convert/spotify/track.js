@@ -60,9 +60,11 @@ exports.searchIdFromProvider = async (tracks, token) => {
 
       const artist = t.artist;
       let track = await trackService.findTrack(t.title, artist.ids.local);
+
       const local_track_id = track._id;
       local_track_ids.push(local_track_id);
       let provider_track_id = "";
+
       if (track.provider_id.spotify) {
         console.log("cached");
         provider_track_id = track.provider_id.spotify;

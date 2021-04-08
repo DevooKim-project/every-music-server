@@ -19,14 +19,20 @@ exports.search = async (tracks, token) => {
         authorization: `Bearer ${token}`,
       },
     };
-    const track_ids = [];
+
+    const provider_track_ids = [];
+    const local_track_ids = [];
     for (const t of tracks) {
       const artist = t.artist;
       let track = await trackService.findTrack(t.title, artist.ids.local);
-      let track_id = "";
+
+      const local_track_id = track._id;
+      local_track_ids.push(local_track_id);
+      let provider_track_id = "";
+
       if (track.provider_id.youtube) {
         console.log("cached");
-        track_id = track.provider_id.youtube;
+        provider_track_id = track.provider_id.youtube;
       } else {
         console.log("not Cache");
 
@@ -37,15 +43,15 @@ exports.search = async (tracks, token) => {
         const items = response.data.items;
 
         if (items.length !== 0) {
-          track_id = items[0].id.videoId;
+          provider_track_id = items[0].id.videoId;
         } else {
           console.log("not found");
         }
       }
-      track_ids.push(track_id);
+      provider_track_ids.push(provider_track_id);
     }
 
-    return track_ids;
+    return { provider: provider_track_ids, local: local_track_ids };
   } catch (error) {
     throw error;
   }
