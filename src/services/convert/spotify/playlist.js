@@ -1,5 +1,6 @@
 const axios = require("axios");
-const { storePlaylist } = require("../../database/playlist");
+
+const { storePlaylist } = require("../common");
 
 exports.search = async (access_token) => {
   try {

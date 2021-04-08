@@ -1,6 +1,7 @@
 const axios = require("axios");
 
-const { trackService, storeArtistTrack } = require("../../database");
+const { storeArtistTrack } = require("../common");
+const { trackService } = require("../../database");
 
 exports.getFromPlaylist = async (id, token) => {
   try {
