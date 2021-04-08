@@ -5,7 +5,7 @@ const controller = require("./controller");
 
 const router = express.Router();
 
-router.get("/", controller.withLogin, controller.obtainOAuth); //배포시 post
+router.post("/", controller.withLogin, controller.obtainOAuth);
 router.get(
   "/callback",
   controller.withLogin,
@@ -14,7 +14,7 @@ router.get(
   auth.createLocalToken
 );
 
-router.get("/token", controller.withoutLogin, controller.obtainOAuth);
+router.post("/token", controller.withoutLogin, controller.obtainOAuth);
 router.get(
   "/callback2",
   auth.isAccessToken,
@@ -23,7 +23,7 @@ router.get(
   controller.saveTokenWithoutLogin
 );
 
-router.get("/signOut", auth.isAccessToken, controller.signOut);
+router.delete("/signOut", auth.isAccessToken, controller.signOut);
 
 //로그아웃은 클라이언트에서 jwt제거
 
