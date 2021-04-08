@@ -16,7 +16,7 @@ router.get(
 
 router.post("/token", controller.withoutLogin, controller.obtainOAuth);
 router.get(
-  "/callback2",
+  "/callbackToken",
   auth.isAccessToken,
   controller.withoutLogin,
   controller.getProviderToken,

@@ -20,7 +20,7 @@ exports.OAuthParams = {
       "playlist-modify-private",
       "playlist-read-private",
     ],
-    redirect_uri: "http://localhost:5000/auth/spotify/callback2",
+    redirect_uri: "http://localhost:5000/auth/spotify/callbackToken",
   },
 };
 

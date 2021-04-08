@@ -24,7 +24,7 @@ exports.OAuthParams = {
       "https://www.googleapis.com/auth/youtube.force-ssl",
       "https://www.googleapis.com/auth/youtube",
     ],
-    redirect_uri: `http://localhost:5000/auth/google/callback2`,
+    redirect_uri: `http://localhost:5000/auth/google/callbackToken`,
   },
 };
 
