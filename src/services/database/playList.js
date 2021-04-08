@@ -5,10 +5,11 @@ const User = require("../../database/schema/user");
 //플레이리스트 저장
 exports.storePlaylist = async (data) => {
   try {
-    const { playlists, track_ids, user_id } = data;
+    const { playlist, track_ids, user_id } = data;
+    console.log(data);
     await Playlist.create({
-      ...playlists,
-      provider_id: playlists.id,
+      ...playlist,
+      provider_id: playlist.id,
       owner: user_id,
       tracks: track_ids,
     });

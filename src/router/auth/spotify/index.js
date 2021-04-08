@@ -4,7 +4,7 @@ const controller = require("./controller");
 
 const router = express.Router();
 
-router.post("/", controller.withLogin, controller.obtainOAuth);
+router.get("/", controller.withLogin, controller.obtainOAuth);
 router.get(
   "/callback",
   controller.withLogin,

@@ -1,4 +1,8 @@
-const { youtubeService, splitArray } = require("../../../services/convert");
+const {
+  youtubeService,
+  storePlaylist,
+  splitArray,
+} = require("../../../services/convert");
 const { tokenService } = require("../../../services/database");
 
 exports.getProviderTokenFromDB = async (req, res, next) => {
@@ -86,7 +90,7 @@ exports.insertMusic = async (req, res) => {
     const provider_token = req.provider_token;
     const { playlists, tracks } = req.body;
 
-    const playlist_items = [];
+    // const playlist_items = [];
     for (let i = 0; i < playlists.length; i++) {
       // const new_playlist = await youtubeService.playlist.create(
       //   playlists[i],
@@ -98,16 +102,22 @@ exports.insertMusic = async (req, res) => {
         tracks[i],
         provider_token.access_token
       );
+      console.log(track_ids);
       const provider_track_ids = track_ids.provider;
       const local_track_ids = track_ids.local;
       playlist_items.push(local_track_ids);
       console.log("get track_ids ok");
-      // await youtubeService.track.insert(new_playlist.id, provider_track_ids, provider_token.access_token);
+      // await youtubeService.track.insert(
+      //   new_playlist.id,
+      //   track_ids,
+      //   provider_token.access_token
+      // );
     }
 
-    // res.send("finish");
+    res.send("finish");
     res.send({ playlists, track_ids: playlist_items });
   } catch (error) {
+    console.log(error);
     res.send(error);
   }
 };
@@ -116,12 +126,17 @@ exports.storePlaylist = async (req, res) => {
   try {
     const user_id = req.payload.user_id;
     const { playlists, track_ids } = req.body;
-    await spotifyService.playlist.store({
-      playlists: playlists,
-      track_ids: track_ids,
-      user_id: user_id,
-    });
+
+    for (let i = 0; i < playlists.length; i++) {
+      await storePlaylist({
+        playlist: playlists[i],
+        track_ids: track_ids[i],
+        user_id: user_id,
+      });
+    }
+    res.send("fin");
   } catch (error) {
+    console.log(error);
     res.send(error);
   }
 };

@@ -59,9 +59,9 @@ exports.storeArtistTrack = async (trackData, provider) => {
   }
 };
 
-exports.storePlaylist = async (playlist, track_ids, user_id) => {
+exports.storePlaylist = async (data) => {
   try {
-    await playlistService(playlist, track_ids, user_id);
+    await playlistService.storePlaylist(data);
     return;
   } catch (error) {
     throw error;

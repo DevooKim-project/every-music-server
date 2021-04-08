@@ -60,14 +60,14 @@ exports.create = async (playlist, user_id, access_token) => {
   }
 };
 
-exports.store = async (playlist, track_ids, user_id) => {
-  try {
-    await storePlaylist(playlist, track_ids, user_id);
-    return;
-  } catch (error) {
-    throw error;
-  }
-};
+// exports.store = async (data) => {
+//   try {
+//     await storePlaylist(data);
+//     return;
+//   } catch (error) {
+//     throw error;
+//   }
+// };
 
 //not exports
 const parsePlaylist = (playlist) => {

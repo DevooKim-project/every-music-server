@@ -49,7 +49,7 @@ exports.create = async (playlist, access_token) => {
     };
     const options = {
       method: "POST",
-      url: "https://www.googleapis.com/youtube/v3/playLists",
+      url: "https://www.googleapis.com/youtube/v3/playlists",
       headers: {
         authorization: `Bearer ${access_token}`,
       },

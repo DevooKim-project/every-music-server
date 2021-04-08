@@ -5,7 +5,7 @@ const controller = require("./controller");
 
 const router = express.Router();
 
-router.post("/", controller.withLogin, controller.obtainOAuth);
+router.get("/", controller.withLogin, controller.obtainOAuth);
 router.get(
   "/callback",
   controller.withLogin,
@@ -14,7 +14,7 @@ router.get(
   auth.createLocalToken
 );
 
-router.post("/token", controller.withoutLogin, controller.obtainOAuth);
+router.get("/token", controller.withoutLogin, controller.obtainOAuth);
 router.get(
   "/callbackToken",
   auth.isAccessToken,
