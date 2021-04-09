@@ -139,7 +139,7 @@ exports.changePrivatePlaylist = async (data) => {
     console.log(data.private);
     await Playlist.updateOne(
       { _id: playlist_id, owner: data.user_id },
-      { private: data.private }
+      { $set: { private: data.private } }
     );
   } catch (error) {
     throw error;

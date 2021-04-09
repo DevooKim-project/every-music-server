@@ -27,7 +27,7 @@ exports.updateTrack = async (title, provider_id) => {
   try {
     const track = await Track.findOneAndUpdate(
       { title },
-      { provider_id },
+      { $set: { provider_id: provider_id } },
       { returnNewDocument: true }
     );
     return track;

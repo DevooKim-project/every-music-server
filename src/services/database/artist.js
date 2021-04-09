@@ -25,7 +25,10 @@ exports.findArtist = async (name) => {
 
 exports.updateArtist = async (name, provider_id) => {
   try {
-    const artist = await Artist.updateOne({ name }, { provider_id });
+    const artist = await Artist.updateOne(
+      { name },
+      { $set: { provider_id: provider_id } }
+    );
     return artist;
   } catch (error) {
     throw error;
