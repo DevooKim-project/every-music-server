@@ -37,7 +37,7 @@ exports.findAllPlaylist = async (limit, last_id) => {
     if (!last_id) {
       //page1
       const playlist = await Playlist.find({ private: false })
-        .sort({ like: 1 })
+        .sort({ like: -1 })
         .limit(limit);
       return playlist;
     } else {
@@ -46,7 +46,7 @@ exports.findAllPlaylist = async (limit, last_id) => {
         _id: { $gt: last_id },
         private: false,
       })
-        .sort({ like: 1 })
+        .sort({ like: -1 })
         .limit(limit);
       return playlist;
     }
@@ -105,7 +105,7 @@ exports.findUserLibrary = async (data) => {
 exports.likePlaylist = async (data) => {
   try {
     switch (data.status) {
-      case "up":
+      case "like":
         await User.updateOne(
           { _id: data.user_id },
           { $addToSet: { like_playlists: data.playlist_id } }
@@ -115,7 +115,7 @@ exports.likePlaylist = async (data) => {
           { $inc: { like: 1 } }
         );
         return;
-      case "down":
+      case "unlike":
         await User.updateOne(
           { _id: data.user_id },
           { $pullAll: { like_playlists: [data.playlist_id] } }
@@ -136,6 +136,7 @@ exports.likePlaylist = async (data) => {
 //본인의 플레이리스트 공개 변경
 exports.changePrivatePlaylist = async (data) => {
   try {
+    console.log(data.private);
     await Playlist.updateOne(
       { _id: playlist_id, owner: data.user_id },
       { private: data.private }

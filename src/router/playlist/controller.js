@@ -31,9 +31,9 @@ exports.readLibrary = async (req, res) => {
 exports.likePlaylist = async (req, res) => {
   try {
     await playlistService.likePlaylist({
-      playlist_id: req.params.playlist_id,
+      playlist_id: req.body.playlist_id,
       user_id: req.payload.user_id,
-      status: req.params.status,
+      status: req.body.status,
     });
     res.status(204).send("like playlist ok");
     // const playlist =
@@ -45,9 +45,9 @@ exports.likePlaylist = async (req, res) => {
 exports.changePrivatePlaylist = async (req, res) => {
   try {
     await playlistService.changePrivatePlaylist({
-      playlist_id: req.params.playlist_id,
+      playlist_id: req.body.playlist_id,
       user_id: req.payload.user_id,
-      private: !req.body.private,
+      private: !req.body.current_private,
     });
     res.status(204).send("change private playlist ok");
   } catch (error) {
