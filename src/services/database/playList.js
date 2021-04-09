@@ -56,28 +56,28 @@ exports.findAllPlaylist = async (limit, last_id) => {
 };
 
 //유저가 업로드한 플레이리스트
-exports.findUserPlaylist = async (limit, last_id, data) => {
+exports.findUserPlaylist = async (data, limit, last_id) => {
   try {
-    let privateQuery = {};
+    let privateOption = {};
     if (data.isMine) {
-      privateQuery = { $or: [{ private: true }, { private: false }] };
+      privateOption = { $or: [{ private: true }, { private: false }] };
     } else {
-      privateQuery = { private: false };
+      privateOption = { private: false };
     }
 
     if (!last_id) {
       //page1
       const playlist = await Playlist.find({
-        owner: data.owner,
-        ...privateQuery,
+        owner: data.user_id,
+        ...privateOption,
       }).limit(limit);
       return playlist;
     } else {
       //page2...
       const playlist = await Playlist.find({
         _id: { $gt: last_id },
-        owner: data.owner,
-        ...privateQuery,
+        owner: data.user_id,
+        ...privateOption,
       }).limit(limit);
       return playlist;
     }
@@ -87,13 +87,15 @@ exports.findUserPlaylist = async (limit, last_id, data) => {
 };
 
 //유저가 좋아요 누른 플레이리스트(라이브러리)
-exports.findUserLibrary = async (data) => {
+exports.findUserLibrary = async (user_id) => {
   try {
-    const userData = await User.findOne({ _id: data.user_id }).populate(
+    const userData = await User.findOne({ _id: user_id }).populate(
       "like_playlists"
     );
     const playlist_id = userData.like_playlists;
-    const library = await Playlist.find({ _id: { $in: playlist_id } });
+    const library = await Playlist.find({
+      _id: { $in: playlist_id },
+    });
 
     return library;
   } catch (error) {
@@ -104,7 +106,7 @@ exports.findUserLibrary = async (data) => {
 //유저가 좋아요 누름
 exports.likePlaylist = async (data) => {
   try {
-    switch (data.status) {
+    switch (data.operator) {
       case "like":
         await User.updateOne(
           { _id: data.user_id },
@@ -134,13 +136,9 @@ exports.likePlaylist = async (data) => {
 };
 
 //본인의 플레이리스트 공개 변경
-exports.changePrivatePlaylist = async (data) => {
+exports.updatePlaylistOptions = async (filter, update) => {
   try {
-    console.log(data.private);
-    await Playlist.updateOne(
-      { _id: playlist_id, owner: data.user_id },
-      { $set: { private: data.private } }
-    );
+    await Playlist.updateOne(filter, { $set: update });
   } catch (error) {
     throw error;
   }

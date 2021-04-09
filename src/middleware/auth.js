@@ -31,6 +31,14 @@ exports.isRefreshToken = (req, res, next) => {
   }
 };
 
+exports.hasToken = (req, res, next) => {
+  if (req.headers.authorization) {
+    this.isAccessToken(req, res, next);
+    return;
+  }
+  next();
+};
+
 exports.verifyToken = (req, res, next) => {
   try {
     const authorization = req.authorization;

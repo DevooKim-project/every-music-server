@@ -12,13 +12,37 @@ exports.readAllPlaylist = async (req, res) => {
 
     res.send(playlist);
   } catch (error) {
-    throw error;
+    res.send(error);
+  }
+};
+
+exports.readUserPlaylist = async (req, res) => {
+  try {
+    const data = {
+      user_id: req.params.user_id,
+      isMine: req.payload.user_id === req.params.user_id,
+    };
+    const max_result = req.query.maxResult || 10;
+    const last_id = req.query.lastId;
+
+    const playlist = await playlistService.findUserPlaylist(
+      data,
+      max_result,
+      last_id
+    );
+    res.send(playlist);
+  } catch (error) {
+    console.log(error);
+    res.send(error);
   }
 };
 
 //내가 좋아요 누른 플레이리스트(라이브러리)
 exports.readLibrary = async (req, res) => {
   try {
+    if (req.payload.user_id !== req.params.user_id) {
+      res.status(400).send("토큰과 파라미터의 user_id 불일치");
+    }
     const library = await playlistService.findUserLibrary(req.payload.user_id);
 
     res.status(200).send(library);
@@ -31,9 +55,9 @@ exports.readLibrary = async (req, res) => {
 exports.likePlaylist = async (req, res) => {
   try {
     await playlistService.likePlaylist({
-      playlist_id: req.body.playlist_id,
+      playlist_id: req.params.playlist_id,
       user_id: req.payload.user_id,
-      status: req.body.status,
+      operator: req.params.operator,
     });
     res.status(204).send("like playlist ok");
     // const playlist =
@@ -42,13 +66,21 @@ exports.likePlaylist = async (req, res) => {
   }
 };
 
-exports.changePrivatePlaylist = async (req, res) => {
+exports.updatePlaylistOptions = async (req, res) => {
   try {
-    await playlistService.changePrivatePlaylist({
-      playlist_id: req.body.playlist_id,
-      user_id: req.payload.user_id,
-      private: !req.body.current_private,
-    });
+    const filter = {
+      _id: req.params.playlist_id,
+      owner: req.payload.user_id,
+    };
+    const update = {};
+    if (req.body.hasOwnProperty("title")) update.title = req.body.title;
+    if (req.body.hasOwnProperty("description"))
+      update.description = req.body.description;
+    if (req.body.hasOwnProperty("thumbnail"))
+      update.thumbnail = req.body.thumbnail;
+    if (req.body.hasOwnProperty("private")) update.private = req.body.private;
+
+    await playlistService.updatePlaylistOptions(filter, update);
     res.status(204).send("change private playlist ok");
   } catch (error) {
     res.send(error);
@@ -57,10 +89,10 @@ exports.changePrivatePlaylist = async (req, res) => {
 
 exports.deletePlaylist = async (req, res) => {
   try {
-    await playlistService.deletePlaylist(
-      req.params.playlist_id,
-      req.payload.user_id
-    );
+    const playlist_id = req.params.playlist_id;
+    const user_id = req.payload.user_id;
+    const data = { playlist_id, user_id };
+    await playlistService.deletePlaylist(data);
     res.status(204).send("delete playlist ok");
   } catch (error) {
     res.send(error);
