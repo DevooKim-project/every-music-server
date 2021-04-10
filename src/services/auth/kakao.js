@@ -55,7 +55,7 @@ exports.login = async (token) => {
       console.log("new_user");
       const new_user = await userService.createUser({
         email: account.email,
-        nick: account.profile.name,
+        nick: account.profile.nickname,
         provider: {
           name: "kakao",
           id: profile.id,
