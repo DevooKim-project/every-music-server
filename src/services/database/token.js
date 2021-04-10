@@ -14,13 +14,13 @@ exports.updateToken = async (data) => {
     if (refresh_token) {
       await Token.updateOne(
         { user: user, provider: provider },
-        { access_token: access_token, refresh_token: refresh_token },
+        { $set: { access_token: access_token, refresh_token: refresh_token } },
         { upsert: true }
       );
     } else {
       await Token.updateOne(
         { user: user, provider: provider },
-        { access_token: access_token },
+        { $set: { access_token: access_token } },
         { upsert: true }
       );
     }
