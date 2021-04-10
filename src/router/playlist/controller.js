@@ -8,9 +8,12 @@ exports.readAllPlaylist = async (req, res) => {
     const max_result = req.query.maxResult || 10;
     const last_id = req.query.lastId;
 
-    const playlist = await playlistService.findAllPlaylist(max_result, last_id);
+    const playlists = await playlistService.findAllPlaylist(
+      max_result,
+      last_id
+    );
 
-    res.send(playlist);
+    res.send(playlists);
   } catch (error) {
     res.send(error);
   }

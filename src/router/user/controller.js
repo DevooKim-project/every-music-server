@@ -10,12 +10,12 @@ exports.readUserPlaylist = async (req, res) => {
     const max_result = req.query.maxResult || 10;
     const last_id = req.query.lastId;
 
-    const playlist = await playlistService.findUserPlaylist(
+    const playlists = await playlistService.findUserPlaylist(
       data,
       max_result,
       last_id
     );
-    res.send(playlist);
+    res.send({ isMine, playlists });
   } catch (error) {
     console.log(error);
     res.send(error);
