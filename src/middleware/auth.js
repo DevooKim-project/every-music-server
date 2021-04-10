@@ -102,7 +102,7 @@ exports.createLocalToken = async (req, res, next) => {
     });
     req.local_access_token = local_token.access_token;
     //TODO: redirect 고려
-    res.send(local_token.access_token);
+    res.send({ access_token: local_token.access_token });
   } catch (error) {
     console.error(error);
     res.send(error);
