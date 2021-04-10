@@ -1,7 +1,7 @@
 const axios = require("axios");
 
 const { trackService } = require("../../database");
-const { storeArtistTrack } = require("../common");
+const { uploadArtistTrack } = require("../common");
 
 exports.search = async (tracks, token) => {
   try {
@@ -114,7 +114,7 @@ exports.getInfo = async (id, token) => {
       for (item of data.items) {
         let track = parseTrackInfo(item);
         //db 저장
-        track = await storeArtistTrack(track, "youtube");
+        track = await uploadArtistTrack(track, "youtube");
         trackInfos.push(track);
 
         //insert data to redis

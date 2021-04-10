@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-const { storePlaylist } = require("../common");
+const { uploadPlaylist } = require("../common");
 
 exports.search = async (access_token) => {
   try {
@@ -59,15 +59,6 @@ exports.create = async (playlist, user_id, access_token) => {
     throw error;
   }
 };
-
-// exports.store = async (data) => {
-//   try {
-//     await storePlaylist(data);
-//     return;
-//   } catch (error) {
-//     throw error;
-//   }
-// };
 
 //not exports
 const parsePlaylist = (playlist) => {

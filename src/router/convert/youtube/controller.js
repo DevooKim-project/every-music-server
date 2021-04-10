@@ -1,6 +1,6 @@
 const {
   youtubeService,
-  storePlaylist,
+  uploadPlaylist,
   splitArray,
 } = require("../../../services/convert");
 const { tokenService } = require("../../../services/database");
@@ -122,13 +122,13 @@ exports.insertMusic = async (req, res) => {
   }
 };
 
-exports.storePlaylist = async (req, res) => {
+exports.uploadPlaylist = async (req, res) => {
   try {
     const user_id = req.payload.user_id;
     const { playlists, track_ids } = req.body;
 
     for (let i = 0; i < playlists.length; i++) {
-      await storePlaylist({
+      await uploadPlaylist({
         playlist: playlists[i],
         track_ids: track_ids[i],
         user_id: user_id,

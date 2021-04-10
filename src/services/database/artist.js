@@ -1,6 +1,6 @@
 const Artist = require("../../database/schema/artist");
 
-exports.storeArtist = async (data) => {
+exports.uploadArtist = async (data) => {
   try {
     const { name, ids } = data;
     const response = await Artist.create({

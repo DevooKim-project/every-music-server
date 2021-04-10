@@ -3,7 +3,7 @@ const User = require("../../database/schema/user");
 // const { playlist } = require("../playlist/youtube");
 
 //플레이리스트 저장
-exports.storePlaylist = async (data) => {
+exports.uploadPlaylist = async (data) => {
   try {
     const { playlist, track_ids, user_id } = data;
     console.log(data);

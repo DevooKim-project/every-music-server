@@ -1,5 +1,5 @@
 const { artistService, trackService, playlistService } = require("../database");
-exports.storeArtistTrack = async (trackData, provider) => {
+exports.uploadArtistTrack = async (trackData, provider) => {
   try {
     //1. artist 확인 후 저장
     //1-1. 있는데 providerId가 없으면 업데이트
@@ -21,8 +21,8 @@ exports.storeArtistTrack = async (trackData, provider) => {
         artist = artistService.updateArtist(trackData.artist.name, provider_id);
       }
     } else {
-      console.log("store artist");
-      artist = await artistService.storeArtist(trackData.artist);
+      console.log("upload artist");
+      artist = await artistService.uploadArtist(trackData.artist);
     }
     artistId = {
       local: artist._id,
@@ -42,8 +42,8 @@ exports.storeArtistTrack = async (trackData, provider) => {
         artist = trackService.updateTrack(trackData.title, provider_id);
       }
     } else {
-      console.log("store track");
-      track = await trackService.storeTrack(trackData, artistId.local);
+      console.log("upload track");
+      track = await trackService.uploadTrack(trackData, artistId.local);
     }
     trackId = {
       local: track._id,
@@ -59,9 +59,9 @@ exports.storeArtistTrack = async (trackData, provider) => {
   }
 };
 
-exports.storePlaylist = async (data) => {
+exports.uploadPlaylist = async (data) => {
   try {
-    await playlistService.storePlaylist(data);
+    await playlistService.uploadPlaylist(data);
     return;
   } catch (error) {
     throw error;
