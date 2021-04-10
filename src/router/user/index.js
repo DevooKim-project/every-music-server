@@ -5,13 +5,7 @@ const controller = require("./controller");
 
 const router = express.Router();
 
-router.get("/:user_id", (req, res) => {
-  //내가 올린 리스트검색
-  if (req.headers.authorization) {
-    auth.isAccessToken(req, res, next);
-  }
-
-  controller.readUserPlaylist(req, res);
-});
+router.get("/:user_id", auth.hasToken, controller.readUserPlaylist);
+router.get("/library/:user_id", auth.isAccessToken, controller.readLibrary);
 
 module.exports = router;

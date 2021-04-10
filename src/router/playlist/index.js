@@ -5,8 +5,7 @@ const controller = require("./controller");
 const router = express.Router();
 
 router.get("/", controller.readAllPlaylist);
-router.get("/:user_id", auth.hasToken, controller.readUserPlaylist);
-router.get("/library/:user_id", auth.isAccessToken, controller.readLibrary);
+
 router.put(
   "/like/:user_id/:operator",
   auth.isAccessToken,
