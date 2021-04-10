@@ -5,6 +5,7 @@ const controller = require("./controller");
 const router = express.Router();
 
 router.get("/", controller.readAllPlaylist);
+router.post("/upload", controller.uploadPlaylist);
 
 router.put(
   "/like/:user_id/:operator",

@@ -1,5 +1,5 @@
 const { playlistService } = require("../../services/database");
-
+const { uploadPlaylist } = require("../../services/convert");
 //private: false인 모든 플레이리스트
 exports.readAllPlaylist = async (req, res) => {
   try {
@@ -15,6 +15,25 @@ exports.readAllPlaylist = async (req, res) => {
 
     res.send(playlists);
   } catch (error) {
+    res.send(error);
+  }
+};
+
+exports.uploadPlaylist = async (req, res) => {
+  try {
+    const user_id = req.payload.user_id;
+    const { playlists, track_ids } = req.body;
+
+    for (let i = 0; i < playlists.length; i++) {
+      await uploadPlaylist({
+        playlist: playlists[i],
+        track_ids: track_ids[i],
+        user_id: user_id,
+      });
+    }
+    res.send("fin");
+  } catch (error) {
+    console.log(error);
     res.send(error);
   }
 };
