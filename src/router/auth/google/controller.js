@@ -42,7 +42,7 @@ exports.login = async (req, res, next) => {
     next();
   } catch (error) {
     console.error(error);
-    res.send(error);
+    res.send({ error });
   }
 };
 

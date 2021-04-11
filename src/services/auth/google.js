@@ -76,6 +76,10 @@ exports.login = async (token) => {
 
     //기존 유저 확인
     const exist_user = await userService.findOneUser({ email: profile.email });
+    if (exist_user.provider !== "spotify") {
+      // res.status(400).send(`이미 ${exist_user.provider}로 가입된 유저입니다.`);
+      throw new Error(`이미 ${exist_user.provider}로 가입된 유저입니다.`);
+    }
     if (exist_user) {
       //provider 토큰 업데이트
       console.log("exist_user");
