@@ -1,7 +1,5 @@
 const axios = require("axios");
 
-const { uploadPlaylist } = require("../common");
-
 exports.search = async (access_token) => {
   try {
     const params = {
@@ -61,15 +59,6 @@ exports.create = async (playlist, access_token) => {
     const response = await axios(options);
     const id = response.data.id;
     return { id: id };
-  } catch (error) {
-    throw error;
-  }
-};
-
-exports.upload = async (playlist, track_ids, user_id) => {
-  try {
-    await uploadPlaylist(playlist, track_ids, user_id);
-    return;
   } catch (error) {
     throw error;
   }

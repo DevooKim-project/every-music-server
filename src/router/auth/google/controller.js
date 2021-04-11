@@ -1,4 +1,4 @@
-const { googleService } = require("../../../services/auth");
+const { googleService, checkScope } = require("../../../services/auth");
 const { tokenService } = require("../../../services/database");
 
 exports.withLogin = (req, res, next) => {
@@ -37,6 +37,15 @@ exports.getProviderToken = async (req, res, next) => {
 
 exports.login = async (req, res, next) => {
   try {
+    //scope check
+    const provider_token = req.provider_token;
+    const isValidScope = checkScope(
+      provider_token.scope,
+      googleService.OAuthParams.withLogin.scopes
+    );
+    if (!isValidScope) {
+      res.send("유요하지 않은 권한");
+    }
     const user_id = await googleService.login(req.provider_token);
     req.user_id = user_id;
     next();

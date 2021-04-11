@@ -63,6 +63,7 @@ exports.OAuthRedirect = async (code, OAuth_params) => {
       data: qs.stringify(data),
     });
 
+    console.log(response.data);
     return response.data;
   } catch (error) {
     throw error;

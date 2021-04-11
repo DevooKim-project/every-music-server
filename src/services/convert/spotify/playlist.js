@@ -1,7 +1,5 @@
 const axios = require("axios");
 
-const { uploadPlaylist } = require("../common");
-
 exports.search = async (access_token) => {
   try {
     const params = {

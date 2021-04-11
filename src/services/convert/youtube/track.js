@@ -110,16 +110,11 @@ exports.getInfo = async (id, token) => {
     do {
       const response = await axios(options);
       const { data } = response;
-      // data.items.forEach((item) => {
       for (item of data.items) {
         let track = parseTrackInfo(item);
         //db 저장
         track = await uploadArtistTrack(track, "youtube");
         trackInfos.push(track);
-
-        //insert data to redis
-        // cacheService.addArtist(track.artists[0], "google");
-        // cacheService.addTrack(track, "google");
       }
 
       params.pageToken = data.nextPageToken;
