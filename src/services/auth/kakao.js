@@ -2,14 +2,24 @@ const axios = require("axios");
 const qs = require("qs");
 const { userService } = require("../database");
 
-exports.obtainOAuthCredentials = async () => {
+exports.OAuthParams = {
+  scopes: ["account_email", "profile"],
+  redirect_uri: `http://localhost:5000/auth/kakao/callback`,
+};
+
+exports.obtainOAuthCredentials = async (OAuth_params, type = "") => {
+  const { scopes, redirect_uri } = OAuth_params;
   const url = "https://kauth.kakao.com/oauth/authorize";
   const params = {
     client_id: process.env.KAKAO_ID,
-    redirect_uri: "http://localhost:5000/auth/kakao/callback",
+    redirect_uri: redirect_uri,
     response_type: "code",
     // state: "", //CSRF 공격 보호를 위한 임의의 문자열
   };
+
+  if ((type = "additional")) {
+    params.scope = scopes.join(",");
+  }
 
   const endpoint = await `${url}?${qs.stringify(params)}`;
   return endpoint;
@@ -35,6 +45,20 @@ exports.OAuthRedirect = async (code) => {
   } catch (error) {
     throw error;
   }
+};
+
+exports.obtainAdditionalPermissions = async (scope, redirect_uri) => {
+  const url = "https://kauth.kakao.com/oauth/authorize";
+  const params = {
+    client_id: process.env.KAKAO_ID,
+    redirect_uri: "http://localhost:5000/auth/kakao/callback",
+    response_type: "code",
+    scope: scope.join(","),
+    // state: "", //CSRF 공격 보호를 위한 임의의 문자열
+  };
+
+  const endpoint = await `${url}?${qs.stringify(params)}`;
+  return endpoint;
 };
 
 exports.login = async (token) => {
@@ -100,7 +124,7 @@ exports.logout = async () => {
   }
 };
 
-exports.signOut = async (provider_id) => {
+exports.signOut = async (user_id, provider_id) => {
   try {
     const params = {
       target_id_type: "user_id",
@@ -115,7 +139,7 @@ exports.signOut = async (provider_id) => {
       params,
     };
 
-    Promise.all([axios(options), userService.destroyUser(payload.user_id)]);
+    Promise.all([axios(options), userService.destroyUser(user_id)]);
     return;
   } catch (error) {
     throw error;

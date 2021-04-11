@@ -19,10 +19,16 @@ exports.checkScope = (response_scope, necessary_scope) => {
     response_scope.split(" ").filter((v) => v !== "openid")
   );
 
-  necessary_scope.forEach((v) => {
-    if (!scope.has(v)) {
+  // necessary_scope.forEach((v) => {
+  //   console.log("test: ", v);
+  //   if (!scope.has(v)) {
+  //     return false;
+  //   }
+  // });
+  for (ns of necessary_scope) {
+    if (!scope.has(ns)) {
       return false;
     }
-  });
+  }
   return true;
 };
