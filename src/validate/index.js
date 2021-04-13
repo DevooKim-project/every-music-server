@@ -1,4 +1,4 @@
-module.exports.authValidation = require("./AuthValidation");
-module.exports.playlistValidation = require("./PlaylistValidation");
-module.exports.convertValidation = require("./ConvertValidation");
-module.exports.userValidation = require("./UserValidation");
+module.exports.authValidation = require("./authValidation");
+module.exports.playlistValidation = require("./playlistValidation");
+module.exports.convertValidation = require("./convertValidation");
+module.exports.userValidation = require("./userValidation");

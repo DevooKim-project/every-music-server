@@ -3,6 +3,11 @@ const tokenTypes = {
   REFRESH: "refresh",
 };
 
+const authTypes = {
+  REGISTER: "register",
+  TOKEN: "token",
+};
+
 const platformTypes = {
   KAKAO: "kakao",
   LOCAL: "local",
@@ -18,6 +23,7 @@ const likeTypes = {
 
 module.exports = {
   tokenTypes,
+  authTypes,
   platformTypes,
   likeTypes,
 };

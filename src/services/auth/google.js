@@ -2,7 +2,10 @@ const axios = require("axios");
 const qs = require("qs");
 const jwt = require("jsonwebtoken");
 
-const { tokenService, userService } = require("../database");
+// const { tokenService, userService } = require("../database");
+const { tokenService } = require("../../services");
+const { platformTypes } = require("../../config/type");
+const { Token } = require("../../database/schema");
 
 exports.OAuthParams = {
   withLogin: {
@@ -159,15 +162,15 @@ exports.updateRefreshToken = async (user_id) => {
   }
 };
 
-exports.signOut = async (user_id) => {
+exports.signOut = async (userId) => {
   try {
-    const token = await tokenService.findToken({
-      user: user_id,
-      provider: "google",
-    });
+    const token = await tokenService.findPlatformTokenById(
+      userId,
+      platformTypes.GOOGLE
+    );
     console.log("token: ", token);
     const params = {
-      token: token.refresh_token,
+      token: token.refreshToken,
     };
     const options = {
       method: "POST",
@@ -177,8 +180,8 @@ exports.signOut = async (user_id) => {
 
     Promise.all([
       axios(options),
-      tokenService.deleteToken(user_id),
-      userService.destroyUser(user_id),
+      Token.deleteMany({ user: userId }),
+      userService.deleteUserById(userId),
     ]);
   } catch (error) {
     throw error;

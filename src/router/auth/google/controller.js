@@ -1,5 +1,13 @@
-const { googleService, checkScope } = require("../../../services/auth");
-const { tokenService } = require("../../../services/database");
+const httpStatus = require("http-status");
+const { tokenTypes } = require("../../../config/type");
+const catchAsync = require("../../../utils/catchAsync");
+// const { googleService, checkScope } = require("../../../services/auth");
+// const { tokenService } = require("../../../services/database");
+const {
+  googleService,
+  userService,
+  tokenService,
+} = require("../../../services");
 
 exports.withLogin = (req, res, next) => {
   req.OAuth_params = googleService.OAuthParams.withLogin;
@@ -71,14 +79,12 @@ exports.saveTokenWithoutLogin = async (req, res) => {
   }
 };
 
-exports.signOut = async (req, res) => {
-  try {
-    const user_id = req.payload.user_id;
-    await googleService.signOut(user_id);
+exports.signOut = catchAsync(async (req, res) => {
+  const payload = tokenService.verifyToken(req, tokenTypes.ACCESS);
 
-    return res.send("signout ok");
-  } catch (error) {
-    console.log(error);
-    return res.send(error);
-  }
-};
+  Promise.all([
+    googleService.revoke(payload.userId),
+    userService.deleteUserWithTokenAndPlaylistById(userId),
+  ]);
+  res.status(httpStatus.NO_CONTENT).send();
+});

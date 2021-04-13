@@ -1,8 +1,11 @@
 const Joi = require("joi");
+const { platformTypes } = require("../config/type");
 
 const convertPlatform = {
   params: Joi.object().keys({
-    platform: Joi.string().required().valid("spotify", "youtube"),
+    platform: Joi.string()
+      .required()
+      .valid(platformTypes.SPOTIFY, platformTypes.YOUTUBE),
   }),
 };
 

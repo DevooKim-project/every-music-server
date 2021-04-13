@@ -16,7 +16,7 @@ const generateToken = (tokenBody, expires, secret = process.env.JWT_SECRET) => {
   return jwt.sign(payload, secret);
 };
 
-const hasToken = (req, type) => {
+const hasToken = (req, type, required = true) => {
   if (type === tokenTypes.ACCESS && req.headers.authorization) {
     return type;
   }
@@ -26,10 +26,14 @@ const hasToken = (req, type) => {
   ) {
     return type;
   }
-  return;
+
+  if (required) {
+    return;
+  }
+  throw new ApiError(httpStatus.UNAUTHORIZED, `Not found ${type}`);
 };
 
-const verifyToken = async (req, type) => {
+const verifyToken = (req, type) => {
   try {
     let token = "";
     if (type === tokenTypes.ACCESS) {
@@ -52,6 +56,7 @@ const verifyToken = async (req, type) => {
 const refreshToken = async (userId, type) => {
   let token = "";
   if (type === platformTypes.GOOGLE) {
+    // token = await googleService.updateRefreshToken(userId);
     token = await googleService.updateRefreshToken(userId);
   }
   if (type === platformTypes.SPOTIFY) {
@@ -64,7 +69,7 @@ const refreshToken = async (userId, type) => {
   return token;
 };
 
-const updateLocalToken = async (userId, platForm, token) => {
+const updatePlatformToken = async (userId, platForm, token) => {
   if (token.hasOwnProperty("refreshToken")) {
     await Token.updateOne(
       { user: userId, platForm },
@@ -96,7 +101,10 @@ const generateLocalToken = async (user) => {
     process.env.refreshExpirationMinutes,
     "days"
   );
-  const refreshToken = await generateToken(user.id, refreshTokenExpires);
+  const refreshToken = await generateToken(
+    { userId: user.id },
+    refreshTokenExpires
+  );
 
   console.log("local access_token: ", accessToken);
   console.log("local refresh_token: ", refreshToken);
@@ -106,12 +114,15 @@ const generateLocalToken = async (user) => {
 
 const savePlatformToken = async (tokenBody) => {
   await Token.create(tokenBody);
-  return;
 };
 
-const findPlatformTokenById = async (userId, platform) => {
+const findPlatformTokenByUserId = async (userId, platform) => {
   const token = await Token.findOne({ user: userId, platform });
   return token;
+};
+
+const deletePlatformTokenByUserId = async (userId) => {
+  await Token.deleteMany({ user: userId });
 };
 
 module.exports = {
@@ -119,8 +130,9 @@ module.exports = {
   hasToken,
   verifyToken,
   refreshToken,
-  updateLocalToken,
+  updatePlatformToken,
   generateLocalToken,
   savePlatformToken,
-  findPlatformTokenById,
+  findPlatformTokenByUserId,
+  deletePlatformTokenByUserId,
 };

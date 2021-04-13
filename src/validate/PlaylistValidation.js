@@ -1,4 +1,5 @@
 const Joi = require("joi");
+const { likeTypes, platformTypes } = require("../config/type");
 
 const playlist = {
   playlist: Joi.array().items(
@@ -28,7 +29,7 @@ const track = {
         youtube: Joi.string(),
         spotify: Joi.string(),
       })
-      .or("local", "youtube", "spotify"),
+      .or(platformTypes.LOCAL, platformTypes.YOUTUBE, platformTypes.SPOTIFY),
     artist: Joi.object()
       .required()
       .keys({
@@ -40,14 +41,20 @@ const track = {
             youtube: Joi.string(),
             spotify: Joi.string(),
           })
-          .or("local", "youtube", "spotify"),
+          .or(
+            platformTypes.LOCAL,
+            platformTypes.YOUTUBE,
+            platformTypes.SPOTIFY
+          ),
       }),
     thumbnail: Joi.string(),
   }),
 };
 
 const platform = {
-  platform: Joi.string().required().valid("spotify", "youtube"),
+  platform: Joi.string()
+    .required()
+    .valid(platformTypes.YOUTUBE, platformTypes.SPOTIFY),
 };
 
 const playlistId = Joi.string().required();
@@ -90,7 +97,7 @@ const update = {
 const like = {
   params: Joi.object().keys({
     playlistId,
-    operator: Joi.string().required().valid("like", "unlike"),
+    operator: Joi.string().required().valid(likeTypes.LIKE, likeTypes.UNLIKE),
   }),
 };
 

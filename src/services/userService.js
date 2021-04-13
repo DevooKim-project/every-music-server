@@ -2,6 +2,8 @@ const httpStatus = require("http-status");
 const ApiError = require("../utils/ApiError");
 const { User } = require("../database/schema");
 
+const tokenService = require("./tokenService");
+
 const createUser = async (userBody) => {
   if (await User.isEmailTaken(userBody.email)) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Email already taken");
@@ -10,12 +12,18 @@ const createUser = async (userBody) => {
   return user;
 };
 
-const destroyUser = async (userId) => {
+const deleteUserWithTokenAndPlaylistById = async (userId) => {
   const user = getUserById(userId);
   if (!user) {
     throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
-  await User.remove();
+
+  Promise.all([
+    playlistService.deletePlaylistByUserId(userId),
+    tokenService.deletePlatformTokenByUserId(userId),
+    user.remove(),
+  ]);
+  // await user.remove();
 };
 
 const getUserById = async (id) => {
@@ -28,7 +36,7 @@ const getUserByEmail = async (email) => {
 
 module.exports = {
   createUser,
-  destroyUser,
+  deleteUserWithTokenAndPlaylistById,
   getUserById,
   getUserByEmail,
 };
