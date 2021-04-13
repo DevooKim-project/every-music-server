@@ -3,10 +3,9 @@ const { platformTypes } = require("../../config/type");
 
 const { Schema } = mongoose;
 const tokenSchema = new Schema({
-  provider: {
+  platform: {
     type: String,
     enum: [platformTypes.KAKAO, platformTypes.GOOGLE, platformTypes.SPOTIFY],
-    lowercase: true,
   },
   access_token: String,
   refresh_token: String,

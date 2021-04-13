@@ -3,14 +3,14 @@ const moment = require("moment");
 
 const { tokenTypes, platformTypes } = require("../config/type");
 const { Token } = require("../database/schema");
-const userService = require("./userService");
+// const userService = require("./userService");
 const ApiError = require("../utils/ApiError");
 
 const generateToken = (tokenBody, expires, secret = process.env.JWT_SECRET) => {
   const payload = {
     iss: "everyMusic.com",
     ...tokenBody,
-    iat: moment.unix(),
+    iat: moment().unix(),
     exp: expires.unix(),
   };
   return jwt.sign(payload, secret);
@@ -40,8 +40,6 @@ const verifyToken = (req, type) => {
       token = req.headers.authorization;
     } else if (type === tokenTypes.REFRESH) {
       token = req.cookies.refreshToken;
-    } else {
-      throw new ApiError(httpStatus.UNAUTHORIZED, "Not found token");
     }
 
     const payload = jwt.verify(token, process.env.JWT_SECRET);
@@ -50,6 +48,7 @@ const verifyToken = (req, type) => {
     if (error.name === "TokenExpiredError") {
       throw new ApiError(419, "Expired token");
     }
+    throw new ApiError(httpStatus.UNAUTHORIZED, "Not found token");
   }
 };
 
@@ -69,10 +68,10 @@ const refreshToken = async (userId, type) => {
   return token;
 };
 
-const updatePlatformToken = async (userId, platForm, token) => {
+const upsertPlatformToken = async (userId, platform, token) => {
   if (token.hasOwnProperty("refreshToken")) {
     await Token.updateOne(
-      { user: userId, platForm },
+      { user: userId, platform },
       {
         $set: {
           accessToken: token.accessToken,
@@ -83,31 +82,28 @@ const updatePlatformToken = async (userId, platForm, token) => {
     );
   } else {
     await Token.updateOne(
-      { user: userId, platForm },
+      { user: userId, platform },
       { $set: { accessToken: token.accessToken } },
       { upsert: true }
     );
   }
 };
 
-const generateLocalToken = async (user) => {
+const generateLocalToken = (user) => {
   const accessTokenExpires = moment().add(
     process.env.accessExpirationMinutes,
     "minutes"
   );
-  const accessToken = await generateToken(user, accessTokenExpires);
+  const accessToken = generateToken(user, accessTokenExpires);
 
   const refreshTokenExpires = moment().add(
     process.env.refreshExpirationMinutes,
     "days"
   );
-  const refreshToken = await generateToken(
-    { userId: user.id },
-    refreshTokenExpires
-  );
+  const refreshToken = generateToken({ userId: user.id }, refreshTokenExpires);
 
-  console.log("local access_token: ", accessToken);
-  console.log("local refresh_token: ", refreshToken);
+  console.log("local accessToken: ", accessToken);
+  console.log("local refreshToken: ", refreshToken);
 
   return { accessToken, refreshToken };
 };
@@ -130,9 +126,9 @@ module.exports = {
   hasToken,
   verifyToken,
   refreshToken,
-  updatePlatformToken,
+  upsertPlatformToken,
   generateLocalToken,
-  savePlatformToken,
+  // savePlatformToken,
   findPlatformTokenByUserId,
   deletePlatformTokenByUserId,
 };

@@ -1,37 +1,38 @@
 const express = require("express");
 
-const auth = require("../../../middleware/auth");
+const verifyToken = require("../../../middleware/auth");
 const validate = require("../../../middleware/validate");
 const controller = require("./controller");
 const authValidation = require("../../../validate/authValidation");
+const { authTypes, tokenTypes } = require("../../../config/type");
 
 const router = express.Router();
 
-router.get("/", controller.withLogin, controller.obtainOAuth);
+// router.get(
+//   "/login/direct",
+//   verifyToken(tokenTypes.REFRESH),
+//   controller.loginDirect
+// );
+
+router.get("/login", controller.obtainOAuth(authTypes.LOGIN));
 router.get(
-  "/callback",
-  controller.withLogin,
-  controller.getProviderToken,
-  controller.login,
-  auth.createLocalToken
+  "/login/callback",
+  // validate(authValidation.oAuth),
+  controller.login(authTypes.LOGIN)
 );
 
-router.get("/token", controller.withoutLogin, controller.obtainOAuth);
 router.get(
-  "/callbackToken",
-  auth.isAccessToken,
-  controller.withoutLogin,
-  controller.getProviderToken,
-  controller.saveTokenWithoutLogin
+  "/token",
+  verifyToken(tokenTypes.ACCESS),
+  controller.obtainOAuth(authTypes.TOKEN)
 );
 
-router.delete("/signOut", auth.isAccessToken, controller.signOut);
+// router.get(
+//   "/token/callback",
+//   validate(authValidation.oAuth),
+//   controller.getOnlyToken(authTypes.TOKEN)
+// );
 
-//로그아웃은 클라이언트에서 jwt제거
-
-router.get("/:type", controller.obtainOAuth);
-router.get("/callback", controller.OAuthCallback);
-router.get("/callbackToken", controller.OAuthCallbackToken);
-router.get("/signOut", validate(authValidation.oAuthType), controller.signOut);
+router.get("/signOut", verifyToken(tokenTypes.ACCESS), controller.signOut);
 
 module.exports = router;

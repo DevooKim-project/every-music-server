@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const { parseToken } = require("../../middleware/auth");
+const { parseToken } = require("../../middleware/auth_old");
 const { userService } = require("../database");
 
 exports.createToken = (user) => {

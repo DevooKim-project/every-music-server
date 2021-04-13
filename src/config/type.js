@@ -4,7 +4,7 @@ const tokenTypes = {
 };
 
 const authTypes = {
-  REGISTER: "register",
+  LOGIN: "login",
   TOKEN: "token",
 };
 

@@ -1,6 +1,6 @@
 const express = require("express");
 
-// const authRoute = require("./auth");
+const authRoute = require("./auth");
 // const convertRoute = require("./convert");
 // const playlistRoute = require("./playlist");
 // const userRoute = require("./user");
@@ -8,24 +8,16 @@ const express = require("express");
 
 const router = express.Router();
 
-const { Playlist } = require("../database/schema");
-
-const getPlaylistById = async (id) => {
-  return Playlist.findById(id);
-};
-
-const deletePlaylistById = async (playlistId) => {
-  return Playlist.deleteMany({ id: playlistId });
-  return;
-};
+const { User } = require("../database/schema");
 
 router.get("/", async (req, res) => {
-  const playlist = await deletePlaylistById("607082272bc391abcdf7b1af");
-  console.log(playlist);
-  res.send(playlist);
+  const email = "khwoo8027@naver.com";
+  const nick = "김현우";
+  const user = await User.findOne({ email, nick: { $ne: nick } });
+  res.send(!!user);
 });
 
-// router.use("/auth", authRoute);
+router.use("/auth", authRoute);
 // router.use("/convert", convertRoute);
 // router.use("/playlist", playlistRoute);
 // router.use("/track", trackRoute);

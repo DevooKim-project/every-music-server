@@ -1,5 +1,5 @@
 const Joi = require("joi");
-const { authTypes, platformTypes } = require("../config/type");
+const { platformTypes } = require("../config/type");
 
 const oAuthPlatform = {
   params: Joi.object().keys({
@@ -9,9 +9,9 @@ const oAuthPlatform = {
   }),
 };
 
-const oAuthType = {
-  params: Joi.object().keys({
-    type: Joi.string().required().valid(authTypes.REGISTER, authTypes.TOKEN),
+const oAuth = {
+  query: Joi.object().keys({
+    code: Joi.string().required(),
   }),
 };
 
@@ -23,4 +23,4 @@ const refreshPlatform = {
   }),
 };
 
-module.exports = { oAuthPlatform, oAuthType, refreshPlatform };
+module.exports = { oAuthPlatform, oAuth, refreshPlatform };

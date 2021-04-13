@@ -10,15 +10,12 @@ const userSchema = new Schema({
   nick: {
     type: String,
   },
-  provider: {
-    name: {
-      type: String,
-      enum: [platformTypes.KAKAO, platformTypes.GOOGLE, platformTypes.SPOTIFY],
-      lowercase: true,
-    },
-    id: String,
+  platform: {
+    type: String,
+    enum: [platformTypes.KAKAO, platformTypes.GOOGLE, platformTypes.SPOTIFY],
   },
-  like_playlists: [{ type: Schema.Types.ObjectId, ref: "Playlist" }],
+  platformId: String,
+  likePlaylists: [{ type: Schema.Types.ObjectId, ref: "Playlist" }],
   private: {
     type: Boolean,
     default: false,
@@ -26,8 +23,8 @@ const userSchema = new Schema({
   // token: { type: Schema.Types.ObjectId, ref: "Token" },
 });
 
-userSchema.statics.isEmailTaken = async function (email) {
-  const user = await this.findOne({ email });
+userSchema.statics.isEmailTaken = async function (email, platform) {
+  const user = await this.findOne({ email, platform: { $ne: platform } });
   return !!user; //null -> true -> false
 };
 
