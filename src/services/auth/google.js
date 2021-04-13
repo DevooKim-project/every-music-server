@@ -146,6 +146,7 @@ exports.updateRefreshToken = async (user_id) => {
       data: qs.stringify(data),
     });
 
+    return response.data.access_token;
     await tokenService.updateToken({
       user: user_id,
       provider: "google",

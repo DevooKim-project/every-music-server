@@ -26,6 +26,7 @@ exports.createToken = (user) => {
   return { access_token, refresh_token };
 };
 
+//not used
 exports.updateRefreshToken = async (token) => {
   try {
     const localToken = parseToken(token);

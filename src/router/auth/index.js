@@ -3,7 +3,6 @@ const {
   isRefreshToken,
   refreshToken,
   createLocalToken,
-  verifyToken,
 } = require("../../middleware/auth");
 const googleRoute = require("./google");
 const kakaoRoute = require("./kakao");
@@ -15,6 +14,6 @@ router.use("/google", googleRoute);
 router.use("/kakao", kakaoRoute);
 router.use("/spotify", spotifyRoute);
 
-router.put("/refresh/:type", isRefreshToken, refreshToken, createLocalToken);
+router.put("/:type/refresh", isRefreshToken, refreshToken, createLocalToken);
 
 module.exports = router;
