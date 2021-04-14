@@ -52,21 +52,21 @@ const hasToken = (req, type, required = true) => {
 //   }
 // };
 
-const refreshToken = async (userId, type) => {
-  let token = "";
-  if (type === platformTypes.GOOGLE) {
-    // token = await googleService.updateRefreshToken(userId);
-    token = await googleService.updateRefreshToken(userId);
-  }
-  if (type === platformTypes.SPOTIFY) {
-    token = await spotifyService.updateRefreshToken(userId);
-  }
-  if (type === platformTypes.LOCAL) {
-    const user = await userService.findUserById(userId);
-    token = generateLocalToken(user);
-  }
-  return token;
-};
+// const refreshToken = async (userId, type) => {
+//   let token = "";
+//   if (type === platformTypes.GOOGLE) {
+//     // token = await googleService.updateRefreshToken(userId);
+//     token = await googleService.updateRefreshToken(userId);
+//   }
+//   if (type === platformTypes.SPOTIFY) {
+//     token = await spotifyService.updateRefreshToken(userId);
+//   }
+//   if (type === platformTypes.LOCAL) {
+//     const user = await userService.findUserById(userId);
+//     token = generateLocalToken(user);
+//   }
+//   return token;
+// };
 
 const upsertPlatformToken = async (userId, platform, token) => {
   if (token.hasOwnProperty("refreshToken")) {
@@ -90,17 +90,23 @@ const upsertPlatformToken = async (userId, platform, token) => {
 };
 
 const generateLocalToken = (user) => {
+  const tokenBody = {
+    id: user.id,
+    name: user.nick,
+    platform: user.platform,
+    platformId: user.platformId,
+  };
   const accessTokenExpires = moment().add(
     process.env.accessExpirationMinutes,
     "minutes"
   );
-  const accessToken = generateToken(user, accessTokenExpires);
+  const accessToken = generateToken(tokenBody, accessTokenExpires);
 
   const refreshTokenExpires = moment().add(
     process.env.refreshExpirationMinutes,
     "days"
   );
-  const refreshToken = generateToken({ userId: user.id }, refreshTokenExpires);
+  const refreshToken = generateToken({ id: tokenBody.id }, refreshTokenExpires);
 
   console.log("local accessToken: ", accessToken);
   console.log("local refreshToken: ", refreshToken);
@@ -112,7 +118,7 @@ const savePlatformToken = async (tokenBody) => {
   await Token.create(tokenBody);
 };
 
-const findPlatformTokenByUserId = async (userId, platform) => {
+const findPlatformTokenById = async (userId, platform) => {
   const token = await Token.findOne({ user: userId, platform });
   return token;
 };
@@ -125,10 +131,10 @@ module.exports = {
   generateToken,
   hasToken,
   // verifyToken,
-  refreshToken,
+  // refreshToken,
   upsertPlatformToken,
   generateLocalToken,
   // savePlatformToken,
-  findPlatformTokenByUserId,
+  findPlatformTokenById,
   deletePlatformTokenByUserId,
 };

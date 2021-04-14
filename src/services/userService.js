@@ -28,17 +28,11 @@ const login = async (userBody, platform, platformToken) => {
 };
 
 const deleteUserWithTokenAndPlaylistById = async (userId) => {
-  const user = getUserById(userId);
-  if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
-  }
-
   Promise.all([
-    playlistService.deletePlaylistByUserId(userId),
+    // playlistService.deletePlaylistByUserId(userId),
     tokenService.deletePlatformTokenByUserId(userId),
-    user.remove(),
+    deleteUserById(id),
   ]);
-  // await user.remove();
 };
 
 const getUserById = async (id) => {
@@ -47,6 +41,10 @@ const getUserById = async (id) => {
 
 const getUserByEmail = async (email) => {
   return User.findOne({ email });
+};
+
+const deleteUserById = async (id) => {
+  await User.deleteOne({ id });
 };
 
 module.exports = {

@@ -82,13 +82,12 @@ const getOnlyToken = (type) =>
   });
 
 const signOut = catchAsync(async (req, res) => {
-  const payload = tokenService.verifyToken(req, tokenTypes.ACCESS);
-
-  Promise.all([
-    googleService.revoke(payload.userId),
-    userService.deleteUserWithTokenAndPlaylistById(userId),
-  ]);
-  res.status(httpStatus.NO_CONTENT).send();
+  const payload = req.payload;
+  userService.deleteUserWithTokenAndPlaylistById(payload.id),
+    // Promise.all([
+    // googleService.revoke(payload.id),
+    // ]);
+    res.status(httpStatus.NO_CONTENT).send();
 });
 
 module.exports = {

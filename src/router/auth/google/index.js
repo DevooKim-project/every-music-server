@@ -23,7 +23,11 @@ router.get(
   controller.obtainOAuth(authTypes.TOKEN)
 );
 
-router.get("/token/callback", controller.getOnlyToken(authTypes.TOKEN));
+router.get(
+  "/token/callback",
+  verifyToken(tokenTypes.ACCESS),
+  controller.getOnlyToken(authTypes.TOKEN)
+);
 
 router.get("/signOut", verifyToken(tokenTypes.ACCESS), controller.signOut);
 
