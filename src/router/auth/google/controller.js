@@ -78,7 +78,8 @@ const getOnlyToken = (type) =>
       platformTypes.GOOGLE,
       platformToken
     );
-    res.status(httpStatus.NO_CONTENT).send();
+    // res.status(httpStatus.NO_CONTENT).send();
+    res.send();
   });
 
 const signOut = catchAsync(async (req, res) => {

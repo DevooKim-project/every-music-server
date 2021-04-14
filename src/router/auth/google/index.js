@@ -25,7 +25,7 @@ router.get(
 
 router.get(
   "/token/callback",
-  verifyToken(tokenTypes.ACCESS),
+  verifyToken(tokenTypes.REFRESH),
   controller.getOnlyToken(authTypes.TOKEN)
 );
 

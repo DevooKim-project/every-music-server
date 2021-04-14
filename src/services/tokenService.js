@@ -87,6 +87,7 @@ const upsertPlatformToken = async (userId, platform, token) => {
       { upsert: true }
     );
   }
+  return;
 };
 
 const generateLocalToken = (user) => {

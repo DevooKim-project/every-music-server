@@ -11,9 +11,7 @@ const verifyToken = (type, required = true) => (req, res, next) => {
     } else if (type === tokenTypes.REFRESH) {
       token = parseToken(req.cookies.refreshToken);
     }
-    console.log("token: ", token);
     const payload = jwt.verify(token, process.env.JWT_SECRET);
-    console.log("payload: ", payload);
     req.payload = payload;
     next();
   } catch (error) {
