@@ -15,23 +15,15 @@ router.get(
 );
 
 router.get("/login", controller.obtainOAuth(authTypes.LOGIN));
-router.get(
-  "/login/callback",
-  // validate(authValidation.oAuth),
-  controller.login(authTypes.LOGIN)
-);
+router.get("/login/callback", controller.login(authTypes.LOGIN));
 
 router.get(
   "/token",
-  verifyToken(tokenTypes.ACCESS),
+  // verifyToken(tokenTypes.ACCESS),
   controller.obtainOAuth(authTypes.TOKEN)
 );
 
-router.get(
-  "/token/callback",
-  validate(authValidation.oAuth),
-  controller.getOnlyToken(authTypes.TOKEN)
-);
+router.get("/token/callback", controller.getOnlyToken(authTypes.TOKEN));
 
 router.get("/signOut", verifyToken(tokenTypes.ACCESS), controller.signOut);
 

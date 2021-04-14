@@ -24,7 +24,6 @@ const login = async (userBody, platform, platformToken) => {
   const localToken = tokenService.generateLocalToken(user);
   await tokenService.upsertPlatformToken(user.id, platform, platformToken);
 
-  console.log("user: ", localToken);
   return localToken;
 };
 
