@@ -8,11 +8,11 @@ const { authTypes, tokenTypes } = require("../../../config/type");
 
 const router = express.Router();
 
-// router.get(
-//   "/login/direct",
-//   verifyToken(tokenTypes.REFRESH),
-//   controller.loginDirect
-// );
+router.get(
+  "/login/direct",
+  verifyToken(tokenTypes.REFRESH),
+  controller.loginDirect
+);
 
 router.get("/login", controller.obtainOAuth(authTypes.LOGIN));
 router.get(
@@ -27,11 +27,11 @@ router.get(
   controller.obtainOAuth(authTypes.TOKEN)
 );
 
-// router.get(
-//   "/token/callback",
-//   validate(authValidation.oAuth),
-//   controller.getOnlyToken(authTypes.TOKEN)
-// );
+router.get(
+  "/token/callback",
+  validate(authValidation.oAuth),
+  controller.getOnlyToken(authTypes.TOKEN)
+);
 
 router.get("/signOut", verifyToken(tokenTypes.ACCESS), controller.signOut);
 

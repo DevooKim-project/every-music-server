@@ -33,24 +33,24 @@ const hasToken = (req, type, required = true) => {
   throw new ApiError(httpStatus.UNAUTHORIZED, `Not found ${type}`);
 };
 
-const verifyToken = (req, type) => {
-  try {
-    let token = "";
-    if (type === tokenTypes.ACCESS) {
-      token = req.headers.authorization;
-    } else if (type === tokenTypes.REFRESH) {
-      token = req.cookies.refreshToken;
-    }
+// const verifyToken = (req, type) => {
+//   try {
+//     let token = "";
+//     if (type === tokenTypes.ACCESS) {
+//       token = req.headers.authorization;
+//     } else if (type === tokenTypes.REFRESH) {
+//       token = req.cookies.refreshToken;
+//     }
 
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
-    return payload;
-  } catch (error) {
-    if (error.name === "TokenExpiredError") {
-      throw new ApiError(419, "Expired token");
-    }
-    throw new ApiError(httpStatus.UNAUTHORIZED, "Not found token");
-  }
-};
+//     const payload = jwt.verify(token, process.env.JWT_SECRET);
+//     return payload;
+//   } catch (error) {
+//     if (error.name === "TokenExpiredError") {
+//       throw new ApiError(419, "Expired token");
+//     }
+//     throw new ApiError(httpStatus.UNAUTHORIZED, "Not found token");
+//   }
+// };
 
 const refreshToken = async (userId, type) => {
   let token = "";
@@ -124,7 +124,7 @@ const deletePlatformTokenByUserId = async (userId) => {
 module.exports = {
   generateToken,
   hasToken,
-  verifyToken,
+  // verifyToken,
   refreshToken,
   upsertPlatformToken,
   generateLocalToken,
