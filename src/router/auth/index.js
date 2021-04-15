@@ -4,15 +4,15 @@ const express = require("express");
 //   refreshToken,
 //   createLocalToken,
 // } = require("../../middleware/auth");
-const googleRoute = require("./google");
+// const googleRoute = require("./google");
 // const kakaoRoute = require("./kakao");
 // const spotifyRoute = require("./spotify");
+const controller = require("./controller");
 
 const router = express.Router();
 
-router.use("/google", googleRoute);
-// router.use("/kakao", kakaoRoute);
-// router.use("/spotify", spotifyRoute);
+router.get("/:type/login", controller.obtainOAuth);
+router.get("/:type/login/callback", controller.login);
 
 // router.put("/:type/refresh", isRefreshToken, refreshToken, createLocalToken);
 

@@ -44,8 +44,8 @@ const getPlatformToken = async (code, type) => {
   return response.data;
 };
 
-const getProfile = (token) => {
-  return jwt.decode(token.id_token);
+const getProfile = (idToken) => {
+  return jwt.decode(idToken);
 };
 
 const revoke = async (userId) => {

@@ -1,9 +1,7 @@
 const express = require("express");
 
 const verifyToken = require("../../../middleware/auth");
-const validate = require("../../../middleware/validate");
 const controller = require("./controller");
-const authValidation = require("../../../validate/authValidation");
 const { authTypes, tokenTypes } = require("../../../config/type");
 
 const router = express.Router();

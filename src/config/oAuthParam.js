@@ -27,6 +27,29 @@ const googleParam = (type) => {
   }
 };
 
-const spotifyParam = {};
+const spotifyParam = (type) => {
+  if (type === authTypes.LOGIN) {
+    return {
+      scopes: [
+        "user-read-email",
+        "playlist-modify-public",
+        "playlist-modify-private",
+        "playlist-read-private",
+      ],
+      redirectUri: `http://localhost:5000/auth/spotify/${type}/callback`,
+    };
+  }
+
+  if (type === authTypes.TOKEN) {
+    return {
+      scopes: [
+        "playlist-modify-public",
+        "playlist-modify-private",
+        "playlist-read-private",
+      ],
+      redirectUri: `http://localhost:5000/auth/spotify/${type}/callback`,
+    };
+  }
+};
 
 module.exports = { googleParam, spotifyParam };
