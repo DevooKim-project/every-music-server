@@ -1,6 +1,10 @@
 const httpStatus = require("http-status");
-const { tokenTypes, platformTypes } = require("../../config/type");
-const { spotifyService, userService, tokenService } = require("../../services");
+const { platformTypes } = require("../../../config/type");
+const {
+  spotifyService,
+  userService,
+  tokenService,
+} = require("../../../services");
 
 const obtainOAuth = (type) => async (req, res) => {
   const oAuthUri = await spotifyService.getOAuthUrl(type);
@@ -12,7 +16,6 @@ const login = (type) => async (req, res) => {
     req.query.code,
     type
   );
-  //check scope
 
   const profile = await spotifyService.getProfile(platformToken.access_token);
   const userBody = {

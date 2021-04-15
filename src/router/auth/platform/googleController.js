@@ -1,6 +1,10 @@
 const httpStatus = require("http-status");
-const { platformTypes } = require("../../config/type");
-const { googleService, userService, tokenService } = require("../../services");
+const { platformTypes } = require("../../../config/type");
+const {
+  googleService,
+  userService,
+  tokenService,
+} = require("../../../services");
 
 const obtainOAuth = (type) => async (req, res) => {
   const oAuthUri = await googleService.getOAuthUrl(type);
@@ -40,7 +44,9 @@ const login = (type) => async (req, res) => {
 };
 
 const loginDirect = async (req, res) => {
-  const userId = payload.id;
+  const payload = req.payload;
+  console.log(payload);
+  const userId = req.payload.id;
   const user = await userService.getUserById(userId);
   const localToken = await tokenService.generateLocalToken(
     user,
