@@ -1,9 +1,18 @@
 const axios = require("axios");
 const qs = require("qs");
 const { Base64 } = require("js-base64");
+const Joi = require("joi");
 
 const { spotifyParams } = require("../config/oAuthParam");
-const tokenService = require("./tokenService");
+const trackService = require("./trackService");
+const artistService = require("./artistService");
+const { spotifyUtils } = require("../utils/platformUtils");
+
+const schema = Joi.object().keys({
+  ids: Joi.object().keys({
+    spotify: Joi.string().required(),
+  }),
+});
 
 const getOAuthUrl = (type) => {
   const oAuthParam = spotifyParams(type);
@@ -61,8 +70,71 @@ const getProfile = async (accessToken) => {
   return response.data;
 };
 
+const getPlaylistsFromPlatform = async (accessToken) => {
+  const params = {
+    limit: 50,
+  };
+  const options = {
+    method: "GET",
+    url: "https://api.spotify.com/v1/me/playlists",
+    headers: {
+      authorization: `Bearer ${accessToken}`,
+    },
+    params,
+  };
+
+  const playlists = [];
+  do {
+    const response = await axios(options);
+    const { data } = response;
+
+    data.items.forEach((item) => {
+      playlists.push(spotifyUtils.parsePlaylist(item));
+    });
+
+    options.url = data.next;
+  } while (options.url);
+
+  return playlists;
+};
+
+const getTracksFromPlatform = async (playlistId, accessToken) => {
+  const options = {
+    method: "GET",
+    url: `https://api.spotify.com/v1/playlists/${id}/tracks`,
+    headers: {
+      authorization: `Bearer ${token}`,
+    },
+  };
+
+  const tracks = [];
+  do {
+    const response = await axios(options);
+    const { data } = response;
+    for (const item of data.items) {
+      let track = spotifyUtils.setTrack(item.track);
+      //db 저장
+      // track = await trackService.uploadArtistTrack(
+      //   track,
+      //   platformTypes.SPOTIFY
+      // );
+      const artist = artistService.caching(track.artist, schema);
+      track = trackService.caching(track, artist, schema);
+
+      console.log("artist: ", artist);
+      console.log("track: ", track);
+      tracks.push(track);
+    }
+    options.url = data.next;
+  } while (options.url);
+
+  return tracks;
+};
+
 module.exports = {
   getOAuthUrl,
   getPlatformToken,
   getProfile,
+  getPlaylistsFromPlatform,
+  getTracksFromPlatform,
 };

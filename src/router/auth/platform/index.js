@@ -1,3 +1,3 @@
-module.exports.googleController = require("./googleController");
-module.exports.spotifyController = require("./spotifyController");
-module.exports.kakaoController = require("./kakaoController");
+module.exports.authGoogleController = require("./googleController");
+module.exports.authSpotifyController = require("./spotifyController");
+module.exports.authKakaoController = require("./kakaoController");

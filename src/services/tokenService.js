@@ -119,8 +119,9 @@ const savePlatformToken = async (tokenBody) => {
   await Token.create(tokenBody);
 };
 
-const findPlatformTokenById = async (userId, platform) => {
+const findPlatformTokenByUserId = async (userId, platform) => {
   const token = await Token.findOne({ user: userId, platform });
+  console.log(token);
   return token;
 };
 
@@ -136,6 +137,6 @@ module.exports = {
   upsertPlatformToken,
   generateLocalToken,
   // savePlatformToken,
-  findPlatformTokenById,
+  findPlatformTokenByUserId,
   deletePlatformTokenByUserId,
 };

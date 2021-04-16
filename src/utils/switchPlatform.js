@@ -1,22 +1,34 @@
 const { platformTypes } = require("../config/type");
 const {
-  googleController,
-  spotifyController,
-  kakaoController,
+  authGoogleController,
+  authSpotifyController,
+  authKakaoController,
 } = require("../router/auth/platform");
+const {
+  convertYoutubeController,
+  convertSpotifyController,
+} = require("../router/convert/platform");
 
 const switchAuthPlatform = (platform) => {
   if (platform === platformTypes.GOOGLE) {
-    return googleController;
+    return authGoogleController;
   }
   if (platform === platformTypes.SPOTIFY) {
-    return spotifyController;
+    return authSpotifyController;
   }
   if (platform === platformTypes.KAKAO) {
-    return kakaoController;
+    return authKakaoController;
   }
 };
 
-module.exports = {
-  switchAuthPlatform,
+const switchConvertPlatform = (platform) => {
+  if (platform === platformTypes.YOUTUBE) {
+    return convertYoutubeController;
+  }
+
+  if (platform === platformTypes.SPOTIFY) {
+    return convertSpotifyController;
+  }
 };
+
+module.exports = { switchAuthPlatform, switchConvertPlatform };
