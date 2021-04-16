@@ -1,6 +1,6 @@
 const express = require("express");
 
-const { tokenTypes } = require("../../config/type");
+const { tokenTypes, authTypes } = require("../../config/type");
 const verifyToken = require("../../middleware/auth");
 const validate = require("../../middleware/validate");
 const authValidation = require("../../validate/AuthValidation");
@@ -16,10 +16,15 @@ router.param(
   }
 );
 
-router.get("/:platform/login", controller.obtainOAuth);
+router.get("/:platform/login", controller.obtainOAuth(authTypes.LOGIN));
 router.get("/:platform/login/callback", controller.login);
 
-router.get("/:platform/token");
+router.get("/:platform/token", controller.obtainOAuth(authTypes.TOKEN));
+router.get(
+  "/:platform/token/callback",
+  verifyToken(tokenTypes.REFRESH),
+  controller.getOnlyPlatformToken
+);
 
 router.get(
   "/login/direct",
