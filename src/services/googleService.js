@@ -3,11 +3,11 @@ const qs = require("qs");
 const jwt = require("jsonwebtoken");
 
 const { platformTypes } = require("../config/type");
-const { googleParam } = require("../config/oAuthParam");
+const { googleParams } = require("../config/oAuthParam");
 const tokenService = require("./tokenService");
 
-const getOAuthUrl = async (type) => {
-  const oAuthParam = googleParam(type);
+const getOAuthUrl = (type) => {
+  const oAuthParam = googleParams(type);
   const { scopes, redirectUri } = oAuthParam;
   const url = "https://accounts.google.com/o/oauth2/v2/auth";
 
@@ -19,12 +19,12 @@ const getOAuthUrl = async (type) => {
     scope: scopes.join(" "),
   };
 
-  const oAuthUri = await `${url}?${qs.stringify(params)}`;
+  const oAuthUri = `${url}?${qs.stringify(params)}`;
   return oAuthUri;
 };
 
 const getPlatformToken = async (code, type) => {
-  const oAuthParam = googleParam(type);
+  const oAuthParam = googleParams(type);
   const { redirectUri } = oAuthParam;
   const data = {
     code,

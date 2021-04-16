@@ -7,8 +7,8 @@ const tokenSchema = new Schema({
     type: String,
     enum: [platformTypes.KAKAO, platformTypes.GOOGLE, platformTypes.SPOTIFY],
   },
-  access_token: String,
-  refresh_token: String,
+  accessToken: String,
+  refreshToken: String,
   user: { type: Schema.Types.ObjectId, ref: "User" },
   updatedAt: { type: Date, default: Date.now },
 });

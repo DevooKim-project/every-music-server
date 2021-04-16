@@ -2,11 +2,11 @@ const axios = require("axios");
 const qs = require("qs");
 const { Base64 } = require("js-base64");
 
-const { spotifyParam } = require("../config/oAuthParam");
+const { spotifyParams } = require("../config/oAuthParam");
 const tokenService = require("./tokenService");
 
-const getOAuthUrl = async (type) => {
-  const oAuthParam = spotifyParam(type);
+const getOAuthUrl = (type) => {
+  const oAuthParam = spotifyParams(type);
   const { scopes, redirectUri } = oAuthParam;
   const url = "https://accounts.spotify.com/authorize";
 
@@ -17,12 +17,12 @@ const getOAuthUrl = async (type) => {
     scope: scopes.join(" "),
   };
 
-  const oAuthUri = await `${url}?${qs.stringify(params)}`;
+  const oAuthUri = `${url}?${qs.stringify(params)}`;
   return oAuthUri;
 };
 
 const getPlatformToken = async (code, type) => {
-  const oAuthParam = spotifyParam(type);
+  const oAuthParam = spotifyParams(type);
   const { redirectUri } = oAuthParam;
 
   const data = {

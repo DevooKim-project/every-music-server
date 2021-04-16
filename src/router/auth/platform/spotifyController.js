@@ -6,8 +6,8 @@ const {
   tokenService,
 } = require("../../../services");
 
-const obtainOAuth = (type) => async (req, res) => {
-  const oAuthUri = await spotifyService.getOAuthUrl(type);
+const obtainOAuth = (type) => (req, res) => {
+  const oAuthUri = spotifyService.getOAuthUrl(type);
   res.redirect(oAuthUri);
 };
 
@@ -24,11 +24,14 @@ const login = (type) => async (req, res) => {
     platform: platformTypes.SPOTIFY,
     platformId: profile.sub,
   };
-
+  const platformTokenBody = {
+    accessToken: platformToken.access_token,
+    refreshToken: platformToken.refresh_token,
+  };
   const localToken = await userService.login(
     userBody,
     platformTypes.SPOTIFY,
-    platformToken
+    platformTokenBody
   );
 
   res.clearCookie("refreshToken");
@@ -49,11 +52,14 @@ const getOnlyToken = (type) => async (req, res) => {
     req.query.code,
     type
   );
-
+  const platformTokenBody = {
+    accessToken: platformToken.access_token,
+    refreshToken: platformToken.refresh_token,
+  };
   await tokenService.upsertPlatformToken(
     payload.id,
     platformTypes.SPOTIFY,
-    platformToken
+    platformTokenBody
   );
   // res.status(httpStatus.NO_CONTENT).send();
   res.send();

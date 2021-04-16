@@ -1,5 +1,5 @@
 const { authTypes } = require("./type");
-const googleParam = (type) => {
+const googleParams = (type) => {
   if (type === authTypes.LOGIN) {
     return {
       scopes: [
@@ -27,7 +27,7 @@ const googleParam = (type) => {
   }
 };
 
-const spotifyParam = (type) => {
+const spotifyParams = (type) => {
   if (type === authTypes.LOGIN) {
     return {
       scopes: [
@@ -52,4 +52,13 @@ const spotifyParam = (type) => {
   }
 };
 
-module.exports = { googleParam, spotifyParam };
+const kakaoParams = (type) => {
+  if (type === authTypes.LOGIN) {
+    return {
+      scopes: ["account_email", "profile"],
+      redirectUri: `http://localhost:5000/auth/kakao/${type}/callback`,
+    };
+  }
+};
+
+module.exports = { googleParams, spotifyParams, kakaoParams };
