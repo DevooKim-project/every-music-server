@@ -31,8 +31,9 @@ const deleteUserWithTokenAndPlaylistById = async (userId) => {
   Promise.all([
     // playlistService.deletePlaylistByUserId(userId),
     tokenService.deletePlatformTokenByUserId(userId),
-    deleteUserById(id),
+    deleteUserById(userId),
   ]);
+  return;
 };
 
 const getUserById = async (id) => {
@@ -44,7 +45,7 @@ const getUserByEmail = async (email) => {
 };
 
 const deleteUserById = async (id) => {
-  await User.deleteOne({ id });
+  await User.deleteOne({ _id: id });
 };
 
 module.exports = {

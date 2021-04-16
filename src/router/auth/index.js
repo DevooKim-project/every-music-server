@@ -22,6 +22,7 @@ router.get("/:platform/login/callback", controller.login);
 router.get("/:platform/token", controller.obtainOAuth(authTypes.TOKEN));
 router.get(
   "/:platform/token/callback",
+  // verifyToken(tokenTypes.ACCESS),
   verifyToken(tokenTypes.REFRESH),
   controller.getOnlyPlatformToken
 );
@@ -31,6 +32,9 @@ router.get(
   verifyToken(tokenTypes.REFRESH),
   controller.loginWithUserId
 );
+
+router.get("/sign-out", verifyToken(tokenTypes.ACCESS), controller.signOut);
+// router.get("/sign-out", verifyToken(tokenTypes.REFRESH), controller.signOut);
 
 // router.put("/:platform/refresh", isRefreshToken, refreshToken, createLocalToken);
 

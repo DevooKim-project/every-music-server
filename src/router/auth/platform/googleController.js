@@ -81,12 +81,9 @@ const getOnlyToken = (type) => async (req, res) => {
 };
 
 const signOut = async (req, res) => {
-  const payload = req.payload;
-  userService.deleteUserWithTokenAndPlaylistById(payload.id),
-    // Promise.all([
-    // googleService.revoke(payload.id),
-    // ]);
-    res.status(httpStatus.NO_CONTENT).send();
+  await userService.deleteUserWithTokenAndPlaylistById(req.payload.id);
+  res.clearCookie("refreshToken");
+  res.status(httpStatus.NO_CONTENT).send();
 };
 
 module.exports = {

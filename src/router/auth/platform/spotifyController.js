@@ -59,4 +59,10 @@ const getOnlyToken = (type) => async (req, res) => {
   res.send();
 };
 
-module.exports = { obtainOAuth, login, getOnlyToken };
+const signOut = async (req, res) => {
+  await userService.deleteUserWithTokenAndPlaylistById(req.payload.id);
+  res.clearCookie("refreshToken");
+  res.status(httpStatus.NO_CONTENT).send();
+};
+
+module.exports = { obtainOAuth, login, getOnlyToken, signOut };

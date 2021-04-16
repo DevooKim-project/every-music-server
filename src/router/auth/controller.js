@@ -36,14 +36,10 @@ const loginWithUserId = catchAsync(async (req, res) => {
   res.send({ accessToken: localToken.accessToken });
 });
 
-const signOut = catchAsync(async (req, res) => {});
-
-// const platform = req.params.platform
-// if(platform === platformTypes.GOOGLE) {}
-
-// if (platform === platformTypes.SPOTIFY) {}
-
-// if(platform === platformTypes.KAKAO){}
+const signOut = catchAsync(async (req, res) => {
+  const controller = switchAuthPlatform(req.payload.platform);
+  return controller.signOut(req, res);
+});
 
 module.exports = {
   obtainOAuth,
