@@ -15,7 +15,9 @@ const userSchema = new Schema({
     type: String,
     enum: [platformTypes.KAKAO, platformTypes.GOOGLE, platformTypes.SPOTIFY],
   },
-  platformId: String,
+  platformId: {
+    type: String,
+  },
   likePlaylists: [{ type: Schema.Types.ObjectId, ref: "Playlist" }],
   private: {
     type: Boolean,

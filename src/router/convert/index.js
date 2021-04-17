@@ -9,12 +9,12 @@ const router = express.Router();
 router.use(verifyToken(tokenTypes.ACCESS), controller.getPlatformTokenByUserId);
 
 //get playlists from platform
-router.get("/:platform/playlists", controller.getPlaylistsFromPlatform);
+router.get("/:platform/playlists", controller.getPlaylistFromPlatform);
 
 //playlists insert into platform
-router.post("/:platform/playlists", controller.uploadPlaylistsToLocal);
+router.post("/:platform/playlists", controller.convertPlaylist);
 
 //get tracks from platform playlists
-router.get("/:platform/tracks", controller.getTracksFromPlatform);
+router.get("/:platform/tracks", controller.getItemFromPlatform);
 
 module.exports = router;

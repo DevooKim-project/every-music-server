@@ -22,7 +22,7 @@ const login = (type) => async (req, res) => {
     email: profile.email,
     nick: profile.name,
     platform: platformTypes.SPOTIFY,
-    platformId: profile.sub,
+    platformId: profile.id,
   };
   const platformTokenBody = {
     accessToken: platformToken.access_token,

@@ -7,6 +7,7 @@ const { spotifyParams } = require("../config/oAuthParam");
 const trackService = require("./trackService");
 const artistService = require("./artistService");
 const { spotifyUtils } = require("../utils/platformUtils");
+const { platformTypes } = require("../config/type");
 
 const schema = Joi.object().keys({
   platformIds: Joi.object().keys({
@@ -14,6 +15,7 @@ const schema = Joi.object().keys({
   }),
 });
 
+//OAuth Service
 const getOAuthUrl = (type) => {
   const oAuthParam = spotifyParams(type);
   const { scopes, redirectUri } = oAuthParam;
@@ -70,7 +72,45 @@ const getProfile = async (accessToken) => {
   return response.data;
 };
 
-const getPlaylistsFromPlatform = async (accessToken) => {
+//Playlist Service
+const createPlaylistToPlatform = async (playlist, platformId, accessToken) => {
+  const data = {
+    name: playlist.title,
+    description: "",
+    public: false,
+  };
+  const options = {
+    method: "POST",
+    url: `https://api.spotify.com/v1/users/${platformId}/playlists`,
+    headers: {
+      authorization: `Bearer ${accessToken}`,
+    },
+    data,
+  };
+
+  const response = await axios(options);
+
+  return response.data;
+};
+
+const insertTrackToPlatform = async (playlistId, trackId, accessToken) => {
+  const data = {
+    uris: trackId,
+  };
+  const options = {
+    method: "POST",
+    url: `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
+    headers: {
+      authorization: `Bearer ${accessToken}`,
+    },
+    data,
+  };
+
+  await axios(options);
+  return;
+};
+
+const getPlaylistFromPlatform = async (accessToken) => {
   const params = {
     limit: 50,
   };
@@ -98,7 +138,67 @@ const getPlaylistsFromPlatform = async (accessToken) => {
   return playlists;
 };
 
-const getTracksFromPlatform = async (playlistId, accessToken) => {
+const getTrackIdFromPlatform = async (tracks, accessToken) => {
+  const params = {
+    q: "",
+    type: "track",
+    limit: 1,
+  };
+  const options = {
+    method: "GET",
+    url: "https://api.spotify.com/v1/search",
+    headers: {
+      authorization: `Bearer ${accessToken}`,
+    },
+    params,
+  };
+
+  const platformTrackIds = [];
+  const cachedTrackIds = [];
+
+  for (const track of tracks) {
+    //1. 아티스트 로컬 Id와 트랙 명으로 캐시에서 트랙 검색 (트랙과 아티스트는 모두 로컬id를 가지고 있음)
+    //2. 트랙에 찾고자 하는 platform의 Id( platformId.{platform} )가 있는지 확인
+    //3. 있는 경우 그대로 저장
+    //4. 없는 경우 요청 보내고 저장
+
+    let platformTrackId;
+    const artist = track.artist;
+    let cachedTrack = await trackService.getTrackByTitleAndArtist(
+      track.title,
+      artist.platformIds.local
+    );
+
+    cachedTrackIds.push(cachedTrack.id);
+    if (
+      Object.prototype.hasOwnProperty.call(
+        cachedTrack.platformIds,
+        platformTypes.SPOTIFY
+      )
+    ) {
+      console.log("cached");
+      platformTrackId = cachedTrack.platformIds.spotify;
+    } else {
+      console.log("not cached");
+      const query = `${track.title} artist: "${artist.name}"`;
+      params.q = query;
+
+      const response = await axios(options);
+      const items = response.data.tracks.items;
+      if (items.length !== 0) {
+        platformTrackId = items[0].id;
+      } else {
+        console.log("not found track");
+      }
+    }
+
+    platformTrackIds.push(`spotify:track:${platformTrackId}`);
+  }
+
+  return { platform: platformTrackIds, local: cachedTrackIds };
+};
+
+const getItemFromPlatform = async (playlistId, accessToken) => {
   const options = {
     method: "GET",
     url: `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
@@ -138,6 +238,9 @@ module.exports = {
   getOAuthUrl,
   getPlatformToken,
   getProfile,
-  getPlaylistsFromPlatform,
-  getTracksFromPlatform,
+  createPlaylistToPlatform,
+  insertTrackToPlatform,
+  getPlaylistFromPlatform,
+  getTrackIdFromPlatform,
+  getItemFromPlatform,
 };

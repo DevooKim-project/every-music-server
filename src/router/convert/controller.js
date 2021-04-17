@@ -11,14 +11,19 @@ const getPlatformTokenByUserId = async (req, res, next) => {
   req.platformToken = platformToken;
   return next();
 };
-const getPlaylistsFromPlatform = catchAsync(async (req, res) => {
+const getPlaylistFromPlatform = catchAsync(async (req, res) => {
   const controller = switchConvertPlatform(req.params.platform);
-  return controller.getPlaylistsFromPlatform(req, res);
+  return controller.getPlaylistFromPlatform(req, res);
 });
 
-const getTracksFromPlatform = catchAsync((req, res) => {
+const getItemFromPlatform = catchAsync((req, res) => {
   const controller = switchConvertPlatform(req.params.platform);
-  return controller.getTracksFromPlatform(req, res);
+  return controller.getItemFromPlatform(req, res);
+});
+
+const convertPlaylist = catchAsync(async (req, res) => {
+  const controller = switchConvertPlatform(req.params.platform);
+  return controller.createPlaylistToPlatform(req, res);
 });
 
 const uploadPlaylistsToLocal = catchAsync(async (req, res) => {
@@ -36,7 +41,8 @@ const uploadPlaylistsToLocal = catchAsync(async (req, res) => {
 
 module.exports = {
   getPlatformTokenByUserId,
-  getPlaylistsFromPlatform,
-  getTracksFromPlatform,
+  getPlaylistFromPlatform,
+  getItemFromPlatform,
+  convertPlaylist,
   uploadPlaylistsToLocal,
 };
