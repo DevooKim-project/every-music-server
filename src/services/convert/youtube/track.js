@@ -20,19 +20,19 @@ exports.search = async (tracks, token) => {
       },
     };
 
-    const provider_track_ids = [];
-    const local_track_ids = [];
+    const provider_trackids = [];
+    const local_trackids = [];
     for (const t of tracks) {
       const artist = t.artist;
       let track = await trackService.findTrack(t.title, artist.ids.local);
 
-      const local_track_id = track._id;
-      local_track_ids.push(local_track_id);
-      let provider_track_id = "";
+      const local_trackid = track.id;
+      local_trackids.push(local_trackid);
+      let provider_trackid = "";
 
-      if (track.provider_id.youtube) {
+      if (track.providerid.youtube) {
         console.log("cached");
-        provider_track_id = track.provider_id.youtube;
+        provider_trackid = track.providerid.youtube;
       } else {
         console.log("not Cache");
 
@@ -43,15 +43,15 @@ exports.search = async (tracks, token) => {
         const items = response.data.items;
 
         if (items.length !== 0) {
-          provider_track_id = items[0].id.videoId;
+          provider_trackid = items[0].id.videoId;
         } else {
           console.log("not found");
         }
       }
-      provider_track_ids.push(provider_track_id);
+      provider_trackids.push(provider_trackid);
     }
 
-    return { provider: provider_track_ids, local: local_track_ids };
+    return { provider: provider_trackids, local: local_trackids };
   } catch (error) {
     throw error;
   }
@@ -72,19 +72,19 @@ exports.getId = async (id, token) => {
       params,
     };
 
-    const track_ids = [];
+    const trackids = [];
     do {
       const response = await axios(options);
       const { data } = response;
       data.items.forEach((item) => {
-        let track_id = parseTrackItem(item);
-        track_ids.push(track_id);
+        let trackid = parseTrackItem(item);
+        trackids.push(trackid);
       });
 
       params.pageToken = data.nextPageToken;
     } while (params.pageToken);
 
-    return { track_ids };
+    return { trackids };
   } catch (error) {
     // console.error(error);
     throw error;
@@ -126,14 +126,14 @@ exports.getInfo = async (id, token) => {
   }
 };
 
-exports.insert = async (playlist_id, track_ids, token) => {
+exports.insert = async (playlistid, trackids, token) => {
   try {
     const params = {
       part: "snippet",
     };
     const data = {
       snippet: {
-        playlistId: playlist_id,
+        playlistId: playlistid,
         resourceId: {
           kind: "youtube#video",
           videoId: "",
@@ -150,8 +150,8 @@ exports.insert = async (playlist_id, track_ids, token) => {
       data,
     };
 
-    for (const track_id of track_ids) {
-      data.snippet.resourceId.videoId = track_id;
+    for (const trackid of trackids) {
+      data.snippet.resourceId.videoId = trackid;
       const response = await axios(options);
       console.log("insert: ", response.data.snippet.title);
     }
@@ -162,8 +162,8 @@ exports.insert = async (playlist_id, track_ids, token) => {
   }
 };
 
-const parseTrackItem = (track_id) => {
-  return track_id.contentDetails.videoId;
+const parseTrackItem = (trackid) => {
+  return trackid.contentDetails.videoId;
 };
 
 const parseTrackInfo = (track) => {

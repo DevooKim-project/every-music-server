@@ -8,14 +8,14 @@ router.get("/", controller.readAllPlaylist);
 router.post("/upload", controller.uploadPlaylist);
 
 router.put(
-  "/like/:user_id/:operator",
+  "/like/:userid/:operator",
   auth.isAccessToken,
   controller.likePlaylist
 );
 router.put(
-  "/update/:playlist_id",
+  "/update/:playlistid",
   auth.isAccessToken,
   controller.updatePlaylistOptions
 );
-router.delete("/:playlist_id", auth.isAccessToken, controller.deletePlaylist);
+router.delete("/:playlistid", auth.isAccessToken, controller.deletePlaylist);
 module.exports = router;

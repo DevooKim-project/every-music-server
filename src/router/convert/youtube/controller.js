@@ -9,7 +9,7 @@ exports.getProviderTokenFromDB = async (req, res, next) => {
   try {
     const provider_token = await tokenService.findToken({
       provider: "google",
-      user: req.payload.user_id,
+      user: req.payload.userid,
     });
     req.provider_token = provider_token;
     next();
@@ -37,10 +37,10 @@ exports.getTracks = async (req, res) => {
   try {
     const provider_token = req.provider_token;
 
-    //playlist에서 track_id를 가져온다.
+    //playlist에서 trackid를 가져온다.
     const { playlists } = req.body;
 
-    const track_ids = [];
+    const trackids = [];
     for (const playlist of playlists) {
       const id = playlist.id;
       // const item = await youtubeService.getPlaylistItem(id, access_token);
@@ -48,14 +48,14 @@ exports.getTracks = async (req, res) => {
         id,
         provider_token.access_token
       );
-      track_ids.push(item.track_ids);
+      trackids.push(item.trackids);
     }
     //trackId로 track을 가져온다.
     const trackInfos = [];
-    for (const track_id of track_ids) {
+    for (const trackid of trackids) {
       //한번에 최대 50개 가능
       const tracks = [];
-      for (const t of splitArray(track_id, 50)) {
+      for (const t of splitArray(trackid, 50)) {
         console.log(t.length);
         const item = await youtubeService.track.getInfo(
           t,
@@ -98,24 +98,24 @@ exports.insertMusic = async (req, res) => {
       );
       console.log("createPlaylist ok");
 
-      const track_ids = await youtubeService.track.search(
+      const trackids = await youtubeService.track.search(
         tracks[i],
         provider_token.access_token
       );
-      console.log(track_ids);
-      const provider_track_ids = track_ids.provider;
-      const local_track_ids = track_ids.local;
-      playlist_items.push(local_track_ids);
-      console.log("get track_ids ok");
+      console.log(trackids);
+      const provider_trackids = trackids.provider;
+      const local_trackids = trackids.local;
+      playlist_items.push(local_trackids);
+      console.log("get trackids ok");
       await youtubeService.track.insert(
         new_playlist.id,
-        provider_track_ids,
+        provider_trackids,
         provider_token.access_token
       );
     }
 
     // res.send("finish");
-    res.send({ playlists, track_ids: playlist_items });
+    res.send({ playlists, trackids: playlist_items });
   } catch (error) {
     console.log(error);
     res.send(error);
@@ -124,14 +124,14 @@ exports.insertMusic = async (req, res) => {
 
 exports.uploadPlaylist = async (req, res) => {
   try {
-    const user_id = req.payload.user_id;
-    const { playlists, track_ids } = req.body;
+    const userid = req.payload.userid;
+    const { playlists, trackids } = req.body;
 
     for (let i = 0; i < playlists.length; i++) {
       await uploadPlaylist({
         playlist: playlists[i],
-        track_ids: track_ids[i],
-        user_id: user_id,
+        trackids: trackids[i],
+        userid: userid,
       });
     }
     res.send("fin");

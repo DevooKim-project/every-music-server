@@ -6,12 +6,9 @@ exports.readAllPlaylist = async (req, res) => {
     //skip의 성능은 좋지 않다. 따라서 마지막 id값을 이용하여 기능을 구현한다.
     // max_result: default 10
     const max_result = req.query.maxResult || 10;
-    const last_id = req.query.lastId;
+    const lastid = req.query.lastId;
 
-    const playlists = await playlistService.findAllPlaylist(
-      max_result,
-      last_id
-    );
+    const playlists = await playlistService.findAllPlaylist(max_result, lastid);
 
     res.send(playlists);
   } catch (error) {
@@ -21,14 +18,14 @@ exports.readAllPlaylist = async (req, res) => {
 
 exports.uploadPlaylist = async (req, res) => {
   try {
-    const user_id = req.payload.user_id;
-    const { playlists, track_ids } = req.body;
+    const userid = req.payload.userid;
+    const { playlists, trackids } = req.body;
 
     for (let i = 0; i < playlists.length; i++) {
       await uploadPlaylist({
         playlist: playlists[i],
-        track_ids: track_ids[i],
-        user_id: user_id,
+        trackids: trackids[i],
+        userid: userid,
       });
     }
     res.send("fin");
@@ -42,8 +39,8 @@ exports.uploadPlaylist = async (req, res) => {
 exports.likePlaylist = async (req, res) => {
   try {
     await playlistService.likePlaylist({
-      playlist_id: req.params.playlist_id,
-      user_id: req.payload.user_id,
+      playlistid: req.params.playlistid,
+      userid: req.payload.userid,
       operator: req.params.operator,
     });
     res.status(204).send("like playlist ok");
@@ -56,8 +53,8 @@ exports.likePlaylist = async (req, res) => {
 exports.updatePlaylistOptions = async (req, res) => {
   try {
     const filter = {
-      _id: req.params.playlist_id,
-      owner: req.payload.user_id,
+      id: req.params.playlistid,
+      owner: req.payload.userid,
     };
     const update = {};
     if (req.body.hasOwnProperty("title")) update.title = req.body.title;
@@ -76,9 +73,9 @@ exports.updatePlaylistOptions = async (req, res) => {
 
 exports.deletePlaylist = async (req, res) => {
   try {
-    const playlist_id = req.params.playlist_id;
-    const user_id = req.payload.user_id;
-    const data = { playlist_id, user_id };
+    const playlistid = req.params.playlistid;
+    const userid = req.payload.userid;
+    const data = { playlistid, userid };
     await playlistService.deletePlaylist(data);
     res.status(204).send("delete playlist ok");
   } catch (error) {

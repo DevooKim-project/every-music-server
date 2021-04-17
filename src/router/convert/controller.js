@@ -22,13 +22,13 @@ const getTracksFromPlatform = catchAsync((req, res) => {
 });
 
 const uploadPlaylistsToLocal = catchAsync(async (req, res) => {
-  // const user_id = req.payload.user_id;
-  // const { playlists, track_ids } = req.body;
+  // const userid = req.payload.userid;
+  // const { playlists, trackids } = req.body;
   // for (let i = 0; i < playlists.length; i++) {
   //   await uploadPlaylist({
   //     playlist: playlists[i],
-  //     track_ids: track_ids[i],
-  //     user_id: user_id,
+  //     trackids: trackids[i],
+  //     userid: userid,
   //   });
   // }
   // res.send("fin");

@@ -9,9 +9,9 @@ exports.createToken = (user) => {
     {
       iss: "everyMusic.com",
       user_name: nick,
-      user_id: id,
+      userid: id,
       provider_name: provider.name,
-      provider_id: provider.id,
+      providerid: provider.id,
     },
     process.env.JWT_SECRET,
     {

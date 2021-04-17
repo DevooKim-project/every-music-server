@@ -33,7 +33,7 @@ exports.search = async (access_token) => {
   }
 };
 
-exports.create = async (playlist, user_id, access_token) => {
+exports.create = async (playlist, userid, access_token) => {
   try {
     const data = {
       name: "",
@@ -42,7 +42,7 @@ exports.create = async (playlist, user_id, access_token) => {
     };
     const options = {
       method: "POST",
-      url: `https://api.spotify.com/v1/users/${user_id}/playlists`,
+      url: `https://api.spotify.com/v1/users/${userid}/playlists`,
       headers: {
         authorization: `Bearer ${access_token}`,
       },

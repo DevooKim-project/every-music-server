@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 
 const { tokenTypes } = require("../config/type");
+const ApiError = require("../utils/ApiError");
 const parseToken = require("../utils/parseToken");
 
 const verifyToken = (type, required = true) => (req, res, next) => {

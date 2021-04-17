@@ -2,38 +2,48 @@
 const { platformTypes } = require("../config/type");
 const { Track } = require("../database/schema");
 
-const getTrackByTitleAndArtist = async (title, artist) => {
-  return await Track.findOne({ title, artist: artist.platformId.local });
+const getTrackByTitleAndArtist = async (title, artistId) => {
+  return await Track.findOne({ title, artist: artistId });
 };
 
-const updateTrack = async (title, platformId) => {
+const updateTrack = async (title, platformIds) => {
   return await Track.findOneAndUpdate(
     { title },
-    { $set: { platformId } },
-    { returnNewDocument: true }
+    { $set: { platformIds } },
+    { new: true }
   );
 };
 
-const saveTrack = async (trackBody, artist) => {
+const saveTrack = async (trackBody, artistId) => {
   const track = await Track.create({
     ...trackBody,
-    platformId: trackBody.ids,
-    artist: artist.platformId.local,
+    platformIds: trackBody.platformIds,
+    artist: artistId,
   });
   return track;
 };
 
 const caching = async (trackBody, artist, schema) => {
-  const track = await getTrackByTitleAndArtist(trackBody.title, artist);
-  const { error } = schema.validate(track.platform);
+  let track = await getTrackByTitleAndArtist(trackBody.title, artist.id);
+  const object = track ? track.toJSON() : track;
+  const { value, error } = schema.validate(object, {
+    allowUnknown: true,
+  });
+
   if (track && error) {
-    Object.assign(track.platformId, trackBody.ids);
-    track = updateTrack(trackBody.title, track.platformId);
-  } else {
-    track = await saveTrack(trackBody, artist);
+    const platformIds = Object.assign(
+      {},
+      track.platformIds,
+      trackBody.platformIds
+    );
+    console.log("update");
+    track = await updateTrack(trackBody.title, platformIds);
   }
 
-  Object.assign(track.platformId, { local: track._id });
+  if (!track) {
+    console.log("save");
+    track = await saveTrack(trackBody, artist.id);
+  }
 
   return track;
 };

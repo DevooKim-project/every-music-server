@@ -5,13 +5,13 @@ const User = require("../../database/schema/user");
 //플레이리스트 저장
 exports.uploadPlaylist = async (data) => {
   try {
-    const { playlist, track_ids, user_id } = data;
+    const { playlist, trackids, userid } = data;
     console.log(data);
     await Playlist.create({
       ...playlist,
-      provider_id: playlist.id,
-      owner: user_id,
-      tracks: track_ids,
+      providerid: playlist.id,
+      owner: userid,
+      tracks: trackids,
     });
     return;
   } catch (error) {
@@ -23,7 +23,7 @@ exports.uploadPlaylist = async (data) => {
 exports.findTrackOfPlaylist = async (data) => {
   try {
     const playlist = await Playlist.findOne({
-      _id: data.playlist_id,
+      id: data.playlistid,
     }).populate("tracks");
     return playlist.tracks;
   } catch (error) {
@@ -32,9 +32,9 @@ exports.findTrackOfPlaylist = async (data) => {
 };
 
 //모든 플레이리스트 검색
-exports.findAllPlaylist = async (limit, last_id) => {
+exports.findAllPlaylist = async (limit, lastid) => {
   try {
-    if (!last_id) {
+    if (!lastid) {
       //page1
       const playlist = await Playlist.find({ private: false })
         .sort({ like: -1 })
@@ -43,7 +43,7 @@ exports.findAllPlaylist = async (limit, last_id) => {
     } else {
       //page2...
       const playlist = await Playlist.find({
-        _id: { $gt: last_id },
+        id: { $gt: lastid },
         private: false,
       })
         .sort({ like: -1 })
@@ -56,7 +56,7 @@ exports.findAllPlaylist = async (limit, last_id) => {
 };
 
 //유저가 업로드한 플레이리스트
-exports.findUserPlaylist = async (data, limit, last_id) => {
+exports.findUserPlaylist = async (data, limit, lastid) => {
   try {
     let privateOption = {};
     if (data.isMine) {
@@ -65,18 +65,18 @@ exports.findUserPlaylist = async (data, limit, last_id) => {
       privateOption = { private: false };
     }
 
-    if (!last_id) {
+    if (!lastid) {
       //page1
       const playlist = await Playlist.find({
-        owner: data.user_id,
+        owner: data.userid,
         ...privateOption,
       }).limit(limit);
       return playlist;
     } else {
       //page2...
       const playlist = await Playlist.find({
-        _id: { $gt: last_id },
-        owner: data.user_id,
+        id: { $gt: lastid },
+        owner: data.userid,
         ...privateOption,
       }).limit(limit);
       return playlist;
@@ -87,14 +87,14 @@ exports.findUserPlaylist = async (data, limit, last_id) => {
 };
 
 //유저가 좋아요 누른 플레이리스트(라이브러리)
-exports.findUserLibrary = async (user_id) => {
+exports.findUserLibrary = async (userid) => {
   try {
-    const userData = await User.findOne({ _id: user_id }).populate(
+    const userData = await User.findOne({ id: userid }).populate(
       "like_playlists"
     );
-    const playlist_id = userData.like_playlists;
+    const playlistid = userData.like_playlists;
     const library = await Playlist.find({
-      _id: { $in: playlist_id },
+      id: { $in: playlistid },
     });
 
     return library;
@@ -109,21 +109,21 @@ exports.likePlaylist = async (data) => {
     switch (data.operator) {
       case "like":
         await User.updateOne(
-          { _id: data.user_id },
-          { $addToSet: { like_playlists: data.playlist_id } }
+          { id: data.userid },
+          { $addToSet: { like_playlists: data.playlistid } }
         );
         await Playlist.updateOne(
-          { _id: data.playlist_id },
+          { id: data.playlistid },
           { $inc: { like: 1 } }
         );
         return;
       case "unlike":
         await User.updateOne(
-          { _id: data.user_id },
-          { $pullAll: { like_playlists: [data.playlist_id] } }
+          { id: data.userid },
+          { $pullAll: { like_playlists: [data.playlistid] } }
         );
         await Playlist.updateOne(
-          { _id: data.playlist_id },
+          { id: data.playlistid },
           { $inc: { like: -1 } }
         );
         return;
@@ -147,7 +147,7 @@ exports.updatePlaylistOptions = async (filter, update) => {
 //본인의 플레이리스트 삭제
 exports.deletePlaylist = async (data) => {
   try {
-    await Playlist.deleteOne({ _id: data.playlist_id, owner: data.user_id });
+    await Playlist.deleteOne({ id: data.playlistid, owner: data.userid });
     return;
   } catch (error) {
     throw error;

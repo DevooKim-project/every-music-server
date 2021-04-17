@@ -4,6 +4,6 @@ const controller = require("./controller");
 
 const router = express.Router();
 
-router.get("/:playlist_id", controller.readTrackOfPlaylist);
+router.get("/:playlistid", controller.readTrackOfPlaylist);
 
 module.exports = router;

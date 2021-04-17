@@ -45,7 +45,7 @@ const getUserByEmail = async (email) => {
 };
 
 const deleteUserById = async (id) => {
-  await User.deleteOne({ _id: id });
+  await User.deleteOne({ id: id });
 };
 
 module.exports = {

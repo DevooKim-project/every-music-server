@@ -38,8 +38,8 @@ exports.getProviderToken = async (req, res, next) => {
 
 exports.login = async (req, res, next) => {
   try {
-    const user_id = await spotifyService.login(req.provider_token);
-    req.user_id = user_id;
+    const userid = await spotifyService.login(req.provider_token);
+    req.userid = userid;
     next();
   } catch (error) {
     console.log(error);
@@ -50,9 +50,9 @@ exports.login = async (req, res, next) => {
 exports.saveTokenWithoutLogin = async (req, res) => {
   try {
     const { access_token, refresh_token } = req.provider_token;
-    const user_id = req.payload.user_id;
+    const userid = req.payload.userid;
     await tokenService.storeToken({
-      user: user_id,
+      user: userid,
       access_token: access_token,
       refresh_token: refresh_token,
     });
@@ -65,7 +65,7 @@ exports.saveTokenWithoutLogin = async (req, res) => {
 
 exports.signOut = async (req, res) => {
   try {
-    await spotifyService.signOut(req.payload.user_id);
+    await spotifyService.signOut(req.payload.userid);
 
     return res.send("signout ok");
   } catch (error) {

@@ -3,26 +3,27 @@ const youtubeUtils = {};
 const spotifyUtils = {
   parsePlaylist: (playlist) => {
     return {
-      id: playlist.id,
+      platformId: playlist.id,
       title: playlist.name,
       thumbnail: playlist.images[0].url,
       description: playlist.description,
       owner: {
         name: playlist.owner.display_name,
-        id: playlist.owner.id,
+        platformId: playlist.owner.id,
       },
-      provider: "spotify",
+      platform: "spotify",
     };
   },
   setTrack: (track) => {
+    const artist = track.artists[0];
     return {
       title: track.name,
-      ids: {
+      platformIds: {
         spotify: track.id,
       },
       artist: {
         name: artist.name,
-        ids: {
+        platformIds: {
           spotify: artist.id,
         },
       },

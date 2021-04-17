@@ -12,7 +12,7 @@ const getOAuthUrl = (type) => {
   const url = "https://accounts.google.com/o/oauth2/v2/auth";
 
   const params = {
-    client_id: process.env.GOOGLE_ID,
+    clientid: process.env.GOOGLEid,
     redirect_uri: redirectUri,
     response_type: "code",
     // access_type: "offline",
@@ -28,7 +28,7 @@ const getPlatformToken = async (code, type) => {
   const { redirectUri } = oAuthParam;
   const data = {
     code,
-    client_id: process.env.GOOGLE_ID,
+    clientid: process.env.GOOGLEid,
     client_secret: process.env.GOOGLE_SECRET,
     redirect_uri: redirectUri,
     grant_type: "authorization_code",

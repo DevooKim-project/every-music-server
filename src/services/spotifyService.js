@@ -9,7 +9,7 @@ const artistService = require("./artistService");
 const { spotifyUtils } = require("../utils/platformUtils");
 
 const schema = Joi.object().keys({
-  ids: Joi.object().keys({
+  platformIds: Joi.object().keys({
     spotify: Joi.string().required(),
   }),
 });
@@ -101,9 +101,9 @@ const getPlaylistsFromPlatform = async (accessToken) => {
 const getTracksFromPlatform = async (playlistId, accessToken) => {
   const options = {
     method: "GET",
-    url: `https://api.spotify.com/v1/playlists/${id}/tracks`,
+    url: `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
     headers: {
-      authorization: `Bearer ${token}`,
+      authorization: `Bearer ${accessToken}`,
     },
   };
 
@@ -112,18 +112,21 @@ const getTracksFromPlatform = async (playlistId, accessToken) => {
     const response = await axios(options);
     const { data } = response;
     for (const item of data.items) {
-      let track = spotifyUtils.setTrack(item.track);
-      //db 저장
-      // track = await trackService.uploadArtistTrack(
-      //   track,
-      //   platformTypes.SPOTIFY
-      // );
-      const artist = artistService.caching(track.artist, schema);
-      track = trackService.caching(track, artist, schema);
+      const trackBody = spotifyUtils.setTrack(item.track);
+      console.log("body: ", trackBody);
+      //캐싱
+      let artist = await artistService.caching(trackBody.artist, schema);
+      let track = await trackService.caching(trackBody, artist, schema);
+      artist = artist.toJSON();
+      track = track.toJSON();
 
-      console.log("artist: ", artist);
-      console.log("track: ", track);
-      tracks.push(track);
+      Object.assign(trackBody.platformIds, track.platformIds, {
+        local: track.id,
+      });
+      Object.assign(trackBody.artist.platformIds, artist.platformIds, {
+        local: artist.id,
+      });
+      tracks.push(trackBody);
     }
     options.url = data.next;
   } while (options.url);

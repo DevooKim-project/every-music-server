@@ -14,8 +14,18 @@ const getTracksFromPlatform = async (req, res) => {
 
   const tracks = [];
   for (const playlist of playlists) {
-    const track = await spotifyService;
+    const track = await spotifyService.getTracksFromPlatform(
+      playlist.platformId,
+      platformToken.accessToken
+    );
+    // console.log("outter: ", track);
+    tracks.push(track);
   }
+
+  res.send({
+    playlists: playlists,
+    tracks: tracks,
+  });
 };
 
 const saveTracks = async (req, res) => {};

@@ -1,15 +1,17 @@
 const mongoose = require("mongoose");
-
+const { toJSON } = require("./plugins");
 const { Schema } = mongoose;
 
 const trackSchema = new Schema({
   title: String,
   artist: { type: Schema.Types.ObjectId, ref: "Artist" },
   thumbnail: String,
-  platform: {
+  platformIds: {
     spotify: { type: String },
     youtube: { type: String },
   },
 });
+
+trackSchema.plugin(toJSON);
 
 module.exports = mongoose.model("Track", trackSchema);

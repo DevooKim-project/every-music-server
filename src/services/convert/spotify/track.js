@@ -50,8 +50,8 @@ exports.searchIdFromProvider = async (tracks, token) => {
       params,
     };
 
-    const provider_track_ids = [];
-    const local_track_ids = [];
+    const provider_trackids = [];
+    const local_trackids = [];
     for (const t of tracks) {
       //1. 아티스트 로컬 Id와 트랙 명으로 캐시에서 트랙 검색 (트랙과 아티스트는 모두 로컬id를 가지고 있음)
       //2. 트랙의 서비스 id가 있는지 확인
@@ -61,13 +61,13 @@ exports.searchIdFromProvider = async (tracks, token) => {
       const artist = t.artist;
       let track = await trackService.findTrack(t.title, artist.ids.local);
 
-      const local_track_id = track._id;
-      local_track_ids.push(local_track_id);
-      let provider_track_id = "";
+      const local_trackid = track.id;
+      local_trackids.push(local_trackid);
+      let provider_trackid = "";
 
-      if (track.provider_id.spotify) {
+      if (track.providerid.spotify) {
         console.log("cached");
-        provider_track_id = track.provider_id.spotify;
+        provider_trackid = track.providerid.spotify;
       } else {
         console.log("not Cache");
         // const artist = t.artists[0];
@@ -77,31 +77,31 @@ exports.searchIdFromProvider = async (tracks, token) => {
         const response = await axios(options);
         const items = response.data.tracks.items;
         if (items.length !== 0) {
-          provider_track_id = items[0].id;
-          // console.log("getTrack: ", provider_track_id);
+          provider_trackid = items[0].id;
+          // console.log("getTrack: ", provider_trackid);
         } else {
           console.log("not found");
         }
       }
 
-      provider_track_ids.push(`spotify:track:${provider_track_id}`);
+      provider_trackids.push(`spotify:track:${provider_trackid}`);
     }
 
-    // return provider_track_ids;
-    return { provider: provider_track_ids, local: local_track_ids };
+    // return provider_trackids;
+    return { provider: provider_trackids, local: local_trackids };
   } catch (error) {
     throw error;
   }
 };
 
-exports.insert = async (playlist_id, track_ids, token) => {
+exports.insert = async (playlistid, trackids, token) => {
   try {
     const data = {
-      uris: track_ids,
+      uris: trackids,
     };
     const options = {
       method: "POST",
-      url: `https://api.spotify.com/v1/playlists/${playlist_id}/tracks`,
+      url: `https://api.spotify.com/v1/playlists/${playlistid}/tracks`,
       headers: {
         authorization: `Bearer ${token}`,
       },

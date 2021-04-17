@@ -40,9 +40,9 @@ exports.findToken = async (data) => {
   }
 };
 
-exports.deleteToken = async (user_id) => {
+exports.deleteToken = async (userid) => {
   try {
-    await Token.deleteMany({ user: user_id });
+    await Token.deleteMany({ user: userid });
     return;
   } catch (error) {
     throw new Error(error);

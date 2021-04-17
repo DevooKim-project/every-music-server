@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
-
+const { toJSON } = require("./plugins");
 const { Schema } = mongoose;
+
 const playlistSchema = new Schema({
   title: {
     type: String,
@@ -10,8 +11,8 @@ const playlistSchema = new Schema({
   thumbnail: String,
   tracks: [{ type: Schema.Types.ObjectId, ref: "Track" }],
   owner: { type: Schema.Types.ObjectId, ref: "User" },
-  provider_id: String,
-  provider: String,
+  platform: String,
+  platformId: String,
   private: {
     type: Boolean,
     default: false,
@@ -21,6 +22,9 @@ const playlistSchema = new Schema({
     default: 0,
   },
 });
+
+playlistSchema.plugin(toJSON);
+
 playlistSchema.index({ like: -1 });
 playlistSchema.index({ owner: 1 });
 module.exports = mongoose.model("Playlist", playlistSchema);

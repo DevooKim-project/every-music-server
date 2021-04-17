@@ -2,9 +2,9 @@ const { playlistService } = require("../../services/database");
 
 exports.readTrackOfPlaylist = async (req, res) => {
   try {
-    const playlist_id = req.params.playlist_id;
+    const playlistid = req.params.playlistid;
     const track = await playlistService.findTrackOfPlaylist({
-      playlist_id: playlist_id,
+      playlistid: playlistid,
     });
     res.status(200).send(track);
   } catch (error) {

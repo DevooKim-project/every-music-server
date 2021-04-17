@@ -30,7 +30,7 @@ exports.obtainOAuthCredentials = async (OAuth_params) => {
 
   const params = {
     response_type: "code",
-    client_id: process.env.SPOTIFY_ID,
+    clientid: process.env.SPOTIFYid,
     redirect_uri: redirect_uri,
     scope: scopes.join(" "),
   };
@@ -50,7 +50,7 @@ exports.OAuthRedirect = async (code, OAuth_params) => {
     };
 
     const key = Base64.encode(
-      `${process.env.SPOTIFY_ID}:${process.env.SPOTIFY_SECRET}`
+      `${process.env.SPOTIFYid}:${process.env.SPOTIFY_SECRET}`
     );
 
     const response = await axios({
@@ -95,7 +95,7 @@ exports.login = async (token) => {
         access_token: access_token,
         refresh_token: refresh_token,
       });
-      return exist_user._id;
+      return exist_user.id;
     } else {
       //신규 유저 생성
       console.log("new_user");
@@ -113,7 +113,7 @@ exports.login = async (token) => {
         access_token: access_token,
         refresh_token: refresh_token,
       });
-      return new_user._id;
+      return new_user.id;
     }
   } catch (error) {
     throw error;
@@ -138,10 +138,10 @@ exports.getProfile = async (token) => {
 
 //에러처리: 리프레시 토큰이 만료된 경우
 //
-exports.updateRefreshToken = async (user_id) => {
+exports.updateRefreshToken = async (userid) => {
   try {
     const token = await tokenService.findToken({
-      user: user_id,
+      user: userid,
       provider: "spotify",
     });
     console.log("find refresh: ", token.refresh_token);
@@ -152,7 +152,7 @@ exports.updateRefreshToken = async (user_id) => {
     };
 
     const key = Base64.encode(
-      `${process.env.SPOTIFY_ID}:${process.env.SPOTIFY_SECRET}`
+      `${process.env.SPOTIFYid}:${process.env.SPOTIFY_SECRET}`
     );
 
     const response = await axios({
@@ -165,7 +165,7 @@ exports.updateRefreshToken = async (user_id) => {
     });
 
     await tokenService.updateToken({
-      user: user_id,
+      user: userid,
       provider: "spotify",
       access_token: response.data.access_token,
       // refresh_token: response.data.refresh_token,
@@ -181,11 +181,11 @@ exports.updateRefreshToken = async (user_id) => {
   }
 };
 
-exports.signOut = async (user_id) => {
+exports.signOut = async (userid) => {
   try {
     Promise.all([
-      tokenService.deleteToken(user_id),
-      userService.destroyUser(user_id),
+      tokenService.deleteToken(userid),
+      userService.destroyUser(userid),
     ]);
     return;
   } catch (error) {

@@ -61,14 +61,14 @@ exports.verifyToken = (req, res, next) => {
 exports.refreshToken = async (req, res, next) => {
   try {
     const type = req.params.type.toLowerCase();
-    const user_id = req.payload.id;
+    const userid = req.payload.id;
 
     if (type === "google") {
-      await googleService.updateRefreshToken(user_id);
+      await googleService.updateRefreshToken(userid);
       return res.status(201).send("google access_token refresh ok");
     }
     if (type === "spotify") {
-      await spotifyService.updateRefreshToken(user_id);
+      await spotifyService.updateRefreshToken(userid);
       return res.status(201).send("spotify access_token refresh ok");
     }
     if (type === "local") {
@@ -86,8 +86,8 @@ exports.refreshToken = async (req, res, next) => {
 exports.createLocalToken = async (req, res, next) => {
   try {
     const payload = req.payload;
-    const user_id = payload ? payload.id : req.user_id;
-    const user = await userService.findOneUser({ _id: user_id });
+    const userid = payload ? payload.id : req.userid;
+    const user = await userService.findOneUser({ id: userid });
     const local_token = await localService.createToken(user);
 
     console.log("local access_token: ", local_token.access_token);

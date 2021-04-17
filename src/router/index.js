@@ -8,7 +8,37 @@ const convertRoute = require("./convert");
 
 const router = express.Router();
 
-router.get("/", async (req, res) => {});
+const Joi = require("joi");
+const { artistService } = require("../services");
+router.get("/", async (req, res) => {
+  try {
+    const schema = {
+      platformIds: Joi.object().keys({
+        spotify: Joi.string().required(),
+      }),
+      // name: Joi.string().required(),
+    };
+
+    const data = await artistService.getArtistByName("Green Day");
+
+    // const k = {
+    //   platformIds: { spotify: "7oPftvlwr6VrsViSDV7fJY" },
+    //   id: "6079fd054eb0002b6cb298ab",
+    //   name: "Green Day",
+    //   __v: 0,
+    // };
+    // const n = JSON.parse(data);
+    console.log(data);
+    const d = data;
+    const response = schema.platformIds.validate(d.platformIds, {
+      allowUnknown: true,
+    });
+    console.log(d);
+    res.json(response);
+  } catch (error) {
+    console.log(error);
+  }
+});
 
 router.use("/auth", authRoute);
 router.use("/convert", convertRoute);

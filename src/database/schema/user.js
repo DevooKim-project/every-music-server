@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const { platformTypes } = require("../../config/type");
+const { toJSON } = require("./plugins");
 
 const { Schema } = mongoose;
 const userSchema = new Schema({
@@ -22,6 +23,8 @@ const userSchema = new Schema({
   },
   // token: { type: Schema.Types.ObjectId, ref: "Token" },
 });
+
+userSchema.plugin(toJSON);
 
 userSchema.statics.isEmailTaken = async function (email, platform) {
   const user = await this.findOne({ email, platform: { $ne: platform } });

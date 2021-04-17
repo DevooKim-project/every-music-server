@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const { platformTypes } = require("../../config/type");
+const { toJSON } = require("./plugins");
 
 const { Schema } = mongoose;
 const tokenSchema = new Schema({
@@ -13,6 +14,7 @@ const tokenSchema = new Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
+tokenSchema.plugin(toJSON);
 // const Token = mongoose.model("Token", tokenSchema);
 // module.exports = Token;
 module.exports = mongoose.model("Token", tokenSchema);

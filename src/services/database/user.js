@@ -24,11 +24,11 @@ exports.findOneUser = async (data) => {
   }
 };
 
-exports.destroyUser = async (user_id) => {
+exports.destroyUser = async (userid) => {
   try {
     Promise.all([
-      Playlist.deleteMany({ owner: user_id }),
-      User.deleteOne({ _id: user_id }),
+      Playlist.deleteMany({ owner: userid }),
+      User.deleteOne({ id: userid }),
     ]);
   } catch (error) {
     throw error;

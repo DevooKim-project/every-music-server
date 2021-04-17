@@ -42,8 +42,8 @@ exports.login = async (req, res, next) => {
     if (!isValidScope) {
       return res.send({ message: "유효하지 않은 권한" });
     }
-    const user_id = await kakaoService.login(req.provider_token);
-    req.user_id = user_id;
+    const userid = await kakaoService.login(req.provider_token);
+    req.userid = userid;
     next();
   } catch (error) {
     console.log(error);
@@ -62,8 +62,8 @@ exports.logout = async (req, res) => {
 
 exports.signOut = async (req, res) => {
   try {
-    const { user_id, provider_id } = req.payload.provider_id;
-    await kakaoService.signOut(user_id, provider_id);
+    const { userid, providerid } = req.payload.providerid;
+    await kakaoService.signOut(userid, providerid);
 
     return res.send("signout ok");
   } catch (error) {

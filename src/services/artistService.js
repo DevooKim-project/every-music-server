@@ -1,37 +1,45 @@
 const { Artist } = require("../database/schema");
-
 const getArtistByName = async (name) => {
   return await Artist.findOne({ name });
 };
 
-const updateArtist = async (name, platformId) => {
+const updateArtist = async (name, platformIds) => {
   return await Artist.findOneAndUpdate(
     { name },
-    { $set: { platformId } },
-    { returnNewDocument: true }
+    { $set: { platformIds } },
+    { new: true }
   );
 };
 
 const saveArtist = async (artistBody) => {
   const artist = await Artist.create({
     name: artistBody.name,
-    providerId: artistBody.ids,
+    platformIds: artistBody.platformIds,
   });
   return artist;
 };
 
 const caching = async (artistBody, schema) => {
   let artist = await getArtistByName(artistBody.name);
+  const object = artist ? artist.toJSON() : artist;
+  const { value, error } = schema.validate(object, {
+    allowUnknown: true,
+  });
 
-  const { error } = schema.validate(artist.platform);
   if (artist && error) {
-    Object.assign(artist.platformId, artistBody.ids);
-    artist = updateArtist(artistBody.name, artist.platformId);
-  } else {
-    artist = await saveArtist(artistBody);
+    const platformIds = Object.assign(
+      {},
+      artist.platformIds,
+      artistBody.platformIds
+    );
+    console.log("update");
+    artist = await updateArtist(artistBody.name, platformIds);
   }
 
-  Object.assign(artist.platformId, { local: artist._id });
+  if (!artist) {
+    console.log("save");
+    artist = await saveArtist(artistBody);
+  }
 
   return artist;
 };
