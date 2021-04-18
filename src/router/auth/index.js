@@ -8,13 +8,7 @@ const controller = require("./controller");
 
 const router = express.Router();
 
-router.param(
-  "platform",
-  validate(authValidation.oAuthPlatform),
-  (req, res, next, id) => {
-    next();
-  }
-);
+router.param("platform", validate(authValidation.oAuthPlatform));
 
 router.get("/:platform/login", controller.obtainOAuth(authTypes.LOGIN));
 router.get("/:platform/login/callback", controller.login);

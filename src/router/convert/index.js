@@ -2,11 +2,18 @@ const express = require("express");
 
 const controller = require("./controller");
 const verifyToken = require("../../middleware/auth");
+const validate = require("../../middleware/validate");
 const { tokenTypes, platformTypes } = require("../../config/type");
 const convertPlatform = require("../../validate/ConvertValidation");
+const { convertValidation } = require("../../validate");
 const router = express.Router();
 
-router.use(verifyToken(tokenTypes.ACCESS), controller.getPlatformTokenByUserId);
+router.use(
+  "/:platform",
+  validate(convertValidation.convertPlatform),
+  verifyToken(tokenTypes.ACCESS),
+  controller.getPlatformTokenByUserId
+);
 
 //get playlists from platform
 router.get("/:platform/playlists", controller.getPlaylistFromPlatform);

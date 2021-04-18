@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const httpStatus = require("http-status");
 
 const { tokenTypes } = require("../config/type");
 const ApiError = require("../utils/ApiError");
