@@ -8,7 +8,7 @@ const trackSchema = new Schema({
   thumbnail: String,
   platformIds: {
     spotify: { type: String },
-    youtube: { type: String },
+    google: { type: String },
   },
 });
 

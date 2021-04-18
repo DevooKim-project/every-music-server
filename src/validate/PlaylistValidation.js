@@ -26,10 +26,10 @@ const track = {
       .required()
       .keys({
         local: Joi.string(),
-        youtube: Joi.string(),
+        google: Joi.string(),
         spotify: Joi.string(),
       })
-      .or(platformTypes.LOCAL, platformTypes.YOUTUBE, platformTypes.SPOTIFY),
+      .or(platformTypes.LOCAL, platformTypes.GOOGLE, platformTypes.SPOTIFY),
     artist: Joi.object()
       .required()
       .keys({
@@ -38,14 +38,10 @@ const track = {
           .required()
           .keys({
             local: Joi.string(),
-            youtube: Joi.string(),
+            google: Joi.string(),
             spotify: Joi.string(),
           })
-          .or(
-            platformTypes.LOCAL,
-            platformTypes.YOUTUBE,
-            platformTypes.SPOTIFY
-          ),
+          .or(platformTypes.LOCAL, platformTypes.GOOGLE, platformTypes.SPOTIFY),
       }),
     thumbnail: Joi.string(),
   }),
@@ -54,7 +50,7 @@ const track = {
 const platform = {
   platform: Joi.string()
     .required()
-    .valid(platformTypes.YOUTUBE, platformTypes.SPOTIFY),
+    .valid(platformTypes.GOOGLE, platformTypes.SPOTIFY),
 };
 
 const playlistId = Joi.string().required();

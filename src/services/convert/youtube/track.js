@@ -30,9 +30,9 @@ exports.search = async (tracks, token) => {
       local_trackids.push(local_trackid);
       let provider_trackid = "";
 
-      if (track.providerid.youtube) {
+      if (track.providerid.google) {
         console.log("cached");
-        provider_trackid = track.providerid.youtube;
+        provider_trackid = track.providerid.google;
       } else {
         console.log("not Cache");
 

@@ -1,7 +1,38 @@
-const youtubeUtils = {};
+const { platformTypes } = require("../config/type");
+
+const youtubeUtils = {
+  setPlaylist: (playlist) => {
+    return {
+      platformId: playlist.id,
+      title: playlist.snippet.title,
+      thumbnail: playlist.snippet.thumbnails.default.url,
+      description: playlist.snippet.description,
+      owner: {
+        name: playlist.snippet.channelTitle,
+        platformId: playlist.snippet.channelId,
+      },
+      platform: platformTypes.YOUTUBE,
+    };
+  },
+  setTrack: (track) => {
+    return {
+      title: track.snippet.title,
+      platformIds: {
+        google: track.id,
+      },
+      artist: {
+        name: track.snippet.channelTitle.replace(/ - Topic/, ""),
+        platformIds: {
+          google: track.snippet.channelId,
+        },
+      },
+      thumbnail: track.snippet.thumbnails.default.url,
+    };
+  },
+};
 
 const spotifyUtils = {
-  parsePlaylist: (playlist) => {
+  setPlaylist: (playlist) => {
     return {
       platformId: playlist.id,
       title: playlist.name,
@@ -11,7 +42,7 @@ const spotifyUtils = {
         name: playlist.owner.display_name,
         platformId: playlist.owner.id,
       },
-      platform: "spotify",
+      platform: platformTypes.SPOTIFY,
     };
   },
   setTrack: (track) => {

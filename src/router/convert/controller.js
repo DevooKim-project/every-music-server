@@ -6,7 +6,7 @@ const { platformTypes } = require("../../config/type");
 const getPlatformTokenByUserId = async (req, res, next) => {
   const platformToken = await tokenService.findPlatformTokenByUserId(
     req.payload.id,
-    platformTypes.SPOTIFY
+    req.params.platform
   );
   req.platformToken = platformToken;
   return next();

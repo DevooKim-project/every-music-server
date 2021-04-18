@@ -5,7 +5,7 @@ const convertPlatform = {
   params: Joi.object().keys({
     platform: Joi.string()
       .required()
-      .valid(platformTypes.SPOTIFY, platformTypes.YOUTUBE),
+      .valid(platformTypes.SPOTIFY, platformTypes.GOOGLE),
   }),
 };
 

@@ -1,2 +1,2 @@
-module.exports.convertYoutubeController = require("./youtubeController");
+module.exports.convertGoogleController = require("./googleController");
 module.exports.convertSpotifyController = require("./spotifyController");

@@ -3,8 +3,7 @@ const express = require("express");
 const controller = require("./controller");
 const verifyToken = require("../../middleware/auth");
 const validate = require("../../middleware/validate");
-const { tokenTypes, platformTypes } = require("../../config/type");
-const convertPlatform = require("../../validate/ConvertValidation");
+const { tokenTypes } = require("../../config/type");
 const { convertValidation } = require("../../validate");
 const router = express.Router();
 

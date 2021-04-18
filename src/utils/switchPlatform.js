@@ -5,7 +5,7 @@ const {
   authKakaoController,
 } = require("../router/auth/platform");
 const {
-  convertYoutubeController,
+  convertGoogleController,
   convertSpotifyController,
 } = require("../router/convert/platform");
 
@@ -22,8 +22,8 @@ const switchAuthPlatform = (platform) => {
 };
 
 const switchConvertPlatform = (platform) => {
-  if (platform === platformTypes.YOUTUBE) {
-    return convertYoutubeController;
+  if (platform === platformTypes.GOOGLE) {
+    return convertGoogleController;
   }
 
   if (platform === platformTypes.SPOTIFY) {

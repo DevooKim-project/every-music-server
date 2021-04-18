@@ -5,7 +5,7 @@ const artistSchema = new Schema({
   name: String,
   platformIds: {
     spotify: { type: String },
-    youtube: { type: String },
+    google: { type: String },
   },
 });
 

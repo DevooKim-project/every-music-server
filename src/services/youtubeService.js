@@ -1,15 +1,10 @@
 const axios = require("axios");
-const qs = require("qs");
-const jwt = require("jsonwebtoken");
 const Joi = require("joi");
 
 const trackService = require("./trackService");
 const artistService = require("./artistService");
-const tokenService = require("./tokenService");
-const splitArray = require("../utils/splitArray");
 const { youtubeUtils } = require("../utils/platformUtils");
 const { platformTypes } = require("../config/type");
-const { googleParams } = require("../config/oAuthParam");
 
 const schema = Joi.object().keys({
   platformIds: Joi.object().keys({
@@ -17,66 +12,7 @@ const schema = Joi.object().keys({
   }),
 });
 
-const getOAuthUrl = (type) => {
-  const oAuthParam = googleParams(type);
-  const { scopes, redirectUri } = oAuthParam;
-  const url = "https://accounts.google.com/o/oauth2/v2/auth";
-
-  const params = {
-    client_id: process.env.GOOGLE_ID,
-    redirect_uri: redirectUri,
-    response_type: "code",
-    // access_type: "offline",
-    scope: scopes.join(" "),
-  };
-
-  const oAuthUri = `${url}?${qs.stringify(params)}`;
-  return oAuthUri;
-};
-
-const getPlatformToken = async (code, type) => {
-  const oAuthParam = googleParams(type);
-  const { redirectUri } = oAuthParam;
-  const data = {
-    code,
-    client_id: process.env.GOOGLE_ID,
-    client_secret: process.env.GOOGLE_SECRET,
-    redirect_uri: redirectUri,
-    grant_type: "authorization_code",
-  };
-
-  const response = await axios({
-    method: "POST",
-    url: "https://oauth2.googleapis.com/token",
-    data: qs.stringify(data),
-  });
-
-  console.log(response.data);
-  return response.data;
-};
-
-const getProfile = (idToken) => {
-  return jwt.decode(idToken);
-};
-
-const revoke = async (userId) => {
-  const token = await tokenService.findPlatformTokenById(
-    userId,
-    platformTypes.GOOGLE
-  );
-
-  const params = { token: token.refreshToken };
-  const options = {
-    method: "POST",
-    url: "https://oauth2.googleapis.com/revoke",
-    params,
-  };
-
-  await axios(options);
-};
-
-//playlist
-const createPlaylistToPlatform = async (playlist, accessToken) => {
+const createPlaylistToPlatform = async (playlist, platformId, accessToken) => {
   const params = {
     part: "snippet",
   };
@@ -181,22 +117,21 @@ const getTrackIdFromPlatform = async (tracks, accessToken) => {
     trackParams,
   };
 
-  const platformTrackIds = [];
+  const providerTrackIds = [];
   const cachedTrackIds = [];
 
   for (const track of tracks) {
-    let platformTrackId;
     const artist = track.artist;
     const cachedTrack = await trackService.getTrackByTitleAndArtist(
       track.title,
-      artist.platformIds.local
+      artist.platformId.local
     );
 
     cachedTrackIds.push(cachedTrack.id);
     if (
       Object.prototype.hasOwnProperty.call(
         cachedTrack.platformIds,
-        platformTypes.GOOGLE
+        platformTypes.SPOTIFY
       )
     ) {
       console.log("cached");
@@ -211,11 +146,11 @@ const getTrackIdFromPlatform = async (tracks, accessToken) => {
       const items = response.data.items;
 
       if (items.length !== 0) {
-        platformTrackId = item[0].id.videoId;
+        providerTrackId = item[0].id.videoId;
       }
     }
 
-    platformTrackIds.push(platformTrackId);
+    providerTrackIds.push(providerTrackId);
   }
 
   return { platform: platformTrackIds, local: cachedTrackIds };
@@ -223,7 +158,6 @@ const getTrackIdFromPlatform = async (tracks, accessToken) => {
 
 //track.getId
 const getItemIdFromPlatform = async (playlistId, accessToken) => {
-  console.log("playlistId: ", playlistId);
   const params = {
     part: "contentDetails",
     maxResults: 50,
@@ -242,7 +176,6 @@ const getItemIdFromPlatform = async (playlistId, accessToken) => {
   do {
     const response = await axios(options);
     const { data } = response;
-    console.log("data: ", data);
     data.items.forEach((item) => {
       let trackId = item.contentDetails.videoId;
       trackIds.push(trackId);
@@ -301,7 +234,8 @@ const getItemInfoFromPlatform = async (trackId, accessToken) => {
 const iterateGetItemInfo = async (trackIds, accessToken) => {
   let tracks = [];
   for (const trackId of splitArray(trackIds, 50)) {
-    tracks.push(await getItemInfoFromPlatform(trackId, accessToken));
+    const track = await getItemInfoFromPlatform(trackId, accessToken);
+    tracks.push(track.trackInfos);
   }
 
   if (tracks.length !== 0) {
@@ -314,10 +248,6 @@ const iterateGetItemInfo = async (trackIds, accessToken) => {
 };
 
 module.exports = {
-  getOAuthUrl,
-  getPlatformToken,
-  getProfile,
-  revoke,
   createPlaylistToPlatform,
   insertTrackToPlatform,
   getPlaylistFromPlatform,

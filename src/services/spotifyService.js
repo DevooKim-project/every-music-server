@@ -129,7 +129,7 @@ const getPlaylistFromPlatform = async (accessToken) => {
     const { data } = response;
 
     data.items.forEach((item) => {
-      playlists.push(spotifyUtils.parsePlaylist(item));
+      playlists.push(spotifyUtils.setPlaylist(item));
     });
 
     options.url = data.next;
