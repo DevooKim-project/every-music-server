@@ -1,6 +1,7 @@
 // const { artistService, trackService, playlistService } = require("./database");
 const { platformTypes } = require("../config/type");
 const { Track } = require("../database/schema");
+const pick = require("../utils/pick");
 
 const getTrackByTitleAndArtist = async (title, artistId) => {
   return await Track.findOne({ title, artist: artistId });
@@ -23,14 +24,13 @@ const saveTrack = async (trackBody, artistId) => {
   return track;
 };
 
-const caching = async (trackBody, artist, schema) => {
+const caching = async (trackBody, artist, key) => {
   let track = await getTrackByTitleAndArtist(trackBody.title, artist.id);
-  const object = track ? track.toJSON() : track;
-  const { value, error } = schema.validate(object, {
-    allowUnknown: true,
-  });
+  const { platformIds } = track;
+  const value = pick(platformIds, [key]);
 
-  if (track && error) {
+  //플랫폼(key)의 Id가 캐시되어있지 않은 경우
+  if (track && !value[key]) {
     const platformIds = Object.assign(
       {},
       track.platformIds,

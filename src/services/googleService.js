@@ -1,7 +1,6 @@
 const axios = require("axios");
 const qs = require("qs");
 const jwt = require("jsonwebtoken");
-const Joi = require("joi");
 
 const trackService = require("./trackService");
 const artistService = require("./artistService");
@@ -10,12 +9,7 @@ const splitArray = require("../utils/splitArray");
 const { youtubeUtils } = require("../utils/platformUtils");
 const { platformTypes } = require("../config/type");
 const { googleParams } = require("../config/oAuthParam");
-
-const schema = Joi.object().keys({
-  platformIds: Joi.object().keys({
-    google: Joi.string().required(),
-  }),
-});
+const pick = require("../utils/pick");
 
 const getOAuthUrl = (type) => {
   const oAuthParam = googleParams(type);
@@ -193,12 +187,11 @@ const getTrackIdFromPlatform = async (tracks, accessToken) => {
     );
 
     cachedTrackIds.push(cachedTrack.id);
-    if (
-      Object.prototype.hasOwnProperty.call(
-        cachedTrack.platformIds,
-        platformTypes.GOOGLE
-      )
-    ) {
+
+    const { platformIds } = cachedTrack;
+    const { google } = pick(platformIds, ["google"]);
+
+    if (google) {
       console.log("cached");
       platformTrackId = cachedTrack.platformIds.google;
     } else {
@@ -210,7 +203,7 @@ const getTrackIdFromPlatform = async (tracks, accessToken) => {
       const response = await axios(options);
       const items = response.data.items;
 
-      if (items.length !== 0) {
+      if (items.length) {
         platformTrackId = item[0].id.videoId;
       }
     }
@@ -276,8 +269,15 @@ const getItemInfoFromPlatform = async (trackId, accessToken) => {
     for (item of data.items) {
       let trackBody = youtubeUtils.setTrack(item);
       //캐싱
-      let artist = await artistService.caching(trackBody.artist, schema);
-      let track = await trackService.caching(trackBody, artist, schema);
+      let artist = await artistService.caching(
+        trackBody.artist,
+        platformTypes.GOOGLE
+      );
+      let track = await trackService.caching(
+        trackBody,
+        artist,
+        platformTypes.GOOGLE
+      );
       artist = artist.toJSON();
       track = track.toJSON();
 
