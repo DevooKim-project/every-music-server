@@ -1,84 +1,58 @@
-const { playlistService } = require("../../services/database");
-const { uploadPlaylist } = require("../../services/convert");
-//private: false인 모든 플레이리스트
-exports.readAllPlaylist = async (req, res) => {
-  try {
-    //skip의 성능은 좋지 않다. 따라서 마지막 id값을 이용하여 기능을 구현한다.
-    // max_result: default 10
-    const max_result = req.query.maxResult || 10;
-    const lastid = req.query.lastId;
+const httpStatus = require("http-status");
 
-    const playlists = await playlistService.findAllPlaylist(max_result, lastid);
+const catchAsync = require("../../utils/catchAsync");
+const pick = require("../../utils/pick");
+const { playlistService } = require("../../services");
 
-    res.send(playlists);
-  } catch (error) {
-    res.send(error);
-  }
-};
+const getPlaylists = catchAsync(async (req, res) => {
+  const options = pick(req.query, ["page", "limit"]);
+  options.sort = { like: -1 };
+  const filter = { private: false };
+  const result = await playlistService.queryPlaylists(filter, options);
+  res.send(result);
+});
 
-exports.uploadPlaylist = async (req, res) => {
-  try {
-    const userid = req.payload.userid;
-    const { playlists, trackids } = req.body;
+const uploadPlaylist = catchAsync(async (req, res) => {
+  const { playlists, trackIds } = req.body;
+  const { userId } = req.payload;
 
-    for (let i = 0; i < playlists.length; i++) {
-      await uploadPlaylist({
-        playlist: playlists[i],
-        trackids: trackids[i],
-        userid: userid,
-      });
-    }
-    res.send("fin");
-  } catch (error) {
-    console.log(error);
-    res.send(error);
-  }
-};
-
-//좋아요 버튼 기능
-exports.likePlaylist = async (req, res) => {
-  try {
-    await playlistService.likePlaylist({
-      playlistid: req.params.playlistid,
-      userid: req.payload.userid,
-      operator: req.params.operator,
+  const results = [];
+  for (let i = 0; i < playlists.length; i++) {
+    const result = await playlistsService.createPlaylist({
+      playlist: playlists[i],
+      tracks: trackIds[i],
+      user: userId,
     });
-    res.status(204).send("like playlist ok");
-    // const playlist =
-  } catch (error) {
-    res.send(error);
+    results.push(result);
   }
-};
 
-exports.updatePlaylistOptions = async (req, res) => {
-  try {
-    const filter = {
-      id: req.params.playlistid,
-      owner: req.payload.userid,
-    };
-    const update = {};
-    if (req.body.hasOwnProperty("title")) update.title = req.body.title;
-    if (req.body.hasOwnProperty("description"))
-      update.description = req.body.description;
-    if (req.body.hasOwnProperty("thumbnail"))
-      update.thumbnail = req.body.thumbnail;
-    if (req.body.hasOwnProperty("private")) update.private = req.body.private;
+  res.send(result);
+});
 
-    await playlistService.updatePlaylistOptions(filter, update);
-    res.status(204).send("change private playlist ok");
-  } catch (error) {
-    res.send(error);
-  }
-};
+const likePlaylist = catchAsync(async (req, res) => {
+  const { playlistId, operator } = req.params;
+  const { userId } = req.payload;
 
-exports.deletePlaylist = async (req, res) => {
-  try {
-    const playlistid = req.params.playlistid;
-    const userid = req.payload.userid;
-    const data = { playlistid, userid };
-    await playlistService.deletePlaylist(data);
-    res.status(204).send("delete playlist ok");
-  } catch (error) {
-    res.send(error);
-  }
+  await playlistService.likePlaylist({ playlistId, userId }, operator);
+  res.status(httpStatus.NO_CONTENT).send();
+});
+
+const updatePlaylistOptions = catchAsync(async (req, res) => {
+  const update = pick[(req.body, ["title", "description", "thumbnail", "private"])];
+  const filter = { id: req.params.playlistId, owner: req.payload.userId };
+  await playlistService.updatePlaylistOptions(filter, update);
+  res.status(httpStatus.NO_CONTENT).send();
+});
+
+const deletePlaylist = catchAsync(async (req, res) => {
+  await playlistService.deletePlaylistById(req.params.playlistId);
+  res.status(httpStatus.NO_CONTENT).send();
+});
+
+module.exports = {
+  getPlaylists,
+  uploadPlaylist,
+  likePlaylist,
+  updatePlaylistOptions,
+  deletePlaylist,
 };
