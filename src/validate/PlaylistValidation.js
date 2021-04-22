@@ -80,10 +80,20 @@ const playlistBody = Joi.object().keys({
   description: Joi.string(),
 });
 
-const getPlaylist = {
+const getPlaylists = {
   query: Joi.object().keys({
     page: Joi.number().integer(),
     limit: Joi.number().integer(),
+  }),
+};
+
+const getPlaylistsByUser = {
+  query: Joi.object().keys({
+    page: Joi.number().integer(),
+    limit: Joi.number().integer(),
+  }),
+  params: Joi.object().keys({
+    userId: Joi.string().required(),
   }),
 };
 
@@ -125,7 +135,8 @@ const getTrack = {
 };
 
 module.exports = {
-  getPlaylist,
+  getPlaylists,
+  getPlaylistsByUser,
   uploadPlaylist,
   likePlaylist,
   updatePlaylist,

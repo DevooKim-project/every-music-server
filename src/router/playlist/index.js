@@ -7,7 +7,13 @@ const { tokenTypes } = require("../../config/type");
 
 const router = express.Router();
 
-router.get("/", validate(playlistValidation.getPlaylist), controller.getPlaylists);
+router.get("/", validate(playlistValidation.getPlaylists), controller.getPlaylists);
+router.get(
+  "/:userId",
+  validate(playlistValidation.getPlaylistsByUser),
+  verifyToken(tokenTypes.ACCESS, false),
+  controller.getPlaylistsByUser
+);
 
 router.post(
   "/upload",

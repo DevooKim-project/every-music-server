@@ -47,9 +47,26 @@ const deletePlaylistByUserId = async (userId) => {
   await Playlist.deleteOMany({ owner: userId });
 };
 
+const getPlaylistById = async (id) => {
+  return await Playlist.findById(id);
+};
+
+const getLibrary = async (playlistId) => {
+  return await Playlist.find({ id: { $in: playlistId } });
+};
+
 const getTrack = async (playlistId) => {
-  const playlist = await Playlist.findOne({ id: playlistId }).populate("tracks");
+  const playlist = await getPlaylistById(playlistId);
+  await playlist.execPopulate("tracks");
   return playlist.tracks;
+};
+
+const setPrivateOption = (req) => {
+  if (req.payload && req.payload.id === req.params.userId) {
+    return { $or: [{ private: true }, { private: false }] };
+  } else {
+    return { private: false };
+  }
 };
 
 module.exports = {
@@ -59,5 +76,8 @@ module.exports = {
   updatePlaylistOptions,
   deletePlaylistById,
   deletePlaylistByUserId,
+  getPlaylistById,
+  getLibrary,
   getTrack,
+  setPrivateOption,
 };

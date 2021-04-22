@@ -1,11 +1,11 @@
 const express = require("express");
+const { tokenTypes } = require("../../config/type");
 
-const auth = require("../../middleware/auth");
+const verifyToken = require("../../middleware/auth");
 const controller = require("./controller");
 
 const router = express.Router();
 
-router.get("/:userid", auth.hasToken, controller.readUserPlaylist);
-router.get("/library/:userid", auth.isAccessToken, controller.readLibrary);
+router.get("/library/:userId", verifyToken(tokenTypes.ACCESS), controller.getLibrary);
 
 module.exports = router;

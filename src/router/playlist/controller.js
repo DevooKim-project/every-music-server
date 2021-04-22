@@ -12,16 +12,24 @@ const getPlaylists = catchAsync(async (req, res) => {
   res.send(result);
 });
 
+const getPlaylistsByUser = catchAsync(async (req, res) => {
+  const options = pick(req.query, ["page", "limit"]);
+  const privateOption = playlistService.setPrivateOption(req);
+  const filter = { owner: req.params.userId, ...privateOption };
+  const result = await playlistService.queryPlaylists(filter, options);
+  res.send(result);
+});
+
 const uploadPlaylist = catchAsync(async (req, res) => {
   const { playlists, trackIds } = req.body;
-  const { userId } = req.payload;
+  const { id } = req.payload;
 
   const results = [];
   for (let i = 0; i < playlists.length; i++) {
     const result = await playlistsService.createPlaylist({
       playlist: playlists[i],
       tracks: trackIds[i],
-      user: userId,
+      user: id,
     });
     results.push(result);
   }
@@ -31,9 +39,9 @@ const uploadPlaylist = catchAsync(async (req, res) => {
 
 const likePlaylist = catchAsync(async (req, res) => {
   const { playlistId, operator } = req.params;
-  const { userId } = req.payload;
+  const { id } = req.payload;
 
-  await playlistService.likePlaylist({ playlistId, userId }, operator);
+  await playlistService.likePlaylist({ playlistId, userId: id }, operator);
   res.status(httpStatus.NO_CONTENT).send();
 });
 
@@ -51,6 +59,7 @@ const deletePlaylist = catchAsync(async (req, res) => {
 
 module.exports = {
   getPlaylists,
+  getPlaylistsByUser,
   uploadPlaylist,
   likePlaylist,
   updatePlaylistOptions,

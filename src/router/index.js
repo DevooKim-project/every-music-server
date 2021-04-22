@@ -8,13 +8,16 @@ const convertRoute = require("./convert");
 
 const router = express.Router();
 
-const Joi = require("joi");
-const { artistService } = require("../services");
+const { Test, Test2 } = require("../database/schema/test");
 router.get("/", async (req, res) => {
-  const a = { platformIds: { spotify: "6ORqU0bHbVCRjXm9AjyHyZ" } };
-  const b = a.platformIds;
-  console.log(Object.prototype.hasOwnProperty.call(b, "spotify"));
-  res.send();
+  const t2 = await Test2.create({ num: 123 });
+  const t1 = await Test.create({ num: 456, r: t2 });
+
+  const f = await Test.findOne({ num: 456 });
+  console.log(f);
+  await f.execPopulate("r");
+  console.log(f);
+  res.send({ f });
 });
 
 router.use("/auth", authRoute);
