@@ -1,14 +1,9 @@
-const { playlistService } = require("../../services/database");
+const catchAsync = require("../../utils/catchAsync");
+const { playlistService } = require("../../services");
 
-exports.readTrackOfPlaylist = async (req, res) => {
-  try {
-    const playlistid = req.params.playlistid;
-    const track = await playlistService.findTrackOfPlaylist({
-      playlistid: playlistid,
-    });
-    res.status(200).send(track);
-  } catch (error) {
-    console.log(error);
-    res.send(error);
-  }
-};
+const getTrack = catchAsync(async (req, res) => {
+  const track = await playlistService.getTrack(req.params.playlistId);
+  res.send(track);
+});
+
+module.exports = getTrack;

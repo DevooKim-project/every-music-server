@@ -5,3 +5,4 @@ module.exports.userService = require("./userService");
 module.exports.tokenService = require("./tokenService");
 module.exports.artistService = require("./artistService");
 module.exports.playlistService = require("./playlistService");
+module.exports.trackService = require("./trackService");

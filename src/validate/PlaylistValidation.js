@@ -118,10 +118,17 @@ const deletePlaylist = {
   }),
 };
 
+const getTrack = {
+  params: Joi.object().keys({
+    playlistId: Joi.string().required(),
+  }),
+};
+
 module.exports = {
   getPlaylist,
   uploadPlaylist,
   likePlaylist,
   updatePlaylist,
   deletePlaylist,
+  getTrack,
 };
