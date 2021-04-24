@@ -19,7 +19,7 @@ const verifyToken = (type, required = true) => (req, res, next) => {
     next();
   } catch (error) {
     if (!required) {
-      next();
+      return next();
     }
 
     if (error.name === "TokenExpiredError") {
