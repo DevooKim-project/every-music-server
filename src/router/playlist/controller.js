@@ -46,8 +46,8 @@ const likePlaylist = catchAsync(async (req, res) => {
 });
 
 const updatePlaylistOptions = catchAsync(async (req, res) => {
-  const update = pick[(req.body, ["title", "description", "thumbnail", "private"])];
-  const filter = { id: req.params.playlistId, owner: req.payload.userId };
+  const update = pick(req.body, ["title", "description", "thumbnail", "private"]);
+  const filter = { _id: req.params.playlistId, owner: req.payload.id };
   await playlistService.updatePlaylistOptions(filter, update);
   res.status(httpStatus.NO_CONTENT).send();
 });
