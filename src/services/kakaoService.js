@@ -11,7 +11,7 @@ const getOAuthUrl = (type) => {
   const url = "https://kauth.kakao.com/oauth/authorize";
 
   const params = {
-    clientid: process.env.KAKAOid,
+    client_id: process.env.KAKAO_ID,
     redirect_uri: redirectUri,
     response_type: "code",
     scope: scopes.join(","),
@@ -29,7 +29,7 @@ const getPlatformToken = async (code, type) => {
 
   const data = {
     code,
-    clientid: process.env.KAKAOid,
+    client_id: process.env.KAKAO_ID,
     client_secret: process.env.KAKAO_SECRET,
     redirect_uri: redirectUri,
     grant_type: "authorization_code",
@@ -74,8 +74,8 @@ const getProfile = async (accessToken) => {
 
 const signOut = async (platformId) => {
   const params = {
-    targetid_type: "userid",
-    targetid: platformId,
+    target_id_type: "user_id",
+    target_id: platformId,
   };
   const options = {
     method: "POST",

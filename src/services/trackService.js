@@ -8,11 +8,7 @@ const getTrackByTitleAndArtist = async (title, artistId) => {
 };
 
 const updateTrack = async (title, platformIds) => {
-  return await Track.findOneAndUpdate(
-    { title },
-    { $set: { platformIds } },
-    { new: true }
-  );
+  return await Track.findOneAndUpdate({ title }, { $set: { platformIds } }, { new: true });
 };
 
 const saveTrack = async (trackBody, artistId) => {
@@ -26,16 +22,16 @@ const saveTrack = async (trackBody, artistId) => {
 
 const caching = async (trackBody, artist, key) => {
   let track = await getTrackByTitleAndArtist(trackBody.title, artist.id);
-  const { platformIds } = track;
+
+  let platformIds;
+  if (track && Object.prototype.hasOwnProperty.call(track, "platformIds")) {
+    platformIds = track.platformIds;
+  }
   const value = pick(platformIds, [key]);
 
   //플랫폼(key)의 Id가 캐시되어있지 않은 경우
   if (track && !value[key]) {
-    const platformIds = Object.assign(
-      {},
-      track.platformIds,
-      trackBody.platformIds
-    );
+    const platformIds = Object.assign({}, track.platformIds, trackBody.platformIds);
     console.log("update");
     track = await updateTrack(trackBody.title, platformIds);
   }
