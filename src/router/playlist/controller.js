@@ -21,14 +21,14 @@ const getPlaylistsByUser = catchAsync(async (req, res) => {
 });
 
 const uploadPlaylist = catchAsync(async (req, res) => {
-  const { playlists, trackIds } = req.body;
+  const { playlists, tracks } = req.body;
   const { id } = req.payload;
 
   const results = [];
   for (let i = 0; i < playlists.length; i++) {
     const result = await playlistsService.createPlaylist({
       playlist: playlists[i],
-      tracks: trackIds[i],
+      tracks: tracks[i],
       user: id,
     });
     results.push(result);

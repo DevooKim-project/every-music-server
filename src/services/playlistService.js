@@ -7,7 +7,7 @@ const createPlaylist = async (playlistBody) => {
 
   const newPlaylist = await Playlist.create({
     ...playlist,
-    tracks,
+    tracks: tracks.platformIds.local,
     owner: user,
   });
   return newPlaylist;

@@ -9,4 +9,4 @@ const getLibrary = catchAsync(async (req, res) => {
   res.send(library);
 });
 
-module.exports = getLibrary;
+module.exports = { getLibrary };

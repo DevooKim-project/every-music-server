@@ -6,4 +6,4 @@ const getTrack = catchAsync(async (req, res) => {
   res.send(track);
 });
 
-module.exports = getTrack;
+module.exports = { getTrack };
