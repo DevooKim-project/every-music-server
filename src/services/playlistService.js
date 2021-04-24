@@ -4,13 +4,16 @@ const { likeTypes } = require("../config/type");
 
 const createPlaylist = async (playlistBody) => {
   const { playlist, tracks, user } = playlistBody;
+  const trackIds = tracks.map((track) => {
+    return track.platformIds.local;
+  });
 
   const newPlaylist = await Playlist.create({
     ...playlist,
-    tracks: tracks.platformIds.local,
+    tracks: trackIds,
     owner: user,
   });
-  return newPlaylist;
+  return newPlaylist.execPopulate("tracks");
 };
 
 const queryPlaylists = async (filter, options) => {

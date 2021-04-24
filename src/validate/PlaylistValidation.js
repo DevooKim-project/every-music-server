@@ -70,15 +70,18 @@ const { likeTypes, platformTypes } = require("../config/type");
 //     tracks: Joi.array().required().items(track),
 //   }),
 // };
-const playlistBody = Joi.object().keys({
-  // platformId: Joi.string().required(),
-  // platform: Joi.string().required(),
-  platformId: Joi.string(),
-  platform: Joi.string().valid(platformTypes.GOOGLE, platformTypes.SPOTIFY),
-  title: Joi.string().required(),
-  thumbnail: Joi.string(),
-  description: Joi.string(),
-});
+const playlistBody = Joi.object()
+  .keys({
+    // platformId: Joi.string().required(),
+    // platform: Joi.string().required(),
+    platformId: Joi.string(),
+    platform: Joi.string().valid(platformTypes.GOOGLE, platformTypes.SPOTIFY),
+    title: Joi.string().required(),
+    thumbnail: Joi.string().allow(null, ""),
+    description: Joi.string().allow(null, ""),
+    owner: Joi.object(),
+  })
+  .or("title");
 
 const getPlaylists = {
   query: Joi.object().keys({
@@ -100,7 +103,7 @@ const getPlaylistsByUser = {
 const uploadPlaylist = {
   body: Joi.object().keys({
     playlists: Joi.array().items(playlistBody.required()).required(),
-    trackIds: Joi.array().items(Joi.string().required()).required(),
+    tracks: Joi.array().required(),
   }),
 };
 

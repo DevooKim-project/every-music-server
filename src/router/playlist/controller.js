@@ -26,7 +26,7 @@ const uploadPlaylist = catchAsync(async (req, res) => {
 
   const results = [];
   for (let i = 0; i < playlists.length; i++) {
-    const result = await playlistsService.createPlaylist({
+    const result = await playlistService.createPlaylist({
       playlist: playlists[i],
       tracks: tracks[i],
       user: id,
@@ -34,7 +34,7 @@ const uploadPlaylist = catchAsync(async (req, res) => {
     results.push(result);
   }
 
-  res.send(result);
+  res.send(results);
 });
 
 const likePlaylist = catchAsync(async (req, res) => {
