@@ -23,7 +23,7 @@ router.post(
 );
 
 router.put(
-  "/like/:userId/:operator",
+  "/like/:playlistId/:operator",
   validate(playlistValidation.likePlaylist),
   verifyToken(tokenTypes.ACCESS),
   controller.likePlaylist

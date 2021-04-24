@@ -21,18 +21,18 @@ const queryPlaylists = async (filter, options) => {
   return result;
 };
 
-const likePlaylists = async (playlistBody, operator) => {
+const likePlaylist = async (playlistBody, operator) => {
   const { playlistId, userId } = playlistBody;
   let userPromise;
   let playlistPromise;
   if (operator === likeTypes.LIKE) {
-    userPromise = User.updateOne({ id: userId }, { $addToSet: { likePlaylists: playlistId } });
-    playlistPromise = Playlist.updateOne({ id: playlistId }, { $inc: { like: 1 } });
+    userPromise = User.updateOne({ _id: userId }, { $addToSet: { likePlaylists: playlistId } });
+    playlistPromise = Playlist.updateOne({ _id: playlistId }, { $inc: { like: 1 } });
   }
 
   if (operator === likeTypes.UNLIKE) {
-    userPromise = User.updateOne({ id: userId }, { $pullAll: { likePlaylists: [playlistId] } });
-    playlistPromise = Playlist.updateOne({ id: playlistId }, { $inc: { like: -1 } });
+    userPromise = User.updateOne({ _id: userId }, { $pullAll: { likePlaylists: [playlistId] } });
+    playlistPromise = Playlist.updateOne({ _id: playlistId }, { $inc: { like: -1 } });
   }
 
   return Promise.all([userPromise, playlistPromise]);
@@ -43,7 +43,7 @@ const updatePlaylistOptions = async (filter, update) => {
 };
 
 const deletePlaylistById = async (playlistId) => {
-  await Playlist.deleteOne({ id: playlistId });
+  await Playlist.deleteOne({ _id: playlistId });
 };
 
 const deletePlaylistByUserId = async (userId) => {
@@ -55,7 +55,7 @@ const getPlaylistById = async (id) => {
 };
 
 const getLibrary = async (playlistId) => {
-  return await Playlist.find({ id: { $in: playlistId } });
+  return await Playlist.find({ _id: { $in: playlistId } });
 };
 
 const getTrack = async (playlistId) => {
@@ -75,7 +75,7 @@ const setPrivateOption = (req) => {
 module.exports = {
   createPlaylist,
   queryPlaylists,
-  likePlaylists,
+  likePlaylist,
   updatePlaylistOptions,
   deletePlaylistById,
   deletePlaylistByUserId,

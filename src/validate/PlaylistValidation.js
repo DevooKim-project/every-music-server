@@ -110,7 +110,7 @@ const uploadPlaylist = {
 const likePlaylist = {
   params: Joi.object().keys({
     playlistId: Joi.string().required(),
-    operator: Joi.boolean().required(),
+    operator: Joi.string().valid(likeTypes.LIKE, likeTypes.UNLIKE).required(),
   }),
 };
 
