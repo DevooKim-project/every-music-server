@@ -3,6 +3,7 @@ const ApiError = require("../utils/ApiError");
 const { User } = require("../database/schema");
 
 const tokenService = require("./tokenService");
+const playlistService = require("./playlistService");
 
 const createUser = async (userBody) => {
   const user = await User.create(userBody);
@@ -16,10 +17,7 @@ const login = async (userBody, platform, platformToken) => {
     user = await createUser(userBody);
   }
   if (user.platform !== platform) {
-    throw new ApiError(
-      httpStatus.BAD_REQUEST,
-      "Email already taken other platform"
-    );
+    throw new ApiError(httpStatus.BAD_REQUEST, "Email already taken other platform");
   }
   const localToken = tokenService.generateLocalToken(user);
   await tokenService.upsertPlatformToken(user.id, platform, platformToken);
@@ -28,12 +26,11 @@ const login = async (userBody, platform, platformToken) => {
 };
 
 const deleteUserWithTokenAndPlaylistById = async (userId) => {
-  Promise.all([
-    // playlistService.deletePlaylistByUserId(userId),
+  return Promise.all([
+    playlistService.deletePlaylistByUserId(userId),
     tokenService.deletePlatformTokenByUserId(userId),
     deleteUserById(userId),
   ]);
-  return;
 };
 
 const getUserById = async (id) => {
@@ -45,7 +42,10 @@ const getUserByEmail = async (email) => {
 };
 
 const deleteUserById = async (id) => {
-  await User.deleteOne({ id: id });
+  const user = await User.deleteOne({ _id: id });
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Not found User");
+  }
 };
 
 module.exports = {
@@ -54,4 +54,5 @@ module.exports = {
   deleteUserWithTokenAndPlaylistById,
   getUserById,
   getUserByEmail,
+  deleteUserById,
 };

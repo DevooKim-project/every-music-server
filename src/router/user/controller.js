@@ -1,4 +1,5 @@
-const { userService, playlistService } = require("../../services");
+const httpStatus = require("http-status");
+const { userService } = require("../../services");
 const catchAsync = require("../../utils/catchAsync");
 
 const getLibrary = catchAsync(async (req, res) => {
@@ -9,4 +10,9 @@ const getLibrary = catchAsync(async (req, res) => {
   res.send(library);
 });
 
-module.exports = { getLibrary };
+const deleteUser = catchAsync(async (req, res) => {
+  await userService.deleteUserWithTokenAndPlaylistById(req.payload.id);
+  res.status(httpStatus.NO_CONTENT).send();
+});
+
+module.exports = { getLibrary, deleteUser };

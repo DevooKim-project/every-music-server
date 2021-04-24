@@ -59,7 +59,7 @@ const deletePlaylistById = async (userId, playlistId) => {
 };
 
 const deletePlaylistByUserId = async (userId) => {
-  await Playlist.deleteOMany({ owner: userId });
+  await Playlist.deleteMany({ owner: userId });
 };
 
 const getPlaylistById = async (id) => {
