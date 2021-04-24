@@ -54,10 +54,7 @@ const getProfile = (idToken) => {
 };
 
 const revoke = async (userId) => {
-  const token = await tokenService.findPlatformTokenById(
-    userId,
-    platformTypes.GOOGLE
-  );
+  const token = await tokenService.findPlatformTokenById(userId, platformTypes.GOOGLE);
 
   const params = { token: token.refreshToken };
   const options = {
@@ -159,7 +156,7 @@ const getPlaylistFromPlatform = async (accessToken) => {
 
 //track.search
 const getTrackIdFromPlatform = async (tracks, accessToken) => {
-  const trackParams = {
+  const params = {
     part: "id",
     q: "",
     type: "video",
@@ -172,7 +169,7 @@ const getTrackIdFromPlatform = async (tracks, accessToken) => {
     headers: {
       authorization: `Bearer ${accessToken}`,
     },
-    trackParams,
+    params,
   };
 
   const platformTrackIds = [];
@@ -181,10 +178,7 @@ const getTrackIdFromPlatform = async (tracks, accessToken) => {
   for (const track of tracks) {
     let platformTrackId;
     const artist = track.artist;
-    const cachedTrack = await trackService.getTrackByTitleAndArtist(
-      track.title,
-      artist.platformIds.local
-    );
+    const cachedTrack = await trackService.getTrackByTitleAndArtist(track.title, artist.platformIds.local);
 
     cachedTrackIds.push(cachedTrack.id);
 
@@ -198,13 +192,12 @@ const getTrackIdFromPlatform = async (tracks, accessToken) => {
       console.log("not cached");
 
       const query = `${artist.name} ${track.title}`;
-      trackParams.q = query;
-
+      params.q = query;
       const response = await axios(options);
       const items = response.data.items;
 
       if (items.length) {
-        platformTrackId = item[0].id.videoId;
+        platformTrackId = items[0].id.videoId;
       }
     }
 
@@ -269,15 +262,8 @@ const getItemInfoFromPlatform = async (trackId, accessToken) => {
     for (item of data.items) {
       let trackBody = youtubeUtils.setTrack(item);
       //캐싱
-      let artist = await artistService.caching(
-        trackBody.artist,
-        platformTypes.GOOGLE
-      );
-      let track = await trackService.caching(
-        trackBody,
-        artist,
-        platformTypes.GOOGLE
-      );
+      let artist = await artistService.caching(trackBody.artist, platformTypes.GOOGLE);
+      let track = await trackService.caching(trackBody, artist, platformTypes.GOOGLE);
       artist = artist.toJSON();
       track = track.toJSON();
 
