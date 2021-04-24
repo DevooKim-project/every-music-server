@@ -1,6 +1,8 @@
 const { Playlist, User } = require("../database/schema");
 const paginate = require("../utils/paginate");
 const { likeTypes } = require("../config/type");
+const ApiError = require("../utils/ApiError");
+const httpStatus = require("http-status");
 
 const createPlaylist = async (playlistBody) => {
   const { playlist, tracks, user } = playlistBody;
@@ -42,8 +44,18 @@ const updatePlaylistOptions = async (filter, update) => {
   return await Playlist.updateOne(filter, { $set: update });
 };
 
-const deletePlaylistById = async (playlistId) => {
-  await Playlist.deleteOne({ _id: playlistId });
+const deletePlaylistById = async (userId, playlistId) => {
+  const playlist = await getPlaylistById(playlistId);
+  if (!playlist) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Playlist not found");
+  }
+
+  if (playlist.owner.toString() === userId) {
+    return await playlist.remove();
+  } else {
+    throw new ApiError(httpStatus.UNAUTHORIZED, "This user are not have playlist");
+  }
+  // await Playlist.deleteOne({ _id: playlistId });
 };
 
 const deletePlaylistByUserId = async (userId) => {
@@ -52,10 +64,6 @@ const deletePlaylistByUserId = async (userId) => {
 
 const getPlaylistById = async (id) => {
   return await Playlist.findById(id);
-};
-
-const getLibrary = async (playlistId) => {
-  return await Playlist.find({ _id: { $in: playlistId } });
 };
 
 const getTrack = async (playlistId) => {
@@ -80,7 +88,6 @@ module.exports = {
   deletePlaylistById,
   deletePlaylistByUserId,
   getPlaylistById,
-  getLibrary,
   getTrack,
   setPrivateOption,
 };

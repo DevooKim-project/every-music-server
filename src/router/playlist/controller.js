@@ -53,7 +53,7 @@ const updatePlaylistOptions = catchAsync(async (req, res) => {
 });
 
 const deletePlaylist = catchAsync(async (req, res) => {
-  await playlistService.deletePlaylistById(req.params.playlistId);
+  await playlistService.deletePlaylistById(req.payload.id, req.params.playlistId);
   res.status(httpStatus.NO_CONTENT).send();
 });
 
