@@ -60,9 +60,6 @@ const generateLocalToken = (user) => {
   const refreshTokenExpires = moment().add(process.env.refreshExpirationMinutes, "days");
   const refreshToken = generateToken({ id: tokenBody.id }, refreshTokenExpires);
 
-  console.log("local accessToken: ", accessToken);
-  console.log("local refreshToken: ", refreshToken);
-
   return { accessToken, refreshToken };
 };
 

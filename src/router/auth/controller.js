@@ -6,13 +6,12 @@ const { userService, tokenService } = require("../../services");
 const obtainOAuth = (type) =>
   catchAsync((req, res) => {
     const controller = switchAuthPlatform(req.params.platform);
-    console.log(controller);
     return controller.obtainOAuth(type)(req, res);
   });
 
 const login = catchAsync((req, res) => {
   const controller = switchAuthPlatform(req.params.platform);
-  return controller.login(authTypes.LOGIN)(req, res);
+  controller.login(authTypes.LOGIN)(req, res);
 });
 
 const getOnlyPlatformToken = catchAsync((req, res) => {

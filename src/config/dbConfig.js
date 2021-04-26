@@ -10,6 +10,7 @@ const connect = () => {
       dbName: process.env.DB,
       useNewUrlParser: true,
       useCreateIndex: true,
+      useUnifiedTopology: true,
       useFindAndModify: false,
     },
     (error) => {
