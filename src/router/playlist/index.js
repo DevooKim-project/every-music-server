@@ -1,8 +1,9 @@
 const express = require("express");
+
 const validate = require("../../middleware/validate");
 const verifyToken = require("../../middleware/auth");
-const { playlistValidation } = require("../../validate");
 const controller = require("./controller");
+const { playlistValidation } = require("../../validate");
 const { tokenTypes } = require("../../config/type");
 
 const router = express.Router();

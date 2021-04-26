@@ -6,7 +6,7 @@ const { Schema } = mongoose;
 const userSchema = new Schema({
   email: {
     type: String,
-    // unique: true,
+    unique: true,
   },
   nick: {
     type: String,
@@ -23,7 +23,6 @@ const userSchema = new Schema({
     type: Boolean,
     default: false,
   },
-  // token: { type: Schema.Types.ObjectId, ref: "Token" },
 });
 
 userSchema.plugin(toJSON);

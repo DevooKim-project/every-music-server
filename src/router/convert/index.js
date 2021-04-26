@@ -5,6 +5,7 @@ const verifyToken = require("../../middleware/auth");
 const validate = require("../../middleware/validate");
 const { tokenTypes } = require("../../config/type");
 const { convertValidation } = require("../../validate");
+
 const router = express.Router();
 
 router.use(

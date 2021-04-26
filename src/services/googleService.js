@@ -6,10 +6,10 @@ const trackService = require("./trackService");
 const artistService = require("./artistService");
 const tokenService = require("./tokenService");
 const splitArray = require("../utils/splitArray");
+const pick = require("../utils/pick");
 const { youtubeUtils } = require("../utils/platformUtils");
 const { platformTypes } = require("../config/type");
 const { googleParams } = require("../config/oAuthParam");
-const pick = require("../utils/pick");
 
 const getOAuthUrl = (type) => {
   const oAuthParam = googleParams(type);
@@ -20,7 +20,6 @@ const getOAuthUrl = (type) => {
     client_id: process.env.GOOGLE_ID,
     redirect_uri: redirectUri,
     response_type: "code",
-    // access_type: "offline",
     scope: scopes.join(" "),
   };
 
@@ -127,8 +126,8 @@ const getPlaylistFromPlatform = async (accessToken) => {
   const params = {
     part: "snippet",
     maxResults: 50,
-    mine: true,
     pageToken: "",
+    mine: true,
   };
   const options = {
     method: "GET",
@@ -148,7 +147,7 @@ const getPlaylistFromPlatform = async (accessToken) => {
       playlists.push(youtubeUtils.setPlaylist(item));
     });
 
-    params.pageToken = data.nextPageToken;
+    Object.assign(params, { pageToken: data.nextPageToken });
   } while (params.pageToken);
 
   return playlists;
@@ -160,7 +159,6 @@ const getTrackIdFromPlatform = async (tracks, accessToken) => {
     part: "id",
     q: "",
     type: "video",
-    // topicId: "/m/04rlf",
     videoCategoryId: 10,
   };
   const options = {
@@ -186,13 +184,14 @@ const getTrackIdFromPlatform = async (tracks, accessToken) => {
     const { google } = pick(platformIds, ["google"]);
 
     if (google) {
+      //캐싱되어 있음
       console.log("cached");
       platformTrackId = cachedTrack.platformIds.google;
     } else {
       console.log("not cached");
 
       const query = `${artist.name} ${track.title}`;
-      params.q = query;
+      Object.assign(params, { q: query });
       const response = await axios(options);
       const items = response.data.items;
 
@@ -207,9 +206,7 @@ const getTrackIdFromPlatform = async (tracks, accessToken) => {
   return { platform: platformTrackIds, local: cachedTrackIds };
 };
 
-//track.getId
 const getItemIdFromPlatform = async (playlistId, accessToken) => {
-  console.log("playlistId: ", playlistId);
   const params = {
     part: "contentDetails",
     maxResults: 50,
@@ -228,19 +225,18 @@ const getItemIdFromPlatform = async (playlistId, accessToken) => {
   do {
     const response = await axios(options);
     const { data } = response;
-    console.log("data: ", data);
+
     data.items.forEach((item) => {
       let trackId = item.contentDetails.videoId;
       trackIds.push(trackId);
     });
 
-    params.pageToken = data.nextPageToken;
+    Object.assign(params, { pageToken: data.nextPageToken });
   } while (params.pageToken);
 
   return trackIds;
 };
 
-//track.getInfo
 const getItemInfoFromPlatform = async (trackId, accessToken) => {
   const params = {
     part: "snippet",
@@ -261,7 +257,7 @@ const getItemInfoFromPlatform = async (trackId, accessToken) => {
     const { data } = response;
     for (item of data.items) {
       let trackBody = youtubeUtils.setTrack(item);
-      //캐싱
+
       let artist = await artistService.caching(trackBody.artist, platformTypes.GOOGLE);
       let track = await trackService.caching(trackBody, artist, platformTypes.GOOGLE);
       artist = artist.toJSON();
@@ -276,7 +272,7 @@ const getItemInfoFromPlatform = async (trackId, accessToken) => {
       tracks.push(trackBody);
     }
 
-    params.pageToken = data.nextPageToken;
+    Object.assign(params, { pageToken: data.nextPageToken });
   } while (params.pageToken);
 
   return tracks;

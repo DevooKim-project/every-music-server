@@ -1,5 +1,3 @@
-// const { artistService, trackService, playlistService } = require("./database");
-const { platformTypes } = require("../config/type");
 const { Track } = require("../database/schema");
 const pick = require("../utils/pick");
 
@@ -23,21 +21,16 @@ const saveTrack = async (trackBody, artistId) => {
 const caching = async (trackBody, artist, key) => {
   let track = await getTrackByTitleAndArtist(trackBody.title, artist.id);
 
-  let platformIds;
-  if (track && Object.prototype.hasOwnProperty.call(track, "platformIds")) {
-    platformIds = track.platformIds;
-  }
+  const platformIds = track ? track.platformIds : undefined;
   const value = pick(platformIds, [key]);
 
   //플랫폼(key)의 Id가 캐시되어있지 않은 경우
   if (track && !value[key]) {
     const platformIds = Object.assign({}, track.platformIds, trackBody.platformIds);
-    console.log("update");
     track = await updateTrack(trackBody.title, platformIds);
   }
 
   if (!track) {
-    console.log("save");
     track = await saveTrack(trackBody, artist.id);
   }
 

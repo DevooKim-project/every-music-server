@@ -1,4 +1,5 @@
 const httpStatus = require("http-status");
+
 const { spotifyService } = require("../../../services");
 const splitArray = require("../../../utils/splitArray");
 
@@ -15,7 +16,6 @@ const getItemFromPlatform = async (req, res) => {
   const tracks = [];
   for (const playlist of playlists) {
     const track = await spotifyService.getItemFromPlatform(playlist.platformId, platformToken.accessToken);
-    // console.log("outter: ", track);
     tracks.push(track);
   }
 

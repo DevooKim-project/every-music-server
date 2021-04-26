@@ -1,6 +1,5 @@
 const express = require("express");
 const morgan = require("morgan");
-const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const httpStatus = require("http-status");
 
@@ -18,17 +17,6 @@ app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser(process.env.COOKIE_SECRET));
-// app.use(
-//   session({
-//     resave: false,
-//     saveUninitialized: false,
-//     secret: process.env.COOKIE_SECRET,
-//     cookie: {
-//       httpOnly: true,
-//       secure: false,
-//     },
-//   })
-// );
 
 app.use("/", apiRouter);
 app.use((req, res, next) => {

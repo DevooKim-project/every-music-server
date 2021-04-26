@@ -13,8 +13,6 @@ const artistBody = Joi.object().keys({
 });
 
 const playlistBody = Joi.object().keys({
-  // platformId: Joi.string().required(),
-  // platform: Joi.string().required(),
   platformId: Joi.string(),
   platform: Joi.string().valid(platformTypes.GOOGLE, platformTypes.SPOTIFY),
   title: Joi.string(),

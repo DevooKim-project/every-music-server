@@ -1,4 +1,5 @@
 const httpStatus = require("http-status");
+
 const { googleService } = require("../../../services");
 
 const getPlaylistFromPlatform = async (req, res) => {
@@ -17,7 +18,6 @@ const getItemFromPlatform = async (req, res) => {
     const trackId = await googleService.getItemIdFromPlatform(playlist.platformId, platformToken.accessToken);
     trackIds.push(trackId);
   }
-  console.log("tradkIds: ", trackIds);
 
   //2. 트랙ID로 트랙 정보를 가져온다.
   const tracks = [];

@@ -1,5 +1,6 @@
 const { Artist } = require("../database/schema");
 const pick = require("../utils/pick");
+
 const getArtistByName = async (name) => {
   return await Artist.findOne({ name });
 };
@@ -18,21 +19,17 @@ const saveArtist = async (artistBody) => {
 
 const caching = async (artistBody, key) => {
   let artist = await getArtistByName(artistBody.name);
-  let platformIds;
-  if (artist && Object.prototype.hasOwnProperty.call(artist, "platformIds")) {
-    platformIds = track.platformIds;
-  }
+
+  const platformIds = artist ? artist.platformIds : undefined;
   const value = pick(platformIds, [key]);
 
   //플랫폼(key)의 Id가 캐시되어있지 않은 경우
   if (artist && !value[key]) {
     const platformIds = Object.assign({}, artist.platformIds, artistBody.platformIds);
-    console.log("update");
     artist = await updateArtist(artistBody.name, platformIds);
   }
 
   if (!artist) {
-    console.log("save");
     artist = await saveArtist(artistBody);
   }
 

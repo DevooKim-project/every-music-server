@@ -11,25 +11,15 @@ const router = express.Router();
 router.param("platform", validate(authValidation.oAuthPlatform));
 
 router.get("/:platform/login", controller.obtainOAuth(authTypes.LOGIN));
+// router.post("/:platform/login", controller.obtainOAuth(authTypes.LOGIN));
 router.get("/:platform/login/callback", controller.login);
 
 router.get("/:platform/token", controller.obtainOAuth(authTypes.TOKEN));
-router.get(
-  "/:platform/token/callback",
-  // verifyToken(tokenTypes.ACCESS),
-  verifyToken(tokenTypes.REFRESH),
-  controller.getOnlyPlatformToken
-);
+// router.post("/:platform/token", controller.obtainOAuth(authTypes.TOKEN));
+router.get("/:platform/token/callback", verifyToken(tokenTypes.REFRESH), controller.getOnlyPlatformToken);
 
-router.get(
-  "/login/direct",
-  verifyToken(tokenTypes.REFRESH),
-  controller.loginWithUserId
-);
+router.post("/login/direct", verifyToken(tokenTypes.REFRESH), controller.loginWithUserId);
 
-router.get("/sign-out", verifyToken(tokenTypes.ACCESS), controller.signOut);
-// router.get("/sign-out", verifyToken(tokenTypes.REFRESH), controller.signOut);
-
-// router.put("/:platform/refresh", isRefreshToken, refreshToken, createLocalToken);
+router.delete("/:platform/sign-out", verifyToken(tokenTypes.ACCESS), controller.signOut);
 
 module.exports = router;

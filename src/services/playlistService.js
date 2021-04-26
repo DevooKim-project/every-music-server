@@ -55,7 +55,6 @@ const deletePlaylistById = async (userId, playlistId) => {
   } else {
     throw new ApiError(httpStatus.UNAUTHORIZED, "This user are not have playlist");
   }
-  // await Playlist.deleteOne({ _id: playlistId });
 };
 
 const deletePlaylistByUserId = async (userId) => {

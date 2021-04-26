@@ -1,5 +1,3 @@
-const httpStatus = require("http-status");
-
 const { authTypes } = require("../../config/type");
 const catchAsync = require("../../utils/catchAsync");
 const { switchAuthPlatform } = require("../../utils/switchPlatform");
@@ -28,17 +26,17 @@ const loginWithUserId = catchAsync(async (req, res) => {
 
   res.clearCookie("refreshToken");
   res.cookie("refreshToken", localToken.refreshToken, {
-    // httpOnly: true, //JS에서 쿠키 접근 불가능
+    httpOnly: true, //JS에서 쿠키 접근 불가능
     // secure: true, //https에서만 쿠키 생성
-    // expires: new Date(Date.now() + 2592000) //unixTime: 1month
-    // signed: true,
+    expires: new Date(Date.now() + 2592000), //unixTime: 1month
+    signed: true,
   });
 
   res.send({ accessToken: localToken.accessToken });
 });
 
 const signOut = catchAsync((req, res) => {
-  const controller = switchAuthPlatform(req.payload.platform);
+  const controller = switchAuthPlatform(req.params.platform);
   return controller.signOut(req, res);
 });
 

@@ -1,9 +1,7 @@
 const axios = require("axios");
 const qs = require("qs");
 
-const { platformTypes } = require("../config/type");
 const { kakaoParams } = require("../config/oAuthParam");
-const tokenService = require("./tokenService");
 
 const getOAuthUrl = (type) => {
   const oAuthParam = kakaoParams(type);
@@ -45,34 +43,19 @@ const getPlatformToken = async (code, type) => {
   return response.data;
 };
 
-// exports.obtainAdditionalPermissions = async (scope, redirect_uri) => {
-//   const url = "https://kauth.kakao.com/oauth/authorize";
-//   const params = {
-//     clientid: process.env.KAKAOid,
-//     redirect_uri: "http://localhost:5000/auth/kakao/callback",
-//     response_type: "code",
-//     scope: scope.join(","),
-//     // state: "", //CSRF 공격 보호를 위한 임의의 문자열
-//   };
-
-//   const endpoint = await `${url}?${qs.stringify(params)}`;
-//   return endpoint;
-// };
-
 const getProfile = async (accessToken) => {
   const profile = await axios({
     method: "POST",
     url: "https://kapi.kakao.com/v2/user/me",
     headers: {
       Authorization: `Bearer ${accessToken}`,
-      // "Content-type": "application/x-www-form-urlencoded;charset=utf-8",
     },
   });
 
   return profile.data;
 };
 
-const signOut = async (platformId) => {
+const signOut = (platformId) => {
   const params = {
     target_id_type: "user_id",
     target_id: platformId,
@@ -86,8 +69,7 @@ const signOut = async (platformId) => {
     params,
   };
 
-  await axios(options);
-  return;
+  return axios(options);
 };
 
 module.exports = {

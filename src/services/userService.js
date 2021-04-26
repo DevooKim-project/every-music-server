@@ -13,7 +13,6 @@ const createUser = async (userBody) => {
 const login = async (userBody, platform, platformToken) => {
   let user = await getUserByEmail(userBody.email);
   if (!user) {
-    // register()
     user = await createUser(userBody);
   }
   if (user.platform !== platform) {

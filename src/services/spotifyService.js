@@ -36,9 +36,7 @@ const getPlatformToken = async (code, type) => {
     redirect_uri: redirectUri,
   };
 
-  const key = Base64.encode(
-    `${process.env.SPOTIFY_ID}:${process.env.SPOTIFY_SECRET}`
-  );
+  const key = Base64.encode(`${process.env.SPOTIFY_ID}:${process.env.SPOTIFY_SECRET}`);
 
   const response = await axios({
     method: "POST",
@@ -153,10 +151,7 @@ const getTrackIdFromPlatform = async (tracks, accessToken) => {
   for (const track of tracks) {
     let platformTrackId;
     const artist = track.artist;
-    let cachedTrack = await trackService.getTrackByTitleAndArtist(
-      track.title,
-      artist.platformIds.local
-    );
+    let cachedTrack = await trackService.getTrackByTitleAndArtist(track.title, artist.platformIds.local);
 
     cachedTrackIds.push(cachedTrack.id);
 
@@ -202,16 +197,9 @@ const getItemFromPlatform = async (playlistId, accessToken) => {
     const { data } = response;
     for (const item of data.items) {
       const trackBody = spotifyUtils.setTrack(item.track);
-      //캐싱
-      let artist = await artistService.caching(
-        trackBody.artist,
-        platformTypes.SPOTIFY
-      );
-      let track = await trackService.caching(
-        trackBody,
-        artist,
-        platformTypes.SPOTIFY
-      );
+
+      let artist = await artistService.caching(trackBody.artist, platformTypes.SPOTIFY);
+      let track = await trackService.caching(trackBody, artist, platformTypes.SPOTIFY);
       artist = artist.toJSON();
       track = track.toJSON();
 
