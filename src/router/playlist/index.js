@@ -31,7 +31,7 @@ router.put(
   controller.likePlaylist
 );
 
-router.put(
+router.patch(
   "/update/:playlistId",
   validate(playlistValidation.updatePlaylist),
   verifyToken(tokenTypes.ACCESS),
