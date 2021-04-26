@@ -1,20 +1,35 @@
 const express = require("express");
-const {
-  isRefreshToken,
-  refreshToken,
-  createLocalToken,
-  verifyToken,
-} = require("../../middleware/auth");
-const googleRoute = require("./google");
-const kakaoRoute = require("./kakao");
-const spotifyRoute = require("./spotify");
+
+const { tokenTypes, authTypes } = require("../../config/type");
+const verifyToken = require("../../middleware/auth");
+const validate = require("../../middleware/validate");
+const authValidation = require("../../validate/AuthValidation");
+const controller = require("./controller");
 
 const router = express.Router();
 
-router.use("/google", googleRoute);
-router.use("/kakao", kakaoRoute);
-router.use("/spotify", spotifyRoute);
+router.param("platform", validate(authValidation.oAuthPlatform));
 
-router.put("/refresh/:type", isRefreshToken, refreshToken, createLocalToken);
+router.get("/:platform/login", controller.obtainOAuth(authTypes.LOGIN));
+router.get("/:platform/login/callback", controller.login);
+
+router.get("/:platform/token", controller.obtainOAuth(authTypes.TOKEN));
+router.get(
+  "/:platform/token/callback",
+  // verifyToken(tokenTypes.ACCESS),
+  verifyToken(tokenTypes.REFRESH),
+  controller.getOnlyPlatformToken
+);
+
+router.get(
+  "/login/direct",
+  verifyToken(tokenTypes.REFRESH),
+  controller.loginWithUserId
+);
+
+router.get("/sign-out", verifyToken(tokenTypes.ACCESS), controller.signOut);
+// router.get("/sign-out", verifyToken(tokenTypes.REFRESH), controller.signOut);
+
+// router.put("/:platform/refresh", isRefreshToken, refreshToken, createLocalToken);
 
 module.exports = router;

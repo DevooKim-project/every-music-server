@@ -5,7 +5,7 @@ exports.storeTrack = async (data, artistId) => {
     // const { title, ids, artist, duration_ms, thumbnail } = data;
     const response = await Track.create({
       ...data,
-      provider_id: data.ids,
+      providerid: data.ids,
       artist: artistId,
     });
     return response;
@@ -23,11 +23,11 @@ exports.findTrack = async (title, artistId) => {
   }
 };
 
-exports.updateTrack = async (title, provider_id) => {
+exports.updateTrack = async (title, providerid) => {
   try {
     const track = await Track.findOneAndUpdate(
       { title },
-      { $set: { provider_id: provider_id } },
+      { $set: { providerid: providerid } },
       { returnNewDocument: true }
     );
     return track;

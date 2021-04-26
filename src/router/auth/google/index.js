@@ -1,30 +1,32 @@
 const express = require("express");
 
-const auth = require("../../../middleware/auth");
+const verifyToken = require("../../../middleware/auth");
 const controller = require("./controller");
+const { authTypes, tokenTypes } = require("../../../config/type");
 
 const router = express.Router();
 
-router.get("/", controller.withLogin, controller.obtainOAuth);
 router.get(
-  "/callback",
-  controller.withLogin,
-  controller.getProviderToken,
-  controller.login,
-  auth.createLocalToken
+  "/login/direct",
+  verifyToken(tokenTypes.REFRESH),
+  controller.loginDirect
 );
 
-router.get("/token", controller.withoutLogin, controller.obtainOAuth);
+router.get("/login", controller.obtainOAuth(authTypes.LOGIN));
+router.get("/login/callback", controller.login(authTypes.LOGIN));
+
 router.get(
-  "/callbackToken",
-  auth.isAccessToken,
-  controller.withoutLogin,
-  controller.getProviderToken,
-  controller.saveTokenWithoutLogin
+  "/token",
+  // verifyToken(tokenTypes.ACCESS),
+  controller.obtainOAuth(authTypes.TOKEN)
 );
 
-router.delete("/signOut", auth.isAccessToken, controller.signOut);
+router.get(
+  "/token/callback",
+  verifyToken(tokenTypes.REFRESH),
+  controller.getOnlyToken(authTypes.TOKEN)
+);
 
-//로그아웃은 클라이언트에서 jwt제거
+router.get("/signOut", verifyToken(tokenTypes.ACCESS), controller.signOut);
 
 module.exports = router;

@@ -1,9 +1,9 @@
 const youtubeService = require("./youtube");
 const spotifyService = require("./spotify");
-const { storeArtistTrack, storePlaylist, splitArray } = require("./common");
+const { uploadArtistTrack, uploadPlaylist, splitArray } = require("./common");
 
 exports.youtubeService = youtubeService;
 exports.spotifyService = spotifyService;
-exports.storeArtistTrack = storeArtistTrack;
-exports.storePlaylist = storePlaylist;
+exports.uploadArtistTrack = uploadArtistTrack;
+exports.uploadPlaylist = uploadPlaylist;
 exports.splitArray = splitArray;

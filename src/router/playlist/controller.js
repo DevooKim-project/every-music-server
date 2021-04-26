@@ -1,100 +1,67 @@
-const { playlistService } = require("../../services/database");
+const httpStatus = require("http-status");
 
-//private: false인 모든 플레이리스트
-exports.readAllPlaylist = async (req, res) => {
-  try {
-    //skip의 성능은 좋지 않다. 따라서 마지막 id값을 이용하여 기능을 구현한다.
-    // max_result: default 10
-    const max_result = req.query.maxResult || 10;
-    const last_id = req.query.lastId;
+const catchAsync = require("../../utils/catchAsync");
+const pick = require("../../utils/pick");
+const { playlistService } = require("../../services");
 
-    const playlist = await playlistService.findAllPlaylist(max_result, last_id);
+const getPlaylists = catchAsync(async (req, res) => {
+  const options = pick(req.query, ["page", "limit"]);
+  options.sort = { like: -1 };
+  const filter = { private: false };
+  const result = await playlistService.queryPlaylists(filter, options);
+  res.send(result);
+});
 
-    res.send(playlist);
-  } catch (error) {
-    res.send(error);
-  }
-};
+const getPlaylistsByUser = catchAsync(async (req, res) => {
+  const options = pick(req.query, ["page", "limit"]);
+  const privateOption = playlistService.setPrivateOption(req);
+  const filter = { owner: req.params.userId, ...privateOption };
+  const result = await playlistService.queryPlaylists(filter, options);
+  res.send(result);
+});
 
-exports.readUserPlaylist = async (req, res) => {
-  try {
-    const data = {
-      user_id: req.params.user_id,
-      isMine: req.payload.user_id === req.params.user_id,
-    };
-    const max_result = req.query.maxResult || 10;
-    const last_id = req.query.lastId;
+const uploadPlaylist = catchAsync(async (req, res) => {
+  const { playlists, tracks } = req.body;
+  const { id } = req.payload;
 
-    const playlist = await playlistService.findUserPlaylist(
-      data,
-      max_result,
-      last_id
-    );
-    res.send(playlist);
-  } catch (error) {
-    console.log(error);
-    res.send(error);
-  }
-};
-
-//내가 좋아요 누른 플레이리스트(라이브러리)
-exports.readLibrary = async (req, res) => {
-  try {
-    if (req.payload.user_id !== req.params.user_id) {
-      res.status(400).send("토큰과 파라미터의 user_id 불일치");
-    }
-    const library = await playlistService.findUserLibrary(req.payload.user_id);
-
-    res.status(200).send(library);
-  } catch (error) {
-    res.send(error);
-  }
-};
-
-//좋아요 버튼 기능
-exports.likePlaylist = async (req, res) => {
-  try {
-    await playlistService.likePlaylist({
-      playlist_id: req.params.playlist_id,
-      user_id: req.payload.user_id,
-      operator: req.params.operator,
+  const results = [];
+  for (let i = 0; i < playlists.length; i++) {
+    const result = await playlistService.createPlaylist({
+      playlist: playlists[i],
+      tracks: tracks[i],
+      user: id,
     });
-    res.status(204).send("like playlist ok");
-    // const playlist =
-  } catch (error) {
-    res.send(error);
+    results.push(result);
   }
-};
 
-exports.updatePlaylistOptions = async (req, res) => {
-  try {
-    const filter = {
-      _id: req.params.playlist_id,
-      owner: req.payload.user_id,
-    };
-    const update = {};
-    if (req.body.hasOwnProperty("title")) update.title = req.body.title;
-    if (req.body.hasOwnProperty("description"))
-      update.description = req.body.description;
-    if (req.body.hasOwnProperty("thumbnail"))
-      update.thumbnail = req.body.thumbnail;
-    if (req.body.hasOwnProperty("private")) update.private = req.body.private;
+  res.send(results);
+});
 
-    await playlistService.updatePlaylistOptions(filter, update);
-    res.status(204).send("change private playlist ok");
-  } catch (error) {
-    res.send(error);
-  }
-};
+const likePlaylist = catchAsync(async (req, res) => {
+  const { playlistId, operator } = req.params;
+  const { id } = req.payload;
 
-exports.deletePlaylist = async (req, res) => {
-  try {
-    const playlist_id = req.params.playlist_id;
-    const user_id = req.payload.user_id;
-    const data = { playlist_id, user_id };
-    await playlistService.deletePlaylist(data);
-    res.status(204).send("delete playlist ok");
-  } catch (error) {
-    res.send(error);
-  }
+  await playlistService.likePlaylist({ playlistId, userId: id }, operator);
+  res.status(httpStatus.NO_CONTENT).send();
+});
+
+const updatePlaylistOptions = catchAsync(async (req, res) => {
+  const update = pick(req.body, ["title", "description", "thumbnail", "private"]);
+  const filter = { _id: req.params.playlistId, owner: req.payload.id };
+  await playlistService.updatePlaylistOptions(filter, update);
+  res.status(httpStatus.NO_CONTENT).send();
+});
+
+const deletePlaylist = catchAsync(async (req, res) => {
+  await playlistService.deletePlaylistById(req.payload.id, req.params.playlistId);
+  res.status(httpStatus.NO_CONTENT).send();
+});
+
+module.exports = {
+  getPlaylists,
+  getPlaylistsByUser,
+  uploadPlaylist,
+  likePlaylist,
+  updatePlaylistOptions,
+  deletePlaylist,
 };

@@ -14,13 +14,13 @@ exports.updateToken = async (data) => {
     if (refresh_token) {
       await Token.updateOne(
         { user: user, provider: provider },
-        { access_token: access_token, refresh_token: refresh_token },
+        { $set: { access_token: access_token, refresh_token: refresh_token } },
         { upsert: true }
       );
     } else {
       await Token.updateOne(
         { user: user, provider: provider },
-        { access_token: access_token },
+        { $set: { access_token: access_token } },
         { upsert: true }
       );
     }
@@ -40,9 +40,9 @@ exports.findToken = async (data) => {
   }
 };
 
-exports.deleteToken = async (user_id) => {
+exports.deleteToken = async (userid) => {
   try {
-    await Token.deleteMany({ user: user_id });
+    await Token.deleteMany({ user: userid });
     return;
   } catch (error) {
     throw new Error(error);

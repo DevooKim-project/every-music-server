@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const { platformTypes } = require("../../config/type");
+const { toJSON } = require("./plugins");
 
 const { Schema } = mongoose;
 const userSchema = new Schema({
@@ -9,20 +11,26 @@ const userSchema = new Schema({
   nick: {
     type: String,
   },
-  provider: {
-    name: {
-      type: String,
-      enum: ["kakao", "google", "spotify"],
-      lowercase: true,
-    },
-    id: String,
+  platform: {
+    type: String,
+    enum: [platformTypes.KAKAO, platformTypes.GOOGLE, platformTypes.SPOTIFY],
   },
-  like_playlists: [{ type: Schema.Types.ObjectId, ref: "Playlist" }],
+  platformId: {
+    type: String,
+  },
+  likePlaylists: [{ type: Schema.Types.ObjectId, ref: "Playlist" }],
   private: {
     type: Boolean,
     default: false,
   },
   // token: { type: Schema.Types.ObjectId, ref: "Token" },
 });
+
+userSchema.plugin(toJSON);
+
+userSchema.statics.isEmailTaken = async function (email, platform) {
+  const user = await this.findOne({ email, platform: { $ne: platform } });
+  return !!user; //null -> true -> false
+};
 
 module.exports = mongoose.model("User", userSchema);

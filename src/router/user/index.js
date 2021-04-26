@@ -1,17 +1,13 @@
 const express = require("express");
 
-const auth = require("../../middleware/auth");
+const { tokenTypes } = require("../../config/type");
+const verifyToken = require("../../middleware/auth");
 const controller = require("./controller");
 
 const router = express.Router();
 
-router.get("/:user_id", (req, res) => {
-  //내가 올린 리스트검색
-  if (req.headers.authorization) {
-    auth.isAccessToken(req, res, next);
-  }
+router.get("/library", verifyToken(tokenTypes.ACCESS), controller.getLibrary);
 
-  controller.readUserPlaylist(req, res);
-});
+router.delete("/", verifyToken(tokenTypes.ACCESS), controller.deleteUser);
 
 module.exports = router;

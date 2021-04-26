@@ -1,11 +1,11 @@
 const Artist = require("../../database/schema/artist");
 
-exports.storeArtist = async (data) => {
+exports.uploadArtist = async (data) => {
   try {
     const { name, ids } = data;
     const response = await Artist.create({
       name,
-      provider_id: ids,
+      providerid: ids,
     });
 
     return response;
@@ -23,11 +23,11 @@ exports.findArtist = async (name) => {
   }
 };
 
-exports.updateArtist = async (name, provider_id) => {
+exports.updateArtist = async (name, providerid) => {
   try {
     const artist = await Artist.updateOne(
       { name },
-      { $set: { provider_id: provider_id } }
+      { $set: { providerid: providerid } }
     );
     return artist;
   } catch (error) {

@@ -1,21 +1,46 @@
 const express = require("express");
-const auth = require("../../middleware/auth");
+const validate = require("../../middleware/validate");
+const verifyToken = require("../../middleware/auth");
+const { playlistValidation } = require("../../validate");
 const controller = require("./controller");
+const { tokenTypes } = require("../../config/type");
 
 const router = express.Router();
 
-router.get("/", controller.readAllPlaylist);
-router.get("/:user_id", auth.hasToken, controller.readUserPlaylist);
-router.get("/library/:user_id", auth.isAccessToken, controller.readLibrary);
+router.get("/", validate(playlistValidation.getPlaylists), controller.getPlaylists);
+router.get(
+  "/:userId",
+  validate(playlistValidation.getPlaylistsByUser),
+  verifyToken(tokenTypes.ACCESS, false),
+  controller.getPlaylistsByUser
+);
+
+router.post(
+  "/upload",
+  validate(playlistValidation.uploadPlaylist),
+  verifyToken(tokenTypes.ACCESS),
+  controller.uploadPlaylist
+);
+
 router.put(
-  "/like/:user_id/:operator",
-  auth.isAccessToken,
+  "/like/:playlistId/:operator",
+  validate(playlistValidation.likePlaylist),
+  verifyToken(tokenTypes.ACCESS),
   controller.likePlaylist
 );
+
 router.put(
-  "/update/:playlist_id",
-  auth.isAccessToken,
+  "/update/:playlistId",
+  validate(playlistValidation.updatePlaylist),
+  verifyToken(tokenTypes.ACCESS),
   controller.updatePlaylistOptions
 );
-router.delete("/:playlist_id", auth.isAccessToken, controller.deletePlaylist);
+
+router.delete(
+  "/:playlistId",
+  validate(playlistValidation.deletePlaylist),
+  verifyToken(tokenTypes.ACCESS),
+  controller.deletePlaylist
+);
+
 module.exports = router;

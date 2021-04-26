@@ -1,18 +1,20 @@
 const mongoose = require("mongoose");
+const { platformTypes } = require("../../config/type");
+const { toJSON } = require("./plugins");
 
 const { Schema } = mongoose;
 const tokenSchema = new Schema({
-  provider: {
+  platform: {
     type: String,
-    enum: ["kakao", "google", "spotify"],
-    lowercase: true,
+    enum: [platformTypes.KAKAO, platformTypes.GOOGLE, platformTypes.SPOTIFY],
   },
-  access_token: String,
-  refresh_token: String,
+  accessToken: String,
+  refreshToken: String,
   user: { type: Schema.Types.ObjectId, ref: "User" },
   updatedAt: { type: Date, default: Date.now },
 });
 
+tokenSchema.plugin(toJSON);
 // const Token = mongoose.model("Token", tokenSchema);
 // module.exports = Token;
 module.exports = mongoose.model("Token", tokenSchema);

@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const { parseToken } = require("../../middleware/auth");
+const { parseToken } = require("../../middleware/auth_old");
 const { userService } = require("../database");
 
 exports.createToken = (user) => {
@@ -9,9 +9,9 @@ exports.createToken = (user) => {
     {
       iss: "everyMusic.com",
       user_name: nick,
-      user_id: id,
+      userid: id,
       provider_name: provider.name,
-      provider_id: provider.id,
+      providerid: provider.id,
     },
     process.env.JWT_SECRET,
     {
@@ -26,6 +26,7 @@ exports.createToken = (user) => {
   return { access_token, refresh_token };
 };
 
+//not used
 exports.updateRefreshToken = async (token) => {
   try {
     const localToken = parseToken(token);

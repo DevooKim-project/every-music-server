@@ -2,9 +2,12 @@ const express = require("express");
 const morgan = require("morgan");
 const session = require("express-session");
 const cookieParser = require("cookie-parser");
+const httpStatus = require("http-status");
 
 const apiRouter = require("./router");
 const configs = require("./config");
+const ApiError = require("./utils/ApiError");
+const { errorConverter, errorHandler } = require("./middleware/error");
 
 const app = express();
 
@@ -28,6 +31,12 @@ app.use(cookieParser(process.env.COOKIE_SECRET));
 // );
 
 app.use("/", apiRouter);
+app.use((req, res, next) => {
+  next(new ApiError(httpStatus.NOT_FOUND, "Not found"));
+});
+
+app.use(errorConverter);
+app.use(errorHandler);
 
 app.listen(app.get("port"), () => {
   console.log("port open" + app.get("port"));

@@ -1,25 +1,32 @@
-const express = require("express");
-const auth = require("../../../middleware/auth");
-const controller = require("./controller");
+// const express = require("express");
 
-const router = express.Router();
+// const verifyToken = require("../../../middleware/auth");
+// const controller = require("./controller");
+// const { authTypes, tokenTypes } = require("../../../config/type");
 
-router.get("/", controller.withLogin, controller.obtainOAuth);
-router.get(
-  "/callback",
-  controller.withLogin,
-  controller.getProviderToken,
-  controller.login,
-  auth.createLocalToken
-);
+// const router = express.Router();
 
-router.post("/token", controller.withoutLogin, controller.obtainOAuth);
-router.get(
-  "/callbackToken",
-  auth.isAccessToken,
-  controller.withoutLogin,
-  controller.saveTokenWithoutLogin
-);
-router.delete("/signOut", auth.isAccessToken, controller.signOut);
+// router.get(
+//   "/login/direct",
+//   verifyToken(tokenTypes.REFRESH),
+//   controller.loginDirect
+// );
 
-module.exports = router;
+// router.get("/login", controller.obtainOAuth(authTypes.LOGIN));
+// router.get("/login/callback", controller.login(authTypes.LOGIN));
+
+// router.get(
+//   "/token",
+//   // verifyToken(tokenTypes.ACCESS),
+//   controller.obtainOAuth(authTypes.TOKEN)
+// );
+
+// router.get(
+//   "/token/callback",
+//   verifyToken(tokenTypes.REFRESH),
+//   controller.getOnlyToken(authTypes.TOKEN)
+// );
+
+// router.get("/signOut", verifyToken(tokenTypes.ACCESS), controller.signOut);
+
+// module.exports = router;

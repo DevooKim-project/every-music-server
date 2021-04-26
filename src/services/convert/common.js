@@ -1,5 +1,5 @@
 const { artistService, trackService, playlistService } = require("../database");
-exports.storeArtistTrack = async (trackData, provider) => {
+exports.uploadArtistTrack = async (trackData, provider) => {
   try {
     //1. artist 확인 후 저장
     //1-1. 있는데 providerId가 없으면 업데이트
@@ -13,20 +13,20 @@ exports.storeArtistTrack = async (trackData, provider) => {
     let artistId = "";
 
     if (artist) {
-      if (!hasProviderId(artist.provider_id, provider)) {
-        const provider_id = {
-          ...artist.provider_id,
+      if (!hasProviderId(artist.providerid, provider)) {
+        const providerid = {
+          ...artist.providerid,
           ...trackData.artist.ids,
         };
-        artist = artistService.updateArtist(trackData.artist.name, provider_id);
+        artist = artistService.updateArtist(trackData.artist.name, providerid);
       }
     } else {
-      console.log("store artist");
-      artist = await artistService.storeArtist(trackData.artist);
+      console.log("upload artist");
+      artist = await artistService.uploadArtist(trackData.artist);
     }
     artistId = {
-      local: artist._id,
-      ...artist.provider_id,
+      local: artist.id,
+      ...artist.providerid,
     };
 
     //Track
@@ -34,20 +34,20 @@ exports.storeArtistTrack = async (trackData, provider) => {
     let trackId = "";
 
     if (track) {
-      if (!hasProviderId(track.provider_id, provider)) {
-        const provider_id = {
-          ...track.provider_id,
+      if (!hasProviderId(track.providerid, provider)) {
+        const providerid = {
+          ...track.providerid,
           ...trackData.ids,
         };
-        artist = trackService.updateTrack(trackData.title, provider_id);
+        artist = trackService.updateTrack(trackData.title, providerid);
       }
     } else {
-      console.log("store track");
-      track = await trackService.storeTrack(trackData, artistId.local);
+      console.log("upload track");
+      track = await trackService.uploadTrack(trackData, artistId.local);
     }
     trackId = {
-      local: track._id,
-      ...track.provider_id,
+      local: track.id,
+      ...track.providerid,
     };
 
     trackData.artist.ids = artistId;
@@ -59,9 +59,9 @@ exports.storeArtistTrack = async (trackData, provider) => {
   }
 };
 
-exports.storePlaylist = async (data) => {
+exports.uploadPlaylist = async (data) => {
   try {
-    await playlistService.storePlaylist(data);
+    await playlistService.uploadPlaylist(data);
     return;
   } catch (error) {
     throw error;
@@ -80,13 +80,13 @@ exports.splitArray = (array, offset) => {
   return result;
 };
 
-const hasProviderId = (provider_id, provider) => {
+const hasProviderId = (providerid, provider) => {
   switch (provider) {
     case "youtube":
-      if (provider_id.youtube) return true;
+      if (providerid.youtube) return true;
       else return false;
     case "spotify":
-      if (provider_id.spotify) return true;
+      if (providerid.spotify) return true;
       else return false;
     default:
       throw new Error("checkProviderId type error");

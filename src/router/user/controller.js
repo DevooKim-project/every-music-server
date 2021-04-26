@@ -1,25 +1,18 @@
-const { playlistService } = require("../../services/database");
+const httpStatus = require("http-status");
+const { userService } = require("../../services");
+const catchAsync = require("../../utils/catchAsync");
 
-//특정 유저가 올린 플레이리스트
-exports.readUserPlaylist = async (req, res) => {
-  try {
-    // max_result: default 10
-    const max_result = req.query.maxResult || 10;
-    const last_id = req.query.lastId;
-    const { user_id } = req.params;
-    const data = {
-      owner: user_id,
-      isMine: user_id === req.payload.user_id,
-    };
+const getLibrary = catchAsync(async (req, res) => {
+  const user = await userService.getUserById(req.payload.id);
+  await user.execPopulate("likePlaylists");
 
-    const playlist = await playlistService.findUserPlaylist(
-      max_result,
-      last_id,
-      data
-    );
+  const library = user.likePlaylists;
+  res.send(library);
+});
 
-    res.status(200).send(playlist);
-  } catch (error) {
-    throw error;
-  }
-};
+const deleteUser = catchAsync(async (req, res) => {
+  await userService.deleteUserWithTokenAndPlaylistById(req.payload.id);
+  res.status(httpStatus.NO_CONTENT).send();
+});
+
+module.exports = { getLibrary, deleteUser };

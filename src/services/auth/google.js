@@ -2,7 +2,10 @@ const axios = require("axios");
 const qs = require("qs");
 const jwt = require("jsonwebtoken");
 
-const { tokenService, userService } = require("../database");
+// const { tokenService, userService } = require("../database");
+const { tokenService } = require("../../services");
+const { platformTypes } = require("../../config/type");
+const { Token } = require("../../database/schema");
 
 exports.OAuthParams = {
   withLogin: {
@@ -34,7 +37,7 @@ exports.obtainOAuthCredentials = async (OAuth_params) => {
   const { scopes, redirect_uri } = OAuth_params;
 
   const params = {
-    client_id: process.env.GOOGLE_ID,
+    clientid: process.env.GOOGLEid,
     redirect_uri: redirect_uri,
     response_type: "code",
     access_type: "offline",
@@ -51,7 +54,7 @@ exports.OAuthRedirect = async (code, OAuth_params) => {
 
     const data = {
       code,
-      client_id: process.env.GOOGLE_ID,
+      clientid: process.env.GOOGLEid,
       client_secret: process.env.GOOGLE_SECRET,
       redirect_uri: redirect_uri,
       grant_type: "authorization_code",
@@ -63,6 +66,7 @@ exports.OAuthRedirect = async (code, OAuth_params) => {
       data: qs.stringify(data),
     });
 
+    console.log(response.data);
     return response.data;
   } catch (error) {
     throw error;
@@ -76,6 +80,10 @@ exports.login = async (token) => {
 
     //기존 유저 확인
     const exist_user = await userService.findOneUser({ email: profile.email });
+    if (exist_user.provider !== "spotify") {
+      // res.status(400).send(`이미 ${exist_user.provider}로 가입된 유저입니다.`);
+      throw new Error(`이미 ${exist_user.provider}로 가입된 유저입니다.`);
+    }
     if (exist_user) {
       //provider 토큰 업데이트
       console.log("exist_user");
@@ -91,7 +99,7 @@ exports.login = async (token) => {
         token_data.refresh_token = refresh_token;
       }
       await tokenService.updateToken(token_data);
-      return exist_user._id;
+      return exist_user.id;
     } else {
       //신규 유저 생성
       console.log("new_user");
@@ -109,7 +117,7 @@ exports.login = async (token) => {
         access_token: access_token,
         refresh_token: refresh_token,
       });
-      return new_user._id;
+      return new_user.id;
     }
   } catch (error) {
     throw error;
@@ -118,10 +126,10 @@ exports.login = async (token) => {
 
 //에러처리: 리프레시 토큰이 만료된 경우
 //google은 만료 안됨
-exports.updateRefreshToken = async (user_id) => {
+exports.updateRefreshToken = async (userid) => {
   try {
     const token = await tokenService.findToken({
-      user: user_id,
+      user: userid,
       provider: "google",
     });
     if (!token) {
@@ -129,7 +137,7 @@ exports.updateRefreshToken = async (user_id) => {
     }
 
     const data = {
-      client_id: process.env.GOOGLE_ID,
+      clientid: process.env.GOOGLEid,
       client_secret: process.env.GOOGLE_SECRET,
       refresh_token: token.refresh_token,
       grant_type: "refresh_token",
@@ -141,8 +149,9 @@ exports.updateRefreshToken = async (user_id) => {
       data: qs.stringify(data),
     });
 
+    return response.data.access_token;
     await tokenService.updateToken({
-      user: user_id,
+      user: userid,
       provider: "google",
       access_token: response.data.access_token,
     });
@@ -153,15 +162,15 @@ exports.updateRefreshToken = async (user_id) => {
   }
 };
 
-exports.signOut = async (user_id) => {
+exports.signOut = async (userId) => {
   try {
-    const token = await tokenService.findToken({
-      user: user_id,
-      provider: "google",
-    });
+    const token = await tokenService.findPlatformTokenById(
+      userId,
+      platformTypes.GOOGLE
+    );
     console.log("token: ", token);
     const params = {
-      token: token.refresh_token,
+      token: token.refreshToken,
     };
     const options = {
       method: "POST",
@@ -171,8 +180,8 @@ exports.signOut = async (user_id) => {
 
     Promise.all([
       axios(options),
-      tokenService.deleteToken(user_id),
-      userService.destroyUser(user_id),
+      Token.deleteMany({ user: userId }),
+      userService.deleteUserById(userId),
     ]);
   } catch (error) {
     throw error;

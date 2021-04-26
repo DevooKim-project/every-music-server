@@ -6,6 +6,7 @@ const controller = require("./controller");
 const router = express.Router();
 
 router.get("/", controller.obtainOAuth);
+router.get("/scope", controller.additionalAuthority);
 router.get(
   "/callback",
   controller.getProviderToken,
