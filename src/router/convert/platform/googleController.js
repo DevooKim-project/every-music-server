@@ -35,20 +35,20 @@ const createPlaylistToPlatform = async (req, res) => {
   const { accessToken } = req.platformToken;
   const { playlists, tracks } = req.body;
 
-  const playlistItems = [];
   for (let i = 0; i < playlists.length; i++) {
-    const newPlaylist = await googleService.createPlaylistToPlatform(playlists[i], accessToken);
-    console.log("create playlist ok");
+    const createPlaylistPromise = googleService.createPlaylistToPlatform(playlists[i], accessToken);
+    const getTrackIdsPromise = googleService.getTrackIdFromPlatform(tracks[i], accessToken);
 
-    const trackIds = await googleService.getTrackIdFromPlatform(tracks[i], accessToken);
+    const [newPlaylist, trackIds] = await Promise.all([createPlaylistPromise, getTrackIdsPromise]);
+
+    console.log("create playlist ok");
     console.log("get trackId ok");
-    playlistItems.push(trackIds.local);
+
     await googleService.insertTrackToPlatform(newPlaylist.id, trackIds.platform, accessToken);
 
     console.log("insert track ok");
   }
 
-  // res.send({ playlists, trackIds: playlistItems });
   res.status(httpStatus.NO_CONTENT).send();
 };
 

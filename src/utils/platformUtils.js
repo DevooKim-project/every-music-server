@@ -15,13 +15,15 @@ const youtubeUtils = {
     };
   },
   setTrack: (track) => {
+    const title = track.snippet.title.replace(/.*- /, "");
+    const artistName = track.snippet.title.replace(/ -.*/, "");
     return {
-      title: track.snippet.title,
+      title: title,
       platformIds: {
         google: track.id,
       },
       artist: {
-        name: track.snippet.channelTitle.replace(/ - Topic/, ""),
+        name: title === artistName ? track.snippet.channelTitle.replace(/ - Topic/, "") : artistName,
         platformIds: {
           google: track.snippet.channelId,
         },
@@ -36,7 +38,8 @@ const spotifyUtils = {
     return {
       platformId: playlist.id,
       title: playlist.name,
-      thumbnail: playlist.images[0].url,
+      thumbnail: playlist.images[0] ? playlist.images[0].url : "",
+      // thumbnail: playlist.images[0].url || "",
       description: playlist.description,
       owner: {
         name: playlist.owner.display_name,
@@ -58,7 +61,7 @@ const spotifyUtils = {
           spotify: artist.id,
         },
       },
-      thumbnail: track.album.images[0].url,
+      thumbnail: track.album.images[0] ? track.album.images[0].url : "",
     };
   },
 };
