@@ -4,7 +4,7 @@ const catchAsync = require("../../utils/catchAsync");
 const pick = require("../../utils/pick");
 const { playlistService } = require("../../services");
 
-const getPlaylists = catchAsync(async (req, res) => {
+const readPlaylists = catchAsync(async (req, res) => {
   const options = pick(req.query, ["page", "limit"]);
   options.sort = { like: -1 };
   const filter = { private: false };
@@ -12,7 +12,7 @@ const getPlaylists = catchAsync(async (req, res) => {
   res.send(result);
 });
 
-const getPlaylistsByUser = catchAsync(async (req, res) => {
+const readPlaylistsByUser = catchAsync(async (req, res) => {
   const options = pick(req.query, ["page", "limit"]);
   const privateOption = playlistService.setPrivateOption(req);
   const filter = { owner: req.params.userId, ...privateOption };
@@ -58,8 +58,8 @@ const deletePlaylist = catchAsync(async (req, res) => {
 });
 
 module.exports = {
-  getPlaylists,
-  getPlaylistsByUser,
+  readPlaylists,
+  readPlaylistsByUser,
   uploadPlaylist,
   likePlaylist,
   updatePlaylistOptions,
