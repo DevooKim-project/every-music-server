@@ -18,9 +18,9 @@ router.use(
 router.get("/:platform/playlists", controller.getPlaylistFromPlatform);
 
 //playlists insert into platform
-router.post("/:platform/playlists", controller.convertPlaylist);
+router.post("/:platform/playlists", validate(convertValidation.convertPlatform), controller.convertPlaylist);
 
 //get tracks from platform playlists
-router.get("/:platform/tracks", controller.getItemFromPlatform);
+router.get("/:platform/tracks", validate(convertValidation.getTrack), controller.getItemFromPlatform);
 
 module.exports = router;
