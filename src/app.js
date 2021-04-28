@@ -1,6 +1,7 @@
 const express = require("express");
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
+const cors = require("cors");
 const httpStatus = require("http-status");
 
 const apiRouter = require("./router");
@@ -13,6 +14,7 @@ const app = express();
 configs();
 
 app.set("port", process.env.PORT || 8001);
+app.use(cors({ origin: true, credentials: true }));
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

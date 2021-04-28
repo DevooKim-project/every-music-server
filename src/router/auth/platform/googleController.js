@@ -8,6 +8,7 @@ const obtainOAuth = (type) => (req, res) => {
 };
 
 const login = (type) => async (req, res) => {
+  console.log("query: ", req.query);
   const platformToken = await googleService.getPlatformToken(req.query.code, type);
 
   const profile = googleService.getProfile(platformToken.id_token);
@@ -21,17 +22,21 @@ const login = (type) => async (req, res) => {
     accessToken: platformToken.access_token,
     refreshToken: platformToken.refresh_token,
   };
-  const localToken = await userService.login(userBody, platformTypes.GOOGLE, platformTokenBody);
+  const { accessToken, refreshToken, expiresIn } = await userService.login(
+    userBody,
+    platformTypes.GOOGLE,
+    platformTokenBody
+  );
 
   res.clearCookie("refreshToken");
-  res.cookie("refreshToken", localToken.refreshToken, {
+  res.cookie("refreshToken", refreshToken, {
     httpOnly: true, //JS에서 쿠키 접근 불가능
     // secure: true, //https에서만 쿠키 생성
     expires: new Date(Date.now() + 2592000), //unixTime: 1month
     signed: true,
   });
-
-  res.send({ accessToken: localToken.accessToken });
+  console.log("token: ", accessToken);
+  res.json({ accessToken, expiresIn });
 };
 
 const getOnlyToken = (type) => async (req, res) => {

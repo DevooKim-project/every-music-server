@@ -21,17 +21,17 @@ const getOnlyPlatformToken = catchAsync((req, res) => {
 
 const loginWithUserId = catchAsync(async (req, res) => {
   const user = await userService.getUserById(req.payload.id);
-  const localToken = await tokenService.generateLocalToken(user);
+  const { accessToken, refreshToken, expiresIn } = await tokenService.generateLocalToken(user);
 
   res.clearCookie("refreshToken");
-  res.cookie("refreshToken", localToken.refreshToken, {
+  res.cookie("refreshToken", refreshToken, {
     httpOnly: true, //JS에서 쿠키 접근 불가능
     // secure: true, //https에서만 쿠키 생성
     expires: new Date(Date.now() + 2592000), //unixTime: 1month
     signed: true,
   });
 
-  res.send({ accessToken: localToken.accessToken });
+  res.send({ accessToken, expiresIn });
 });
 
 const signOut = catchAsync((req, res) => {

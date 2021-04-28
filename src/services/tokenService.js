@@ -60,7 +60,7 @@ const generateLocalToken = (user) => {
   const refreshTokenExpires = moment().add(process.env.refreshExpirationMinutes, "days");
   const refreshToken = generateToken({ id: tokenBody.id }, refreshTokenExpires);
 
-  return { accessToken, refreshToken };
+  return { accessToken, refreshToken, expiresIn: accessTokenExpires.unix() };
 };
 
 const findPlatformTokenByUserId = async (userId, platform) => {
