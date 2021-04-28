@@ -22,4 +22,9 @@ router.post("/login/direct", verifyToken(tokenTypes.REFRESH), controller.loginWi
 
 router.delete("/:platform/sign-out", verifyToken(tokenTypes.ACCESS), controller.signOut);
 
+router.post("/refresh", (req, res) => {
+  console.log("hi");
+  res.send();
+});
+
 module.exports = router;

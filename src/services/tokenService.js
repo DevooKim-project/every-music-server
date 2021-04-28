@@ -57,7 +57,7 @@ const generateLocalToken = (user) => {
   const accessTokenExpires = moment().add(process.env.accessExpirationMinutes, "minutes");
   const accessToken = generateToken(tokenBody, accessTokenExpires);
 
-  const refreshTokenExpires = moment().add(process.env.refreshExpirationMinutes, "days");
+  const refreshTokenExpires = moment().add(process.env.refreshExpirationDays, "days");
   const refreshToken = generateToken({ id: tokenBody.id }, refreshTokenExpires);
 
   return { accessToken, refreshToken, expiresIn: accessTokenExpires.unix() };
