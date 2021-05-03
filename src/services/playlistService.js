@@ -20,6 +20,12 @@ const createPlaylist = async (playlistBody) => {
 
 const queryPlaylists = async (filter, options) => {
   const result = await paginate(Playlist, filter, options);
+
+  for (let playlist of result.results) {
+    playlist.tracks = undefined;
+    await playlist.execPopulate("owner");
+  }
+
   return result;
 };
 
