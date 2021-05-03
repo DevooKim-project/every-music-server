@@ -74,7 +74,7 @@ const getPlaylistById = async (id) => {
 const getTrack = async (playlistId) => {
   const playlist = await getPlaylistById(playlistId);
   await playlist.execPopulate("tracks");
-  return playlist.tracks;
+  return playlist;
 };
 
 const setPrivateOption = (req) => {

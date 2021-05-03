@@ -8,4 +8,6 @@ const router = express.Router();
 
 router.get("/library", verifyToken(tokenTypes.ACCESS), controller.getLibrary);
 
+router.get("/library/:playlistId", verifyToken(tokenTypes.ACCESS), controller.getLibrary);
+
 module.exports = router;
