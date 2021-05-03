@@ -33,7 +33,8 @@ const getPlatformToken = async (code, type) => {
   const data = {
     code,
     grant_type: "authorization_code",
-    redirect_uri: redirectUri,
+    // redirect_uri: redirectUri,
+    redirect_uri: "http://localhost:3000/?platform=spotify",
   };
 
   const key = Base64.encode(`${process.env.SPOTIFY_ID}:${process.env.SPOTIFY_SECRET}`);

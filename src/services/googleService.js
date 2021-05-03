@@ -35,7 +35,7 @@ const getPlatformToken = async (code, type) => {
     client_id: process.env.GOOGLE_ID,
     client_secret: process.env.GOOGLE_SECRET,
     // redirect_uri: redirectUri,
-    redirect_uri: "http://localhost:3000",
+    redirect_uri: "http://localhost:3000/?platform=google",
     grant_type: "authorization_code",
   };
 

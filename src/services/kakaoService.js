@@ -29,7 +29,7 @@ const getPlatformToken = async (code, type) => {
     code,
     client_id: process.env.KAKAO_ID,
     client_secret: process.env.KAKAO_SECRET,
-    redirect_uri: redirectUri,
+    redirect_uri: "http://localhost:3000/?platform=kakao",
     grant_type: "authorization_code",
   };
 

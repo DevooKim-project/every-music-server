@@ -12,19 +12,16 @@ router.param("platform", validate(authValidation.oAuthPlatform));
 
 router.get("/:platform/login", controller.obtainOAuth(authTypes.LOGIN));
 // router.post("/:platform/login", controller.obtainOAuth(authTypes.LOGIN));
-router.get("/:platform/login/callback", controller.login);
+router.post("/:platform/login/callback", controller.login);
 
 router.get("/:platform/token", controller.obtainOAuth(authTypes.TOKEN));
 // router.post("/:platform/token", controller.obtainOAuth(authTypes.TOKEN));
-router.get("/:platform/token/callback", verifyToken(tokenTypes.REFRESH), controller.getOnlyPlatformToken);
+router.post("/:platform/token/callback", verifyToken(tokenTypes.REFRESH), controller.getOnlyPlatformToken);
 
-router.post("/login/direct", verifyToken(tokenTypes.REFRESH), controller.loginWithUserId);
+router.post("/login", verifyToken(tokenTypes.REFRESH), controller.loginWithUserId);
 
 router.delete("/:platform/sign-out", verifyToken(tokenTypes.ACCESS), controller.signOut);
 
-router.post("/refresh", (req, res) => {
-  console.log("hi");
-  res.send();
-});
+router.post("/refresh", verifyToken(tokenTypes.ACCESS), controller.loginWithUserId);
 
 module.exports = router;

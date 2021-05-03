@@ -1,6 +1,7 @@
 const httpStatus = require("http-status");
 const { platformTypes } = require("../../../config/type");
 const { googleService, userService, tokenService } = require("../../../services");
+const catchAsync = require("../../../utils/catchAsync");
 
 const obtainOAuth = (type) => (req, res) => {
   const oAuthUri = googleService.getOAuthUrl(type);
@@ -8,7 +9,6 @@ const obtainOAuth = (type) => (req, res) => {
 };
 
 const login = (type) => async (req, res) => {
-  console.log("query: ", req.query);
   const platformToken = await googleService.getPlatformToken(req.query.code, type);
 
   const profile = googleService.getProfile(platformToken.id_token);

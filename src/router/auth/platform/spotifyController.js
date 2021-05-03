@@ -13,7 +13,7 @@ const login = (type) => async (req, res) => {
   const profile = await spotifyService.getProfile(platformToken.access_token);
   const userBody = {
     email: profile.email,
-    nick: profile.name,
+    nick: profile.display_name,
     platform: platformTypes.SPOTIFY,
     platformId: profile.id,
   };
@@ -29,7 +29,7 @@ const login = (type) => async (req, res) => {
 
   res.clearCookie("refreshToken");
   res.cookie("refreshToken", refreshToken, {
-    httpOnly: true, //JS에서 쿠키 접근 불가능
+    // httpOnly: true, //JS에서 쿠키 접근 불가능
     // secure: true, //https에서만 쿠키 생성
     expires: new Date(Date.now() + 2592000), //unixTime: 1month
     signed: true,
