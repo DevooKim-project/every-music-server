@@ -17,9 +17,9 @@ const playlistSchema = new Schema({
     enum: [platformTypes.KAKAO, platformTypes.GOOGLE, platformTypes.SPOTIFY],
   },
   platformId: String,
-  private: {
+  visible: {
     type: Boolean,
-    default: false,
+    default: true,
   },
   like: {
     type: Number,

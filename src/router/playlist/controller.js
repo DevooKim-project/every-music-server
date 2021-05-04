@@ -7,15 +7,15 @@ const { playlistService } = require("../../services");
 const readPlaylists = catchAsync(async (req, res) => {
   const options = pick(req.query, ["page", "limit"]);
   options.sort = { like: -1 };
-  const filter = { private: false };
+  const filter = { visible: true };
   const result = await playlistService.queryPlaylists(filter, options);
   res.send(result);
 });
 
 const readPlaylistsByUser = catchAsync(async (req, res) => {
   const options = pick(req.query, ["page", "limit"]);
-  const privateOption = playlistService.setPrivateOption(req);
-  const filter = { owner: req.params.userId, ...privateOption };
+  const visibleOption = playlistService.setVisibleOption(req);
+  const filter = { owner: req.params.userId, ...visibleOption };
   const result = await playlistService.queryPlaylists(filter, options);
   res.send(result);
 });
@@ -46,10 +46,12 @@ const likePlaylist = catchAsync(async (req, res) => {
 });
 
 const updatePlaylistOptions = catchAsync(async (req, res) => {
-  const update = pick(req.body, ["title", "description", "thumbnail", "private"]);
+  const update = pick(req.body, ["title", "description", "thumbnail", "visible"]);
   const filter = { _id: req.params.playlistId, owner: req.payload.id };
-  await playlistService.updatePlaylistOptions(filter, update);
-  res.status(httpStatus.NO_CONTENT).send();
+  const playlist = await playlistService.updatePlaylistOptions(filter, update);
+  await playlist.execPopulate("owner");
+  // res.status(httpStatus.NO_CONTENT).send();
+  res.send(playlist);
 });
 
 const deletePlaylist = catchAsync(async (req, res) => {

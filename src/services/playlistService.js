@@ -47,7 +47,7 @@ const likePlaylist = async (playlistBody, operator) => {
 };
 
 const updatePlaylistOptions = async (filter, update) => {
-  return await Playlist.updateOne(filter, { $set: update });
+  return await Playlist.findOneAndUpdate(filter, { $set: update }, { new: true });
 };
 
 const deletePlaylistById = async (userId, playlistId) => {
@@ -82,11 +82,11 @@ const getTrack = async (playlistId) => {
   return playlist;
 };
 
-const setPrivateOption = (req) => {
+const setVisibleOption = (req) => {
   if (req.payload && req.payload.id === req.params.userId) {
-    return { $or: [{ private: true }, { private: false }] };
+    return { $or: [{ visible: true }, { visible: false }] };
   } else {
-    return { private: false };
+    return { visible: true };
   }
 };
 
@@ -99,5 +99,5 @@ module.exports = {
   deletePlaylistByUserId,
   getPlaylistById,
   getTrack,
-  setPrivateOption,
+  setVisibleOption,
 };
