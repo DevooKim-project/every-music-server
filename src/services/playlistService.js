@@ -73,7 +73,12 @@ const getPlaylistById = async (id) => {
 
 const getTrack = async (playlistId) => {
   const playlist = await getPlaylistById(playlistId);
+  await playlist.execPopulate("owner");
   await playlist.execPopulate("tracks");
+
+  for (const track of playlist.tracks) {
+    await track.execPopulate("artist");
+  }
   return playlist;
 };
 
