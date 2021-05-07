@@ -7,8 +7,8 @@ const obtainOAuth = (type) => (req, res) => {
   res.redirect(oAuthUri);
 };
 
-const login = (type) => async (req, res) => {
-  const platformToken = await kakaoService.getPlatformToken(req.query.code, type);
+const login = async (req, res) => {
+  const platformToken = await kakaoService.getPlatformToken(req.query);
 
   const profile = await kakaoService.getProfile(platformToken.access_token);
   const account = profile.kakao_account;

@@ -5,6 +5,11 @@ const { tokenTypes } = require("../config/type");
 const { Token } = require("../database/schema");
 const ApiError = require("../utils/ApiError");
 
+const hasPlatformToken = async (userId, platform) => {
+  const token = await Token.findOne({ user: userId, platform });
+  console.log(token);
+  return token ? true : false;
+};
 const generateToken = (tokenBody, expires, secret = process.env.JWT_SECRET) => {
   const payload = {
     iss: "everyMusic.com",
@@ -13,20 +18,6 @@ const generateToken = (tokenBody, expires, secret = process.env.JWT_SECRET) => {
     exp: expires.unix(),
   };
   return jwt.sign(payload, secret);
-};
-
-const hasToken = (req, type, required = true) => {
-  if (type === tokenTypes.ACCESS && req.headers.authorization) {
-    return type;
-  }
-  if (type === tokenTypes.REFRESH && req.cookies.hasOwnProperty("refreshToken")) {
-    return type;
-  }
-
-  if (required) {
-    return;
-  }
-  throw new ApiError(httpStatus.UNAUTHORIZED, `Not found ${type}`);
 };
 
 const upsertPlatformToken = async (userId, platform, token) => {
@@ -74,8 +65,8 @@ const deletePlatformTokenByUserId = async (userId) => {
 };
 
 module.exports = {
+  hasPlatformToken,
   generateToken,
-  hasToken,
   upsertPlatformToken,
   generateLocalToken,
   findPlatformTokenByUserId,

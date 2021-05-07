@@ -12,7 +12,7 @@ const getPlaylistFromPlatform = async (req, res) => {
 const getItemFromPlatform = async (req, res) => {
   const platformToken = req.platformToken;
   const { playlists } = req.body;
-
+  console.log(req.body);
   const tracks = [];
   for (const playlist of playlists) {
     const track = await spotifyService.getItemFromPlatform(playlist.platformId, platformToken.accessToken);

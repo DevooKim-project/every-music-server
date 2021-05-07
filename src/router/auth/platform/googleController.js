@@ -3,24 +3,19 @@ const { platformTypes } = require("../../../config/type");
 const { googleService, userService, tokenService } = require("../../../services");
 const catchAsync = require("../../../utils/catchAsync");
 
-const obtainOAuth = (type) => (req, res) => {
-  const oAuthUri = googleService.getOAuthUrl(type);
-  res.redirect(oAuthUri);
-};
-
-const login = (type) => async (req, res) => {
-  const platformToken = await googleService.getPlatformToken(req.query.code, type);
-
+const login = async (req, res) => {
+  const platformToken = await googleService.getPlatformToken(req.query);
   const profile = googleService.getProfile(platformToken.id_token);
+
+  const platformTokenBody = {
+    accessToken: platformToken.access_token,
+    refreshToken: platformToken.refresh_token,
+  };
   const userBody = {
     email: profile.email,
     nick: profile.name,
     platform: platformTypes.GOOGLE,
     platformId: profile.sub,
-  };
-  const platformTokenBody = {
-    accessToken: platformToken.access_token,
-    refreshToken: platformToken.refresh_token,
   };
   const { accessToken, refreshToken, expiresIn } = await userService.login(
     userBody,
@@ -39,9 +34,9 @@ const login = (type) => async (req, res) => {
   res.json({ accessToken, expiresIn });
 };
 
-const getOnlyToken = (type) => async (req, res) => {
+const getOnlyToken = async (req, res) => {
   const payload = req.payload;
-  const platformToken = await googleService.getPlatformToken(req.query.code, type);
+  const platformToken = await googleService.getPlatformToken(req.query);
   const platformTokenBody = {
     accessToken: platformToken.access_token,
     refreshToken: platformToken.refresh_token,
@@ -57,7 +52,6 @@ const signOut = async (req, res) => {
 };
 
 module.exports = {
-  obtainOAuth,
   login,
   getOnlyToken,
   signOut,

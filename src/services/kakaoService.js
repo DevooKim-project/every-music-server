@@ -21,15 +21,13 @@ const getOAuthUrl = (type) => {
   return oAuthUri;
 };
 
-const getPlatformToken = async (code, type) => {
-  const oAuthParam = kakaoParams(type);
-  const { redirectUri } = oAuthParam;
-
+const getPlatformToken = async ({ code, type }) => {
+  const redirectUri = type === "login" ? process.env.REDIRECT_LOGIN : process.env.REDIRECT_TOKEN;
   const data = {
     code,
     client_id: process.env.KAKAO_ID,
     client_secret: process.env.KAKAO_SECRET,
-    redirect_uri: "http://localhost:3000/?platform=kakao",
+    redirect_uri: `${redirectUri}/?platform=kakao&type=${type}`,
     grant_type: "authorization_code",
   };
 

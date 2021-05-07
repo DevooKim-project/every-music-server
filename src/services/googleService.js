@@ -27,15 +27,13 @@ const getOAuthUrl = (type) => {
   return oAuthUri;
 };
 
-const getPlatformToken = async (code, type) => {
-  const oAuthParam = googleParams(type);
-  const { redirectUri } = oAuthParam;
+const getPlatformToken = async ({ code, type }) => {
+  const redirectUri = type === "login" ? process.env.REDIRECT_LOGIN : process.env.REDIRECT_TOKEN;
   const data = {
     code,
     client_id: process.env.GOOGLE_ID,
     client_secret: process.env.GOOGLE_SECRET,
-    // redirect_uri: redirectUri,
-    redirect_uri: "http://localhost:3000/?platform=google",
+    redirect_uri: `${redirectUri}/?platform=google&type=${type}`,
     grant_type: "authorization_code",
   };
 

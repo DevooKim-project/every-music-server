@@ -7,19 +7,19 @@ const obtainOAuth = (type) => (req, res) => {
   res.redirect(oAuthUri);
 };
 
-const login = (type) => async (req, res) => {
-  const platformToken = await spotifyService.getPlatformToken(req.query.code, type);
-
+const login = async (req, res) => {
+  const platformToken = await spotifyService.getPlatformToken(req.query);
   const profile = await spotifyService.getProfile(platformToken.access_token);
+
+  const platformTokenBody = {
+    accessToken: platformToken.access_token,
+    refreshToken: platformToken.refresh_token,
+  };
   const userBody = {
     email: profile.email,
     nick: profile.display_name,
     platform: platformTypes.SPOTIFY,
     platformId: profile.id,
-  };
-  const platformTokenBody = {
-    accessToken: platformToken.access_token,
-    refreshToken: platformToken.refresh_token,
   };
   const { accessToken, refreshToken, expiresIn } = await userService.login(
     userBody,
@@ -39,9 +39,9 @@ const login = (type) => async (req, res) => {
   res.json({ accessToken, expiresIn });
 };
 
-const getOnlyToken = (type) => async (req, res) => {
+const getOnlyToken = async (req, res) => {
   const payload = req.payload;
-  const platformToken = await spotifyService.getPlatformToken(req.query.code, type);
+  const platformToken = await spotifyService.getPlatformToken(req.query);
   const platformTokenBody = {
     accessToken: platformToken.access_token,
     refreshToken: platformToken.refresh_token,

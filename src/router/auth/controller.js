@@ -3,20 +3,19 @@ const catchAsync = require("../../utils/catchAsync");
 const { switchAuthPlatform } = require("../../utils/switchPlatform");
 const { userService, tokenService } = require("../../services");
 
-const obtainOAuth = (type) =>
-  catchAsync((req, res) => {
-    const controller = switchAuthPlatform(req.params.platform);
-    return controller.obtainOAuth(type)(req, res);
-  });
-
 const login = catchAsync((req, res) => {
   const controller = switchAuthPlatform(req.params.platform);
-  return controller.login(authTypes.LOGIN)(req, res);
+  return controller.login(req, res);
 });
 
 const getOnlyPlatformToken = catchAsync((req, res) => {
   const controller = switchAuthPlatform(req.params.platform);
-  return controller.getOnlyToken(authTypes.TOKEN)(req, res);
+  return controller.getOnlyToken(req, res);
+});
+
+const hasPlatformToken = catchAsync(async (req, res) => {
+  const hasToken = await tokenService.hasPlatformToken(req.payload.id, req.params.platform);
+  return res.send({ platformToken: hasToken });
 });
 
 const loginWithUserId = catchAsync(async (req, res) => {
@@ -40,7 +39,7 @@ const signOut = catchAsync((req, res) => {
 });
 
 module.exports = {
-  obtainOAuth,
+  hasPlatformToken,
   login,
   loginWithUserId,
   getOnlyPlatformToken,
