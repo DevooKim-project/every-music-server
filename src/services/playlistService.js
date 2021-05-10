@@ -19,12 +19,7 @@ const createPlaylist = async (playlistBody) => {
 };
 
 const queryPlaylists = async (filter, options) => {
-  const result = await paginate(Playlist, filter, options);
-
-  for (let playlist of result.results) {
-    playlist.tracks = undefined;
-    await playlist.execPopulate("owner");
-  }
+  const result = await paginate(Playlist, filter, options, "owner");
 
   return result;
 };
@@ -67,18 +62,14 @@ const deletePlaylistByUserId = async (userId) => {
   await Playlist.deleteMany({ owner: userId });
 };
 
-const getPlaylistById = async (id) => {
-  return await Playlist.findById(id);
+const getPlaylistById = async (id, path = undefined) => {
+  return await Playlist.findById(id).populate(path);
 };
 
 const getTrack = async (playlistId) => {
-  const playlist = await getPlaylistById(playlistId);
-  await playlist.execPopulate("owner");
-  await playlist.execPopulate("tracks");
+  const path = [{ path: "tracks", populate: { path: "artist", model: "Artist" } }, { path: "owner" }];
+  const playlist = await getPlaylistById(playlistId, path);
 
-  for (const track of playlist.tracks) {
-    await track.execPopulate("artist");
-  }
   return playlist;
 };
 
