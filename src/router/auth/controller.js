@@ -14,7 +14,19 @@ const getOnlyPlatformToken = catchAsync((req, res) => {
 });
 
 const hasPlatformToken = catchAsync(async (req, res) => {
-  const hasToken = await tokenService.hasPlatformToken(req.payload.id, req.params.platform);
+  const { accessToken, refreshToken } = await tokenService.getPlatformTokenByUserId(
+    req.payload.id,
+    req.params.platform
+  );
+
+  if (!accessToken && !refreshToken) {
+    //throw error
+  }
+
+  if (!accessToken && refreshToken) {
+    //refresh
+  }
+  //res.send(hasToken: true)
   return res.send({ platformToken: hasToken });
 });
 

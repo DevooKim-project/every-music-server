@@ -3,7 +3,7 @@ const catchAsync = require("../../utils/catchAsync");
 const { tokenService } = require("../../services");
 
 const getPlatformTokenByUserId = async (req, res, next) => {
-  const platformToken = await tokenService.findPlatformTokenByUserId(req.payload.id, req.params.platform);
+  const platformToken = await tokenService.getPlatformTokenByUserId(req.payload.id, req.params.platform);
   req.platformToken = platformToken;
   return next();
 };

@@ -21,6 +21,8 @@ const login = async (req, res) => {
   const platformTokenBody = {
     accessToken: platformToken.access_token,
     refreshToken: platformToken.refresh_token,
+    expiresIn: platformToken.expires_in,
+    refreshTokenExpiresIn: platformToken.refresh_token_expires_in,
   };
   const { accessToken, refreshToken, expiresIn } = await userService.login(
     userBody,

@@ -14,6 +14,7 @@ const login = async (req, res) => {
   const platformTokenBody = {
     accessToken: platformToken.access_token,
     refreshToken: platformToken.refresh_token,
+    expiresIn: platformToken.expires_in,
   };
   const userBody = {
     email: profile.email,
@@ -46,7 +47,7 @@ const getOnlyToken = async (req, res) => {
     accessToken: platformToken.access_token,
     refreshToken: platformToken.refresh_token,
   };
-  await tokenService.upsertPlatformToken(payload.id, platformTypes.SPOTIFY, platformTokenBody);
+  await tokenService.setPlatformToken(payload.id, platformTypes.SPOTIFY, platformTokenBody);
 
   res.send();
 };

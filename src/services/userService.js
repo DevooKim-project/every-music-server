@@ -19,7 +19,7 @@ const login = async (userBody, platform, platformToken) => {
     throw new ApiError(httpStatus.BAD_REQUEST, "Email already taken other platform");
   }
   const localToken = tokenService.generateLocalToken(user);
-  await tokenService.upsertPlatformToken(user.id, platform, platformToken);
+  await tokenService.setPlatformToken(user.id, platform, platformToken);
 
   return localToken;
 };

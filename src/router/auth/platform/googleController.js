@@ -40,8 +40,9 @@ const getOnlyToken = async (req, res) => {
   const platformTokenBody = {
     accessToken: platformToken.access_token,
     refreshToken: platformToken.refresh_token,
+    expiresIn: platformToken.expires_in,
   };
-  await tokenService.upsertPlatformToken(payload.id, platformTypes.GOOGLE, platformTokenBody);
+  await tokenService.setPlatformToken(payload.id, platformTypes.GOOGLE, platformTokenBody);
   res.status(httpStatus.NO_CONTENT).send();
 };
 
