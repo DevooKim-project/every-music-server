@@ -11,13 +11,13 @@ const createUser = async (userBody) => {
 };
 
 const login = async (userBody, platform, platformToken) => {
-  let user = await getUserByEmail(userBody.email);
+  let user = await getUserByEmailAndPlatform(userBody.email, platform);
   if (!user) {
     user = await createUser(userBody);
   }
-  if (user.platform !== platform) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "Email already taken other platform");
-  }
+  // if (user.platform !== platform) {
+  //   throw new ApiError(httpStatus.BAD_REQUEST, "Email already taken other platform");
+  // }
   const localToken = tokenService.generateLocalToken(user);
   await tokenService.setPlatformToken(user.id, platform, platformToken);
 
@@ -36,8 +36,8 @@ const getUserById = async (id) => {
   return User.findById(id);
 };
 
-const getUserByEmail = async (email) => {
-  return User.findOne({ email });
+const getUserByEmailAndPlatform = async (email, platform) => {
+  return User.findOne({ email, platform });
 };
 
 const deleteUserById = async (id) => {
@@ -52,6 +52,6 @@ module.exports = {
   login,
   deleteUserWithTokenAndPlaylistById,
   getUserById,
-  getUserByEmail,
+  getUserByEmailAndPlatform,
   deleteUserById,
 };
