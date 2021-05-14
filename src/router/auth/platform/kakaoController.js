@@ -1,6 +1,9 @@
 const httpStatus = require("http-status");
 const { platformTypes } = require("../../../config/type");
 const { kakaoService, userService } = require("../../../services");
+const { refreshAccessToken } = require("../../../services/kakaoService");
+const { getPlatformTokenByUserId, setPlatformToken } = require("../../../services/tokenService");
+const ApiError = require("../../../utils/ApiError");
 
 const obtainOAuth = (type) => (req, res) => {
   const oAuthUri = kakaoService.getOAuthUrl(type);
@@ -41,6 +44,21 @@ const login = async (req, res) => {
   res.json({ accessToken, expiresIn });
 };
 
+const refreshToken = async (req, res) => {
+  const { refreshToken } = await getPlatformTokenByUserId(req.payload.id, platformTypes.KAKAO);
+  if (!refreshToken) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Not found kakao refreshToken");
+  }
+
+  const platformToken = await refreshAccessToken(refreshToken);
+  const platformTokenBody = {
+    accessToken: platformToken.access_token,
+    expiresIn: platformToken.expires_in,
+  };
+  await setPlatformToken(req.payload.id, platformTypes.KAKAO, platformTokenBody);
+  res.status(httpStatus.NO_CONTENT).send();
+};
+
 const signOut = async (req, res) => {
   const signOutPromise = kakaoService.signOut(req.payload.platformId);
   const deletePromise = userService.deleteUserWithTokenAndPlaylistById(req.payload.id);
@@ -53,5 +71,6 @@ const signOut = async (req, res) => {
 module.exports = {
   obtainOAuth,
   login,
+  refreshToken,
   signOut,
 };

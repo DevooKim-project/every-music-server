@@ -51,6 +51,22 @@ const getProfile = (idToken) => {
   return jwt.decode(idToken);
 };
 
+const refreshAccessToken = async (refreshToken) => {
+  const data = {
+    client_id: process.env.GOOGLE_ID,
+    client_secret: process.env.GOOGLE_SECRET,
+    refresh_token: refreshToken,
+    grant_type: "refresh_token",
+  };
+
+  const response = await axios({
+    method: "POST",
+    url: "https://oauth2.googleapis.com/token",
+    data: qs.stringify(data),
+  });
+  return response.data;
+};
+
 const revoke = async (userId) => {
   const token = await tokenService.findPlatformTokenById(userId, platformTypes.GOOGLE);
 
@@ -63,7 +79,6 @@ const revoke = async (userId) => {
 
   await axios(options);
 };
-
 //playlist
 const createPlaylistToPlatform = async (playlist, accessToken) => {
   const params = {
@@ -298,6 +313,7 @@ module.exports = {
   getOAuthUrl,
   getPlatformToken,
   getProfile,
+  refreshAccessToken,
   revoke,
   createPlaylistToPlatform,
   insertTrackToPlatform,

@@ -48,13 +48,13 @@ const setKeys = (userId, platform) => {
 
 const setPlatformToken = async (userId, platform, token) => {
   const keys = setKeys(userId, platform);
-  if (token.hasOwnProperty("refreshToken")) {
+  if (token.hasOwnProperty("refreshToken") && token.refreshToken) {
     client.set(keys[tokenTypes.REFRESH], token.refreshToken, redis.print);
-    client.expire(keys[tokenTypes.REFRESH], (token.refreshTokenExpiresIn || 5184000) - 60); //60일
+    client.expire(keys[tokenTypes.REFRESH], (token.refreshTokenExpiresIn || 5184000) - 180); //60일
   }
 
   client.set(keys[tokenTypes.ACCESS], token.accessToken, redis.print);
-  client.expire(keys[tokenTypes.ACCESS], (token.expiresIn || 3600) - 60);
+  client.expire(keys[tokenTypes.ACCESS], (token.expiresIn || 3600) - 180);
   return;
 };
 

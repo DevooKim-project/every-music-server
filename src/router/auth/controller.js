@@ -8,28 +8,6 @@ const login = catchAsync((req, res) => {
   return controller.login(req, res);
 });
 
-const getOnlyPlatformToken = catchAsync((req, res) => {
-  const controller = switchAuthPlatform(req.params.platform);
-  return controller.getOnlyToken(req, res);
-});
-
-const hasPlatformToken = catchAsync(async (req, res) => {
-  const { accessToken, refreshToken } = await tokenService.getPlatformTokenByUserId(
-    req.payload.id,
-    req.params.platform
-  );
-
-  if (!accessToken && !refreshToken) {
-    //throw error
-  }
-
-  if (!accessToken && refreshToken) {
-    //refresh
-  }
-  //res.send(hasToken: true)
-  return res.send({ platformToken: hasToken });
-});
-
 const loginWithUserId = catchAsync(async (req, res) => {
   const user = await userService.getUserById(req.payload.id);
   const { accessToken, refreshToken, expiresIn } = await tokenService.generateLocalToken(user);
@@ -50,10 +28,29 @@ const signOut = catchAsync((req, res) => {
   return controller.signOut(req, res);
 });
 
+const generatePlatformToken = catchAsync((req, res) => {
+  const controller = switchAuthPlatform(req.params.platform);
+  return controller.generateToken(req, res);
+});
+
+const refreshPlatformToken = catchAsync((req, res) => {
+  const controller = switchAuthPlatform(req.params.platform);
+  return controller.refreshToken(req, res);
+});
+
+const getPlatformToken = catchAsync(async (req, res) => {
+  const { accessToken, refreshToken } = await tokenService.getPlatformTokenByUserId(
+    req.payload.id,
+    req.params.platform
+  );
+  res.send({ accessToken, refreshToken });
+});
+
 module.exports = {
-  hasPlatformToken,
   login,
   loginWithUserId,
-  getOnlyPlatformToken,
   signOut,
+  generatePlatformToken,
+  refreshPlatformToken,
+  getPlatformToken,
 };

@@ -53,6 +53,22 @@ const getProfile = async (accessToken) => {
   return profile.data;
 };
 
+const refreshAccessToken = async (refreshToken) => {
+  const data = {
+    client_id: process.env.KAKAO_ID,
+    client_secret: process.env.KAKAO_SECRET,
+    refresh_token: refreshToken,
+    grant_type: "refresh_token",
+  };
+
+  const response = await axios({
+    method: "POST",
+    url: "https://kauth.kakao.com/oauth/token",
+    data: qs.stringify(data),
+  });
+  return response.data;
+};
+
 const signOut = (platformId) => {
   const params = {
     target_id_type: "user_id",
@@ -74,5 +90,6 @@ module.exports = {
   getOAuthUrl,
   getPlatformToken,
   getProfile,
+  refreshAccessToken,
   signOut,
 };

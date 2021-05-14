@@ -8,6 +8,7 @@ const artistService = require("./artistService");
 const { spotifyUtils } = require("../utils/platformUtils");
 const { platformTypes } = require("../config/type");
 const pick = require("../utils/pick");
+const ApiError = require("../utils/ApiError");
 
 //OAuth Service
 const getOAuthUrl = (type) => {
@@ -59,6 +60,23 @@ const getProfile = async (accessToken) => {
     },
   });
   console.log(response.data);
+  return response.data;
+};
+
+const refreshAccessToken = async (refreshToken) => {
+  const key = Base64.encode(`${process.env.SPOTIFY_ID}:${process.env.SPOTIFY_SECRET}`);
+  const data = {
+    refresh_token: refreshToken,
+    grant_type: "refresh_token",
+  };
+  const response = await axios({
+    method: "POST",
+    url: "https://accounts.spotify.com/api/token",
+    headers: {
+      authorization: `Basic ${key}`,
+    },
+    data: qs.stringify(data),
+  });
   return response.data;
 };
 
@@ -219,6 +237,7 @@ module.exports = {
   getOAuthUrl,
   getPlatformToken,
   getProfile,
+  refreshAccessToken,
   createPlaylistToPlatform,
   insertTrackToPlatform,
   getPlaylistFromPlatform,

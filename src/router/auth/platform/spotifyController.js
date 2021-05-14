@@ -1,11 +1,8 @@
 const httpStatus = require("http-status");
 const { platformTypes } = require("../../../config/type");
 const { spotifyService, userService, tokenService } = require("../../../services");
-
-const obtainOAuth = (type) => (req, res) => {
-  const oAuthUri = spotifyService.getOAuthUrl(type);
-  res.redirect(oAuthUri);
-};
+const { refreshAccessToken } = require("../../../services/spotifyService");
+const { getPlatformTokenByUserId, setPlatformToken } = require("../../../services/tokenService");
 
 const login = async (req, res) => {
   const platformToken = await spotifyService.getPlatformToken(req.query);
@@ -40,16 +37,31 @@ const login = async (req, res) => {
   res.json({ accessToken, expiresIn });
 };
 
-const getOnlyToken = async (req, res) => {
-  const payload = req.payload;
+const generateToken = async (req, res) => {
   const platformToken = await spotifyService.getPlatformToken(req.query);
   const platformTokenBody = {
     accessToken: platformToken.access_token,
     refreshToken: platformToken.refresh_token,
+    expiresIn: platformToken.expires_in,
   };
-  await tokenService.setPlatformToken(payload.id, platformTypes.SPOTIFY, platformTokenBody);
+  await tokenService.setPlatformToken(req.payload.id, platformTypes.SPOTIFY, platformTokenBody);
 
   res.send();
+};
+
+const refreshToken = async (req, res) => {
+  const { refreshToken } = await getPlatformTokenByUserId(req.payload.id, platformTypes.SPOTIFY);
+  if (!refreshToken) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Not found spotify refreshToken");
+  }
+
+  const platformToken = await refreshAccessToken(refreshToken);
+  const platformTokenBody = {
+    accessToken: platformToken.access_token,
+    expiresIn: platformToken.expires_in,
+  };
+  await setPlatformToken(req.payload.id, platformTypes.SPOTIFY, platformTokenBody);
+  res.status(httpStatus.NO_CONTENT).send();
 };
 
 const signOut = async (req, res) => {
@@ -58,4 +70,9 @@ const signOut = async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 };
 
-module.exports = { obtainOAuth, login, getOnlyToken, signOut };
+module.exports = {
+  login,
+  generateToken,
+  refreshToken,
+  signOut,
+};
