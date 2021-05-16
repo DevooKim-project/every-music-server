@@ -42,7 +42,8 @@ const likePlaylist = async (playlistBody, operator) => {
 };
 
 const updatePlaylistOptions = async (filter, update) => {
-  return await Playlist.findOneAndUpdate(filter, { $set: update }, { new: true });
+  const playlist = await Playlist.findOneAndUpdate(filter, { $set: update }, { new: true }).populate("owner");
+  return { playlist };
 };
 
 const deletePlaylistById = async (userId, playlistId) => {
@@ -69,8 +70,9 @@ const getPlaylistById = async (id, path = undefined) => {
 const getTrack = async (playlistId) => {
   const path = [{ path: "tracks", populate: { path: "artist", model: "Artist" } }, { path: "owner" }];
   const playlist = await getPlaylistById(playlistId, path);
-
-  return playlist;
+  const tracks = playlist.tracks;
+  playlist.tracks = undefined;
+  return { playlist, tracks };
 };
 
 const setVisibleOption = (req) => {
