@@ -65,6 +65,7 @@ const refreshToken = async (req, res) => {
 
 const signOut = async (req, res) => {
   await userService.deleteUserWithTokenAndPlaylistById(req.payload.id);
+  await googleService.revoke(req.payload.id);
   res.clearCookie("refreshToken");
   res.status(httpStatus.NO_CONTENT).send();
 };

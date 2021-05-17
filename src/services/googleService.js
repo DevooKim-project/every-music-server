@@ -68,7 +68,7 @@ const refreshAccessToken = async (refreshToken) => {
 };
 
 const revoke = async (userId) => {
-  const token = await tokenService.findPlatformTokenById(userId, platformTypes.GOOGLE);
+  const token = await tokenService.getPlatformTokenByUserId(userId, platformTypes.GOOGLE);
 
   const params = { token: token.refreshToken };
   const options = {

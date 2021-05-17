@@ -24,7 +24,8 @@ const loginWithUserId = catchAsync(async (req, res) => {
 });
 
 const signOut = catchAsync((req, res) => {
-  const controller = switchAuthPlatform(req.params.platform);
+  const { platform } = req.payload;
+  const controller = switchAuthPlatform(platform);
   return controller.signOut(req, res);
 });
 

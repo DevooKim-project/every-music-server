@@ -20,7 +20,7 @@ router.post("/:platform/token", verifyToken(tokenTypes.REFRESH), controller.gene
 
 router.post("/login", verifyToken(tokenTypes.REFRESH), controller.loginWithUserId);
 
-router.delete("/:platform/sign-out", verifyToken(tokenTypes.ACCESS), controller.signOut);
+router.delete("/", verifyToken(tokenTypes.ACCESS), controller.signOut);
 
 // router.post("/refresh", verifyToken(tokenTypes.ACCESS), controller.loginWithUserId);
 
