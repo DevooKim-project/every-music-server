@@ -22,6 +22,6 @@ router.post("/login", verifyToken(tokenTypes.REFRESH), controller.loginWithUserI
 
 router.delete("/", verifyToken(tokenTypes.ACCESS), controller.signOut);
 
-// router.post("/refresh", verifyToken(tokenTypes.ACCESS), controller.loginWithUserId);
+router.post("/refresh", verifyToken(tokenTypes.ACCESS), controller.loginWithUserId);
 
 module.exports = router;
