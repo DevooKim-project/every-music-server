@@ -7,6 +7,7 @@ const artistService = require("./artistService");
 const tokenService = require("./tokenService");
 const splitArray = require("../utils/splitArray");
 const pick = require("../utils/pick");
+const ApiError = require("../utils/ApiError");
 const { youtubeUtils } = require("../utils/platformUtils");
 const { platformTypes } = require("../config/type");
 const { googleParams } = require("../config/oAuthParam");
@@ -99,9 +100,12 @@ const createPlaylistToPlatform = async (playlist, accessToken) => {
     data,
   };
 
-  const response = await axios(options);
-
-  return response.data;
+  try {
+    const response = await axios(options);
+    return response.data;
+  } catch (error) {
+    throw new ApiError(error.response.status, error.response.message);
+  }
 };
 
 const insertTrackToPlatform = async (playlistId, trackIds, accessToken) => {
@@ -127,13 +131,16 @@ const insertTrackToPlatform = async (playlistId, trackIds, accessToken) => {
     data,
   };
 
-  //one by one
-  for (const trackId of trackIds) {
-    data.snippet.resourceId.videoId = trackId;
-    await axios(options);
+  try {
+    //one by one
+    for (const trackId of trackIds) {
+      data.snippet.resourceId.videoId = trackId;
+      await axios(options);
+    }
+    return;
+  } catch (error) {
+    throw new ApiError(error.response.status, error.response.message);
   }
-
-  return;
 };
 
 const getPlaylistFromPlatform = async (accessToken) => {
@@ -152,19 +159,23 @@ const getPlaylistFromPlatform = async (accessToken) => {
     params,
   };
 
-  const playlists = [];
-  do {
-    const response = await axios(options);
-    const { data } = response;
+  try {
+    const playlists = [];
+    do {
+      const response = await axios(options);
+      const { data } = response;
 
-    data.items.forEach((item) => {
-      playlists.push(youtubeUtils.setPlaylist(item));
-    });
+      data.items.forEach((item) => {
+        playlists.push(youtubeUtils.setPlaylist(item));
+      });
 
-    Object.assign(params, { pageToken: data.nextPageToken });
-  } while (params.pageToken);
+      Object.assign(params, { pageToken: data.nextPageToken });
+    } while (params.pageToken);
 
-  return playlists;
+    return playlists;
+  } catch (error) {
+    throw new ApiError(error.response.status, error.response.message);
+  }
 };
 
 //track.search
@@ -184,40 +195,44 @@ const getTrackIdFromPlatform = async (tracks, accessToken) => {
     params,
   };
 
-  const platformTrackIds = [];
-  const cachedTrackIds = [];
+  try {
+    const platformTrackIds = [];
+    const cachedTrackIds = [];
 
-  for (const track of tracks) {
-    let platformTrackId;
-    const artist = track.artist;
-    const cachedTrack = await trackService.getTrackByTitleAndArtist(track.title, artist.platformIds.local);
+    for (const track of tracks) {
+      let platformTrackId;
+      const artist = track.artist;
+      const cachedTrack = await trackService.getTrackByTitleAndArtist(track.title, artist.platformIds.local);
 
-    cachedTrackIds.push(cachedTrack.id);
+      cachedTrackIds.push(cachedTrack.id);
 
-    const { platformIds } = cachedTrack;
-    const { google } = pick(platformIds, ["google"]);
+      const { platformIds } = cachedTrack;
+      const { google } = pick(platformIds, ["google"]);
 
-    if (google) {
-      //캐싱되어 있음
-      console.log("cached");
-      platformTrackId = cachedTrack.platformIds.google;
-    } else {
-      console.log("not cached");
+      if (google) {
+        //캐싱되어 있음
+        console.log("cached");
+        platformTrackId = cachedTrack.platformIds.google;
+      } else {
+        console.log("not cached");
 
-      const query = `${artist.name} ${track.title}`;
-      Object.assign(params, { q: query });
-      const response = await axios(options);
-      const items = response.data.items;
+        const query = `${artist.name} ${track.title}`;
+        Object.assign(params, { q: query });
+        const response = await axios(options);
+        const items = response.data.items;
 
-      if (items.length) {
-        platformTrackId = items[0].id.videoId;
+        if (items.length) {
+          platformTrackId = items[0].id.videoId;
+        }
       }
+
+      platformTrackIds.push(platformTrackId);
     }
 
-    platformTrackIds.push(platformTrackId);
+    return { platform: platformTrackIds, local: cachedTrackIds };
+  } catch (error) {
+    throw new ApiError(error.response.status, error.response.message);
   }
-
-  return { platform: platformTrackIds, local: cachedTrackIds };
 };
 
 const getItemIdFromPlatform = async (playlistId, accessToken) => {
@@ -235,20 +250,24 @@ const getItemIdFromPlatform = async (playlistId, accessToken) => {
     params,
   };
 
-  const trackIds = [];
-  do {
-    const response = await axios(options);
-    const { data } = response;
+  try {
+    const trackIds = [];
+    do {
+      const response = await axios(options);
+      const { data } = response;
 
-    data.items.forEach((item) => {
-      let trackId = item.contentDetails.videoId;
-      trackIds.push(trackId);
-    });
+      data.items.forEach((item) => {
+        let trackId = item.contentDetails.videoId;
+        trackIds.push(trackId);
+      });
 
-    Object.assign(params, { pageToken: data.nextPageToken });
-  } while (params.pageToken);
+      Object.assign(params, { pageToken: data.nextPageToken });
+    } while (params.pageToken);
 
-  return trackIds;
+    return trackIds;
+  } catch (error) {
+    throw new ApiError(error.response.status, error.response.message);
+  }
 };
 
 const getItemInfoFromPlatform = async (trackId, accessToken) => {
@@ -265,48 +284,56 @@ const getItemInfoFromPlatform = async (trackId, accessToken) => {
     params,
   };
 
-  const tracks = [];
-  do {
-    const response = await axios(options);
-    const { data } = response;
-    for (item of data.items) {
-      let trackBody = youtubeUtils.setTrack(item);
+  try {
+    const tracks = [];
+    do {
+      const response = await axios(options);
+      const { data } = response;
+      for (item of data.items) {
+        let trackBody = youtubeUtils.setTrack(item);
 
-      let artist = await artistService.caching(trackBody.artist, platformTypes.GOOGLE);
-      let track = await trackService.caching(trackBody, artist, platformTypes.GOOGLE);
-      artist = artist.toJSON();
-      track = track.toJSON();
+        let artist = await artistService.caching(trackBody.artist, platformTypes.GOOGLE);
+        let track = await trackService.caching(trackBody, artist, platformTypes.GOOGLE);
+        artist = artist.toJSON();
+        track = track.toJSON();
 
-      Object.assign(trackBody.platformIds, track.platformIds, {
-        local: track.id,
-      });
-      Object.assign(trackBody.artist.platformIds, artist.platformIds, {
-        local: artist.id,
-      });
-      tracks.push(trackBody);
-    }
+        Object.assign(trackBody.platformIds, track.platformIds, {
+          local: track.id,
+        });
+        Object.assign(trackBody.artist.platformIds, artist.platformIds, {
+          local: artist.id,
+        });
+        tracks.push(trackBody);
+      }
 
-    Object.assign(params, { pageToken: data.nextPageToken });
-  } while (params.pageToken);
+      Object.assign(params, { pageToken: data.nextPageToken });
+    } while (params.pageToken);
 
-  return tracks;
+    return tracks;
+  } catch (error) {
+    throw new ApiError(error.response.status, error.response.message);
+  }
 };
 
 //getItemInfoFromPlatform 반복함수
 //한번에 최대 50개의 트랙정보를 가져올 수 있음
 const iterateGetItemInfo = async (trackIds, accessToken) => {
-  let tracks = [];
-  for (const trackId of splitArray(trackIds, 50)) {
-    tracks.push(await getItemInfoFromPlatform(trackId, accessToken));
-  }
+  try {
+    let tracks = [];
+    for (const trackId of splitArray(trackIds, 50)) {
+      tracks.push(await getItemInfoFromPlatform(trackId, accessToken));
+    }
 
-  if (tracks.length !== 0) {
-    tracks = tracks.reduce((prev, current) => {
-      return prev.concat(current);
-    });
-  }
+    if (tracks.length !== 0) {
+      tracks = tracks.reduce((prev, current) => {
+        return prev.concat(current);
+      });
+    }
 
-  return tracks;
+    return tracks;
+  } catch (error) {
+    throw new ApiError(error.response.status, error.response.message);
+  }
 };
 
 module.exports = {
