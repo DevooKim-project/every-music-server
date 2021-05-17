@@ -12,7 +12,7 @@ const getPlaylistFromPlatform = async (req, res) => {
 const getItemFromPlatform = async (req, res) => {
   const platformToken = req.platformToken;
   const { playlists } = req.body;
-
+  console.log(req.body);
   const tracks = [];
   for (const playlist of playlists) {
     const track = await spotifyService.getItemFromPlatform(playlist.platformId, platformToken.accessToken);
@@ -30,6 +30,7 @@ const createPlaylistToPlatform = async (req, res) => {
   const { platformId } = req.payload;
   const { playlists, tracks } = req.body;
 
+  const newPlaylists = [];
   for (let i = 0; i < playlists.length; i++) {
     const createPlaylistPromise = spotifyService.createPlaylistToPlatform(playlists[i], platformId, accessToken);
     const getTrackIdsPromise = spotifyService.getTrackIdFromPlatform(tracks[i], accessToken);
@@ -44,9 +45,11 @@ const createPlaylistToPlatform = async (req, res) => {
       await spotifyService.insertTrackToPlatform(newPlaylist.id, trackId, accessToken);
     }
     console.log("insert track ok");
+    newPlaylists.push({ ...playlists[i], platformId: newPlaylist.id });
   }
 
-  res.status(httpStatus.NO_CONTENT).send();
+  // res.status(httpStatus.NO_CONTENT).send();
+  res.send({ playlists: newPlaylists });
 };
 
 module.exports = {

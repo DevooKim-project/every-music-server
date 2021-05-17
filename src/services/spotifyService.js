@@ -8,6 +8,7 @@ const artistService = require("./artistService");
 const { spotifyUtils } = require("../utils/platformUtils");
 const { platformTypes } = require("../config/type");
 const pick = require("../utils/pick");
+const ApiError = require("../utils/ApiError");
 
 //OAuth Service
 const getOAuthUrl = (type) => {
@@ -26,14 +27,12 @@ const getOAuthUrl = (type) => {
   return oAuthUri;
 };
 
-const getPlatformToken = async (code, type) => {
-  const oAuthParam = spotifyParams(type);
-  const { redirectUri } = oAuthParam;
-
+const getPlatformToken = async ({ code, type }) => {
+  const redirectUri = type === "login" ? process.env.REDIRECT_LOGIN : process.env.REDIRECT_TOKEN;
   const data = {
     code,
     grant_type: "authorization_code",
-    redirect_uri: redirectUri,
+    redirect_uri: `${redirectUri}/?platform=spotify&type=${type}`,
   };
 
   const key = Base64.encode(`${process.env.SPOTIFY_ID}:${process.env.SPOTIFY_SECRET}`);
@@ -61,6 +60,23 @@ const getProfile = async (accessToken) => {
     },
   });
   console.log(response.data);
+  return response.data;
+};
+
+const refreshAccessToken = async (refreshToken) => {
+  const key = Base64.encode(`${process.env.SPOTIFY_ID}:${process.env.SPOTIFY_SECRET}`);
+  const data = {
+    refresh_token: refreshToken,
+    grant_type: "refresh_token",
+  };
+  const response = await axios({
+    method: "POST",
+    url: "https://accounts.spotify.com/api/token",
+    headers: {
+      authorization: `Basic ${key}`,
+    },
+    data: qs.stringify(data),
+  });
   return response.data;
 };
 
@@ -221,6 +237,7 @@ module.exports = {
   getOAuthUrl,
   getPlatformToken,
   getProfile,
+  refreshAccessToken,
   createPlaylistToPlatform,
   insertTrackToPlatform,
   getPlaylistFromPlatform,

@@ -10,7 +10,7 @@ const googleParams = (type) => {
         "https://www.googleapis.com/auth/youtube.force-ssl",
         "https://www.googleapis.com/auth/youtube",
       ],
-      redirectUri: `http://localhost:5000/auth/google/${type}/callback`,
+      redirectUri: `http://localhost:3000/?platform=google`,
     };
   }
 
@@ -22,7 +22,7 @@ const googleParams = (type) => {
         "https://www.googleapis.com/auth/youtube.force-ssl",
         "https://www.googleapis.com/auth/youtube",
       ],
-      redirectUri: `http://localhost:5000/auth/google/${type}/callback`,
+      redirectUri: `http://localhost:3000/?platform=google&state=token`,
     };
   }
 };
@@ -30,23 +30,14 @@ const googleParams = (type) => {
 const spotifyParams = (type) => {
   if (type === authTypes.LOGIN) {
     return {
-      scopes: [
-        "user-read-email",
-        "playlist-modify-public",
-        "playlist-modify-private",
-        "playlist-read-private",
-      ],
+      scopes: ["user-read-email", "playlist-modify-public", "playlist-modify-private", "playlist-read-private"],
       redirectUri: `http://localhost:5000/auth/spotify/${type}/callback`,
     };
   }
 
   if (type === authTypes.TOKEN) {
     return {
-      scopes: [
-        "playlist-modify-public",
-        "playlist-modify-private",
-        "playlist-read-private",
-      ],
+      scopes: ["playlist-modify-public", "playlist-modify-private", "playlist-read-private"],
       redirectUri: `http://localhost:5000/auth/spotify/${type}/callback`,
     };
   }

@@ -3,46 +3,55 @@ const catchAsync = require("../../utils/catchAsync");
 const { switchAuthPlatform } = require("../../utils/switchPlatform");
 const { userService, tokenService } = require("../../services");
 
-const obtainOAuth = (type) =>
-  catchAsync((req, res) => {
-    const controller = switchAuthPlatform(req.params.platform);
-    return controller.obtainOAuth(type)(req, res);
-  });
-
 const login = catchAsync((req, res) => {
   const controller = switchAuthPlatform(req.params.platform);
-  controller.login(authTypes.LOGIN)(req, res);
-});
-
-const getOnlyPlatformToken = catchAsync((req, res) => {
-  const controller = switchAuthPlatform(req.params.platform);
-  return controller.getOnlyToken(authTypes.TOKEN)(req, res);
+  return controller.login(req, res);
 });
 
 const loginWithUserId = catchAsync(async (req, res) => {
   const user = await userService.getUserById(req.payload.id);
-  const localToken = await tokenService.generateLocalToken(user);
+  const { accessToken, refreshToken, expiresIn } = await tokenService.generateLocalToken(user);
 
   res.clearCookie("refreshToken");
-  res.cookie("refreshToken", localToken.refreshToken, {
-    httpOnly: true, //JS에서 쿠키 접근 불가능
+  res.cookie("refreshToken", refreshToken, {
+    // httpOnly: true, //JS에서 쿠키 접근 불가능
     // secure: true, //https에서만 쿠키 생성
     expires: new Date(Date.now() + 2592000), //unixTime: 1month
     signed: true,
   });
 
-  res.send({ accessToken: localToken.accessToken });
+  res.json({ accessToken, expiresIn });
 });
 
 const signOut = catchAsync((req, res) => {
-  const controller = switchAuthPlatform(req.params.platform);
+  const { platform } = req.payload;
+  const controller = switchAuthPlatform(platform);
   return controller.signOut(req, res);
 });
 
+const generatePlatformToken = catchAsync((req, res) => {
+  const controller = switchAuthPlatform(req.params.platform);
+  return controller.generateToken(req, res);
+});
+
+const refreshPlatformToken = catchAsync((req, res) => {
+  const controller = switchAuthPlatform(req.params.platform);
+  return controller.refreshToken(req, res);
+});
+
+const getPlatformToken = catchAsync(async (req, res) => {
+  const { accessToken, refreshToken } = await tokenService.getPlatformTokenByUserId(
+    req.payload.id,
+    req.params.platform
+  );
+  res.send({ accessToken, refreshToken });
+});
+
 module.exports = {
-  obtainOAuth,
   login,
   loginWithUserId,
-  getOnlyPlatformToken,
   signOut,
+  generatePlatformToken,
+  refreshPlatformToken,
+  getPlatformToken,
 };

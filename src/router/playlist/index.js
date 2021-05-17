@@ -25,14 +25,7 @@ router.post(
 );
 
 router.put(
-  "/like/:playlistId/:operator",
-  validate(playlistValidation.likePlaylist),
-  verifyToken(tokenTypes.ACCESS),
-  controller.likePlaylist
-);
-
-router.patch(
-  "/update/:playlistId",
+  "/:playlistId",
   validate(playlistValidation.updatePlaylist),
   verifyToken(tokenTypes.ACCESS),
   controller.updatePlaylistOptions
@@ -43,6 +36,13 @@ router.delete(
   validate(playlistValidation.deletePlaylist),
   verifyToken(tokenTypes.ACCESS),
   controller.deletePlaylist
+);
+
+router.put(
+  "/like/:playlistId/:operator",
+  validate(playlistValidation.likePlaylist),
+  verifyToken(tokenTypes.ACCESS),
+  controller.likePlaylist
 );
 
 module.exports = router;

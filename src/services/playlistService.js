@@ -19,7 +19,8 @@ const createPlaylist = async (playlistBody) => {
 };
 
 const queryPlaylists = async (filter, options) => {
-  const result = await paginate(Playlist, filter, options);
+  const result = await paginate(Playlist, filter, options, "owner");
+
   return result;
 };
 
@@ -41,7 +42,8 @@ const likePlaylist = async (playlistBody, operator) => {
 };
 
 const updatePlaylistOptions = async (filter, update) => {
-  return await Playlist.updateOne(filter, { $set: update });
+  const playlist = await Playlist.findOneAndUpdate(filter, { $set: update }, { new: true }).populate("owner");
+  return { playlist };
 };
 
 const deletePlaylistById = async (userId, playlistId) => {
@@ -61,21 +63,23 @@ const deletePlaylistByUserId = async (userId) => {
   await Playlist.deleteMany({ owner: userId });
 };
 
-const getPlaylistById = async (id) => {
-  return await Playlist.findById(id);
+const getPlaylistById = async (id, path = undefined) => {
+  return await Playlist.findById(id).populate(path);
 };
 
 const getTrack = async (playlistId) => {
-  const playlist = await getPlaylistById(playlistId);
-  await playlist.execPopulate("tracks");
-  return playlist.tracks;
+  const path = [{ path: "tracks", populate: { path: "artist", model: "Artist" } }, { path: "owner" }];
+  const playlist = await getPlaylistById(playlistId, path);
+  const tracks = playlist.tracks;
+  playlist.tracks = undefined;
+  return { playlist, tracks };
 };
 
-const setPrivateOption = (req) => {
+const setVisibleOption = (req) => {
   if (req.payload && req.payload.id === req.params.userId) {
-    return { $or: [{ private: true }, { private: false }] };
+    return { $or: [{ visible: true }, { visible: false }] };
   } else {
-    return { private: false };
+    return { visible: true };
   }
 };
 
@@ -88,5 +92,5 @@ module.exports = {
   deletePlaylistByUserId,
   getPlaylistById,
   getTrack,
-  setPrivateOption,
+  setVisibleOption,
 };

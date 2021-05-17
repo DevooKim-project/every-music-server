@@ -22,6 +22,6 @@ router.get("/:platform/playlists", controller.getPlaylistFromPlatform);
 router.post("/:platform/playlists", validate(convertValidation.convertPlatform), controller.convertPlaylist);
 
 //get tracks from platform playlists
-router.get("/:platform/tracks", validate(convertValidation.getTrack), controller.getItemFromPlatform);
+router.post("/:platform/tracks", validate(convertValidation.getTrack), controller.getItemFromPlatform);
 
 module.exports = router;

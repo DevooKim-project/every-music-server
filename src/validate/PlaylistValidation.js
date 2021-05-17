@@ -65,11 +65,12 @@ const updatePlaylist = {
   body: Joi.object()
     .keys({
       title: Joi.string(),
-      description: Joi.string(),
-      thumbnail: Joi.string(),
-      private: Joi.boolean(),
+      description: Joi.string().allow(null, ""),
+      thumbnail: Joi.string().allow(null, ""),
+      visible: Joi.boolean(),
     })
-    .min(1),
+    .min(1)
+    .unknown(),
 };
 
 const deletePlaylist = {

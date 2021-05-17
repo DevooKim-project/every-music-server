@@ -6,7 +6,7 @@ const { Schema } = mongoose;
 const userSchema = new Schema({
   email: {
     type: String,
-    unique: true,
+    // unique: true,
   },
   nick: {
     type: String,
@@ -19,9 +19,9 @@ const userSchema = new Schema({
     type: String,
   },
   likePlaylists: [{ type: Schema.Types.ObjectId, ref: "Playlist" }],
-  private: {
+  visible: {
     type: Boolean,
-    default: false,
+    default: true,
   },
 });
 
