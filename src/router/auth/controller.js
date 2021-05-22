@@ -9,6 +9,11 @@ const login = catchAsync((req, res) => {
   return controller.login(req, res);
 });
 
+const logout = catchAsync((req, res) => {
+  res.clearCookie("refreshToken");
+  res.status(httpStatus.NO_CONTENT).send();
+});
+
 const loginWithUserId = catchAsync(async (req, res) => {
   const user = await userService.getUserById(req.payload.id);
   const { accessToken, refreshToken, expiresIn } = await tokenService.generateLocalToken(user);
