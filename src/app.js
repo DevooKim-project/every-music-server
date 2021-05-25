@@ -19,7 +19,7 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: false }));
 app.use(cookieParser(config.cookieSecret));
 
-app.use("/", apiRouter);
+app.use("/api", apiRouter);
 app.use((req, res, next) => {
   next(new ApiError(httpStatus.NOT_FOUND, "Not found"));
 });
