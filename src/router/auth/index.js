@@ -16,6 +16,8 @@ router.post("/:platform/refresh", verifyToken(tokenTypes.ACCESS), controller.ref
 
 router.post("/:platform/login", controller.login);
 
+router.delete("/logout", controller.logout);
+
 router.post("/:platform/token", verifyToken(tokenTypes.REFRESH), controller.generatePlatformToken);
 
 router.post("/login", verifyToken(tokenTypes.REFRESH), controller.loginWithUserId);
