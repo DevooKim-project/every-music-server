@@ -1,7 +1,7 @@
 const axios = require("axios");
 const qs = require("qs");
 const { Base64 } = require("js-base64");
-
+const config = require("../config/config");
 const { spotifyParams } = require("../config/oAuthParam");
 const trackService = require("./trackService");
 const artistService = require("./artistService");
@@ -18,7 +18,7 @@ const getOAuthUrl = (type) => {
 
   const params = {
     response_type: "code",
-    client_id: process.env.SPOTIFY_ID,
+    client_id: config.token.spotifyId,
     redirect_uri: redirectUri,
     scope: scopes.join(" "),
   };
@@ -35,7 +35,7 @@ const getPlatformToken = async ({ code, type }) => {
     redirect_uri: `${redirectUri}/?platform=spotify&type=${type}`,
   };
 
-  const key = Base64.encode(`${process.env.SPOTIFY_ID}:${process.env.SPOTIFY_SECRET}`);
+  const key = Base64.encode(`${config.token.spotifyId}:${config.token.spotifySecret}`);
 
   const response = await axios({
     method: "POST",
@@ -64,7 +64,7 @@ const getProfile = async (accessToken) => {
 };
 
 const refreshAccessToken = async (refreshToken) => {
-  const key = Base64.encode(`${process.env.SPOTIFY_ID}:${process.env.SPOTIFY_SECRET}`);
+  const key = Base64.encode(`${config.token.spotifyId}:${config.token.spotifySecret}`);
   const data = {
     refresh_token: refreshToken,
     grant_type: "refresh_token",

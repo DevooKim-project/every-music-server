@@ -3,17 +3,17 @@ const redis = require("redis");
 const { promisify } = require("util");
 const jwt = require("jsonwebtoken");
 const moment = require("moment");
-
+const config = require("../config/config");
 const { tokenTypes } = require("../config/type");
 
-const client = redis.createClient(process.env.REDIS_PORT, process.env.REDIS_HOST);
+const client = redis.createClient(config.redis.url);
 const getAsync = promisify(client.get).bind(client);
 
 client.on("error", (error) => {
   console.log(error);
 });
 
-const generateToken = (tokenBody, expires, secret = process.env.JWT_SECRET) => {
+const generateToken = (tokenBody, expires, secret = config.jwt.secret) => {
   const payload = {
     iss: "everyMusic.com",
     ...tokenBody,
@@ -30,10 +30,10 @@ const generateLocalToken = async (user) => {
     platform: user.platform,
     platformId: user.platformId,
   };
-  const accessTokenExpires = moment().add(process.env.accessExpirationMinutes, "minutes");
+  const accessTokenExpires = moment().add(config.jwt.accessExpirationMinutes, "minutes");
   const accessToken = generateToken(tokenBody, accessTokenExpires);
 
-  const refreshTokenExpires = moment().add(process.env.refreshExpirationDays, "days");
+  const refreshTokenExpires = moment().add(config.jwt.refreshExpirationDays, "days");
   const refreshToken = generateToken({ id: tokenBody.id }, refreshTokenExpires);
 
   return { accessToken, refreshToken, expiresIn: accessTokenExpires.unix() };

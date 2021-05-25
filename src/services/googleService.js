@@ -1,7 +1,7 @@
 const axios = require("axios");
 const qs = require("qs");
 const jwt = require("jsonwebtoken");
-
+const config = require("../config/config");
 const trackService = require("./trackService");
 const artistService = require("./artistService");
 const tokenService = require("./tokenService");
@@ -18,7 +18,7 @@ const getOAuthUrl = (type) => {
   const url = "https://accounts.google.com/o/oauth2/v2/auth";
 
   const params = {
-    client_id: process.env.GOOGLE_ID,
+    client_id: config.token.googleId,
     redirect_uri: redirectUri,
     response_type: "code",
     scope: scopes.join(" "),
@@ -32,8 +32,8 @@ const getPlatformToken = async ({ code, type }) => {
   const redirectUri = type === "login" ? process.env.REDIRECT_LOGIN : process.env.REDIRECT_TOKEN;
   const data = {
     code,
-    client_id: process.env.GOOGLE_ID,
-    client_secret: process.env.GOOGLE_SECRET,
+    client_id: config.token.googleId,
+    client_secret: config.token.googleSecret,
     redirect_uri: `${redirectUri}/?platform=google&type=${type}`,
     grant_type: "authorization_code",
   };
@@ -54,8 +54,8 @@ const getProfile = (idToken) => {
 
 const refreshAccessToken = async (refreshToken) => {
   const data = {
-    client_id: process.env.GOOGLE_ID,
-    client_secret: process.env.GOOGLE_SECRET,
+    client_id: config.token.googleId,
+    client_secret: config.token.googleSecret,
     refresh_token: refreshToken,
     grant_type: "refresh_token",
   };

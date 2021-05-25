@@ -1,15 +1,15 @@
 const axios = require("axios");
 const qs = require("qs");
-
+const config = require("../config/config");
 const { kakaoParams } = require("../config/oAuthParam");
 
 const getOAuthUrl = (type) => {
   const oAuthParam = kakaoParams(type);
   const { scopes, redirectUri } = oAuthParam;
-  const url = "https://kauth.kakao.com/oauth/authorize";
+  const url = "https://kauth.kakao.com/token/authorize";
 
   const params = {
-    client_id: process.env.KAKAO_ID,
+    client_id: config.token.kakaoId,
     redirect_uri: redirectUri,
     response_type: "code",
     scope: scopes.join(","),
@@ -25,15 +25,15 @@ const getPlatformToken = async ({ code, type }) => {
   const redirectUri = type === "login" ? process.env.REDIRECT_LOGIN : process.env.REDIRECT_TOKEN;
   const data = {
     code,
-    client_id: process.env.KAKAO_ID,
-    client_secret: process.env.KAKAO_SECRET,
+    client_id: config.token.kakaoId,
+    client_secret: config.token.kakaoSecret,
     redirect_uri: `${redirectUri}/?platform=kakao&type=${type}`,
     grant_type: "authorization_code",
   };
 
   const response = await axios({
     method: "POST",
-    url: "https://kauth.kakao.com/oauth/token",
+    url: "https://kauth.kakao.com/token/token",
     data: qs.stringify(data),
   });
 
@@ -55,15 +55,15 @@ const getProfile = async (accessToken) => {
 
 const refreshAccessToken = async (refreshToken) => {
   const data = {
-    client_id: process.env.KAKAO_ID,
-    client_secret: process.env.KAKAO_SECRET,
+    client_id: config.token.kakaoId,
+    client_secret: config.token.kakaoSecret,
     refresh_token: refreshToken,
     grant_type: "refresh_token",
   };
 
   const response = await axios({
     method: "POST",
-    url: "https://kauth.kakao.com/oauth/token",
+    url: "https://kauth.kakao.com/token/token",
     data: qs.stringify(data),
   });
   return response.data;
@@ -78,7 +78,7 @@ const signOut = (platformId) => {
     method: "POST",
     url: "https://kapi.kakao.com/v1/user/unlink",
     headers: {
-      Authorization: `KakaoAK ${process.env.KAKAO_ADMIN}`,
+      Authorization: `KakaoAK ${config.token.kakaoAdmin}`,
     },
     params,
   };
