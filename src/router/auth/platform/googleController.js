@@ -33,7 +33,6 @@ const login = async (req, res) => {
     expires: new Date(Date.now() + 2592000), //unixTime: 1month
     signed: true,
   });
-  console.log("token: ", accessToken);
   res.json({ accessToken, expiresIn });
 };
 

@@ -25,7 +25,7 @@ router.delete("/logout", controller.logout);
 
 router.post("/:platform/token", verifyToken(tokenTypes.REFRESH), controller.generatePlatformToken);
 
-router.post("/login", verifyToken(tokenTypes.REFRESH), controller.loginWithUserId);
+router.post("/login", verifyToken(tokenTypes.REFRESH, false), controller.loginWithUserId);
 
 router.delete("/", verifyToken(tokenTypes.ACCESS), controller.signOut);
 

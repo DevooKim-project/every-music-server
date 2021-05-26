@@ -42,11 +42,8 @@ const createPlaylistToPlatform = async (req, res) => {
 
     const [newPlaylist, trackIds] = await Promise.all([createPlaylistPromise, getTrackIdsPromise]);
 
-    console.log("create playlist ok");
-    console.log("get trackId ok");
-
     await googleService.insertTrackToPlatform(newPlaylist.id, trackIds.platform, accessToken);
-    console.log("insert track ok");
+
     newPlaylists.push({ ...playlists[i], platformId: newPlaylist.id });
   }
 

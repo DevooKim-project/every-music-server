@@ -5,12 +5,13 @@ const jwt = require("jsonwebtoken");
 const moment = require("moment");
 const config = require("../config/config");
 const { tokenTypes } = require("../config/type");
+const logger = require("../config/logger");
 
 const client = redis.createClient(config.redis.url);
 const getAsync = promisify(client.get).bind(client);
 
 client.on("error", (error) => {
-  console.log(error);
+  logger.error(error);
 });
 
 const generateToken = (tokenBody, expires, secret = config.jwt.secret) => {
@@ -49,11 +50,11 @@ const setKeys = (userId, platform) => {
 const setPlatformToken = async (userId, platform, token) => {
   const keys = setKeys(userId, platform);
   if (token.hasOwnProperty("refreshToken") && token.refreshToken) {
-    client.set(keys[tokenTypes.REFRESH], token.refreshToken, redis.print);
+    client.set(keys[tokenTypes.REFRESH], token.refreshToken);
     client.expire(keys[tokenTypes.REFRESH], (token.refreshTokenExpiresIn || 5184000) - 180); //60일
   }
 
-  client.set(keys[tokenTypes.ACCESS], token.accessToken, redis.print);
+  client.set(keys[tokenTypes.ACCESS], token.accessToken);
   client.expire(keys[tokenTypes.ACCESS], (token.expiresIn || 3600) - 180);
   return;
 };

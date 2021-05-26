@@ -33,7 +33,6 @@ const login = async (req, res) => {
     signed: true,
   });
 
-  console.log("token: ", accessToken);
   res.json({ accessToken, expiresIn });
 };
 

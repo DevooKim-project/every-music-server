@@ -44,7 +44,6 @@ const getPlatformToken = async ({ code, type }) => {
     data: qs.stringify(data),
   });
 
-  console.log(response.data);
   return response.data;
 };
 
@@ -211,11 +210,8 @@ const getTrackIdFromPlatform = async (tracks, accessToken) => {
 
       if (google) {
         //캐싱되어 있음
-        console.log("cached");
         platformTrackId = cachedTrack.platformIds.google;
       } else {
-        console.log("not cached");
-
         const query = `${artist.name} ${track.title}`;
         Object.assign(params, { q: query });
         const response = await axios(options);

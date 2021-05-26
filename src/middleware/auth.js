@@ -17,7 +17,6 @@ const verifyToken =
         token = parseToken(req.signedCookies.refreshToken);
       }
       const payload = jwt.verify(token, config.jwt.secret);
-      console.log("payload: ", payload);
       req.payload = payload;
       next();
     } catch (error) {
@@ -28,7 +27,7 @@ const verifyToken =
       if (error.name === "TokenExpiredError") {
         throw new ApiError(419, "Expired token");
       }
-      throw new ApiError(httpStatus.UNAUTHORIZED, "Not found token");
+      throw new ApiError(httpStatus.NON_AUTHORITATIVE_INFORMATION, "Not found token");
     }
   };
 

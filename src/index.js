@@ -1,9 +1,9 @@
 const app = require("./app");
 const config = require("./config/config");
+const logger = require("./config/logger");
 const mongoose = require("./config/mongoose");
 
 mongoose.connect();
 app.listen(config.port, () => {
-  console.log("Server open: ", config.port);
-  console.log("ENV: ", config.env);
+  logger.info(`Server open: ${config.port} / ${config.env}`);
 });

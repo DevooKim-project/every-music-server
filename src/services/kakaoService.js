@@ -37,7 +37,6 @@ const getPlatformToken = async ({ code, type }) => {
     data: qs.stringify(data),
   });
 
-  console.log(response.data);
   return response.data;
 };
 

@@ -46,8 +46,6 @@ const getPlatformToken = async ({ code, type }) => {
     data: qs.stringify(data),
   });
 
-  console.log("response: ", response.data);
-
   return response.data;
 };
 
@@ -59,7 +57,7 @@ const getProfile = async (accessToken) => {
       authorization: `Bearer ${accessToken}`,
     },
   });
-  console.log(response.data);
+
   return response.data;
 };
 
@@ -175,10 +173,8 @@ const getTrackIdFromPlatform = async (tracks, accessToken) => {
     const { spotify } = pick(platformIds, ["spotify"]);
 
     if (spotify) {
-      console.log("cached");
       platformTrackId = spotify;
     } else {
-      console.log("not cached");
       const query = `${track.title} artist: "${artist.name}"`;
       params.q = query;
 
@@ -187,9 +183,6 @@ const getTrackIdFromPlatform = async (tracks, accessToken) => {
 
       if (items.length) {
         platformTrackId = items[0].id;
-        console.log(platformTrackId);
-      } else {
-        console.log("not found track");
       }
     }
     platformTrackIds.push(`spotify:track:${platformTrackId}`);
