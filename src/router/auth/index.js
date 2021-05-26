@@ -12,9 +12,14 @@ router.param("platform", validate(authValidation.oAuthPlatform));
 
 router.get("/:platform", verifyToken(tokenTypes.ACCESS), controller.getPlatformToken);
 
-router.post("/:platform/refresh", verifyToken(tokenTypes.ACCESS), controller.refreshPlatformToken);
+router.post(
+  "/:platform/refresh",
+  validate(authValidation.oAuthToken),
+  verifyToken(tokenTypes.ACCESS),
+  controller.refreshPlatformToken
+);
 
-router.post("/:platform/login", controller.login);
+router.post("/:platform/login", validate(authValidation.oAuthToken), controller.login);
 
 router.delete("/logout", controller.logout);
 
