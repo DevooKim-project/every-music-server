@@ -2,7 +2,6 @@ const axios = require("axios");
 const qs = require("qs");
 const { Base64 } = require("js-base64");
 const config = require("../config/config");
-const { spotifyParams } = require("../config/oAuthParam");
 const trackService = require("./trackService");
 const artistService = require("./artistService");
 const { spotifyUtils } = require("../utils/platformUtils");
@@ -11,28 +10,11 @@ const pick = require("../utils/pick");
 const ApiError = require("../utils/ApiError");
 
 //OAuth Service
-const getOAuthUrl = (type) => {
-  const oAuthParam = spotifyParams(type);
-  const { scopes, redirectUri } = oAuthParam;
-  const url = "https://accounts.spotify.com/authorize";
-
-  const params = {
-    response_type: "code",
-    client_id: config.token.spotifyId,
-    redirect_uri: redirectUri,
-    scope: scopes.join(" "),
-  };
-
-  const oAuthUri = `${url}?${qs.stringify(params)}`;
-  return oAuthUri;
-};
-
-const getPlatformToken = async ({ code, type }) => {
-  const redirectUri = type === "login" ? process.env.REDIRECT_LOGIN : process.env.REDIRECT_TOKEN;
+const getPlatformToken = async ({ code, redirectUri }) => {
   const data = {
     code,
     grant_type: "authorization_code",
-    redirect_uri: `${redirectUri}/?platform=spotify&type=${type}`,
+    redirect_uri: `${redirectUri}`,
   };
 
   const key = Base64.encode(`${config.token.spotifyId}:${config.token.spotifySecret}`);
@@ -227,7 +209,6 @@ const getItemFromPlatform = async (playlistId, accessToken) => {
 };
 
 module.exports = {
-  getOAuthUrl,
   getPlatformToken,
   getProfile,
   refreshAccessToken,

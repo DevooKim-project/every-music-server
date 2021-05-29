@@ -27,7 +27,7 @@ const verifyToken =
       if (error.name === "TokenExpiredError") {
         throw new ApiError(419, "Expired token");
       }
-      throw new ApiError(httpStatus.NON_AUTHORITATIVE_INFORMATION, "Not found token");
+      throw new ApiError(httpStatus.UNAUTHORIZED, "Not found token");
     }
   };
 

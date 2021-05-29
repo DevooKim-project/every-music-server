@@ -10,31 +10,13 @@ const pick = require("../utils/pick");
 const ApiError = require("../utils/ApiError");
 const { youtubeUtils } = require("../utils/platformUtils");
 const { platformTypes } = require("../config/type");
-const { googleParams } = require("../config/oAuthParam");
 
-const getOAuthUrl = (type) => {
-  const oAuthParam = googleParams(type);
-  const { scopes, redirectUri } = oAuthParam;
-  const url = "https://accounts.google.com/o/oauth2/v2/auth";
-
-  const params = {
-    client_id: config.token.googleId,
-    redirect_uri: redirectUri,
-    response_type: "code",
-    scope: scopes.join(" "),
-  };
-
-  const oAuthUri = `${url}?${qs.stringify(params)}`;
-  return oAuthUri;
-};
-
-const getPlatformToken = async ({ code, type }) => {
-  const redirectUri = type === "login" ? process.env.REDIRECT_LOGIN : process.env.REDIRECT_TOKEN;
+const getPlatformToken = async ({ code, redirectUri }) => {
   const data = {
     code,
     client_id: config.token.googleId,
     client_secret: config.token.googleSecret,
-    redirect_uri: `${redirectUri}/?platform=google&type=${type}`,
+    redirect_uri: `${redirectUri}`,
     grant_type: "authorization_code",
   };
 
@@ -333,7 +315,6 @@ const iterateGetItemInfo = async (trackIds, accessToken) => {
 };
 
 module.exports = {
-  getOAuthUrl,
   getPlatformToken,
   getProfile,
   refreshAccessToken,

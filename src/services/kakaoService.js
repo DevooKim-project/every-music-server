@@ -1,43 +1,26 @@
 const axios = require("axios");
 const qs = require("qs");
 const config = require("../config/config");
-const { kakaoParams } = require("../config/oAuthParam");
 
-const getOAuthUrl = (type) => {
-  const oAuthParam = kakaoParams(type);
-  const { scopes, redirectUri } = oAuthParam;
-  const url = "https://kauth.kakao.com/token/authorize";
-
-  const params = {
-    client_id: config.token.kakaoId,
-    redirect_uri: redirectUri,
-    response_type: "code",
-    scope: scopes.join(","),
-    // state: "", //CSRF 공격 보호를 위한 임의의 문자열
-  };
-
-  const oAuthUri = `${url}?${qs.stringify(params)}`;
-
-  return oAuthUri;
-};
-
-const getPlatformToken = async ({ code, type }) => {
-  const redirectUri = type === "login" ? process.env.REDIRECT_LOGIN : process.env.REDIRECT_TOKEN;
+const getPlatformToken = async ({ code, redirectUri }) => {
   const data = {
     code,
     client_id: config.token.kakaoId,
     client_secret: config.token.kakaoSecret,
-    redirect_uri: `${redirectUri}/?platform=kakao&type=${type}`,
+    redirect_uri: `${redirectUri}`,
     grant_type: "authorization_code",
   };
-
-  const response = await axios({
-    method: "POST",
-    url: "https://kauth.kakao.com/token/token",
-    data: qs.stringify(data),
-  });
-
-  return response.data;
+  try {
+    const response = await axios({
+      method: "POST",
+      url: "https://kauth.kakao.com/oauth/token",
+      data: qs.stringify(data),
+    });
+    console.log(response.data);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 const getProfile = async (accessToken) => {
@@ -62,7 +45,7 @@ const refreshAccessToken = async (refreshToken) => {
 
   const response = await axios({
     method: "POST",
-    url: "https://kauth.kakao.com/token/token",
+    url: "https://kauth.kakao.com/oauth/token",
     data: qs.stringify(data),
   });
   return response.data;
@@ -86,7 +69,6 @@ const signOut = (platformId) => {
 };
 
 module.exports = {
-  getOAuthUrl,
   getPlatformToken,
   getProfile,
   refreshAccessToken,

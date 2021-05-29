@@ -5,11 +5,6 @@ const { refreshAccessToken } = require("../../../services/kakaoService");
 const { getPlatformTokenByUserId, setPlatformToken } = require("../../../services/tokenService");
 const ApiError = require("../../../utils/ApiError");
 
-const obtainOAuth = (type) => (req, res) => {
-  const oAuthUri = kakaoService.getOAuthUrl(type);
-  res.redirect(oAuthUri);
-};
-
 const login = async (req, res) => {
   const platformToken = await kakaoService.getPlatformToken(req.query);
 
@@ -69,7 +64,6 @@ const signOut = async (req, res) => {
 };
 
 module.exports = {
-  obtainOAuth,
   login,
   refreshToken,
   signOut,
