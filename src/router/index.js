@@ -1,5 +1,4 @@
 const express = require("express");
-const logger = require("../config/logger");
 
 const authRoute = require("./auth");
 const convertRoute = require("./convert");
@@ -14,11 +13,5 @@ router.use("/convert", convertRoute);
 router.use("/playlist", playlistRoute);
 router.use("/track", trackRoute);
 router.use("/user", userRoute);
-
-router.get("/", (req, res) => {
-  logger.info("infoTest");
-  logger.error("error Test");
-  res.send("d");
-});
 
 module.exports = router;
