@@ -30,14 +30,20 @@ const trackBody = Joi.array().items(
   })
 );
 
-const readPlaylists = {
+const getPlaylist = {
+  params: Joi.object().keys({
+    playlistId: Joi.string().required(),
+  }),
+};
+
+const getPlaylists = {
   query: Joi.object().keys({
     page: Joi.number().integer(),
     limit: Joi.number().integer(),
   }),
 };
 
-const readPlaylistsByUser = {
+const getPlaylistsByUser = {
   query: Joi.object().keys({
     page: Joi.number().integer(),
     limit: Joi.number().integer(),
@@ -79,22 +85,16 @@ const deletePlaylist = {
   }),
 };
 
-const readTrack = {
-  params: Joi.object().keys({
-    playlistId: Joi.string().required(),
-  }),
-};
-
 module.exports = {
   platformIdsBody,
   artistBody,
   playlistBody,
   trackBody,
-  readPlaylists,
-  readPlaylistsByUser,
+  getPlaylist,
+  getPlaylists,
+  getPlaylistsByUser,
   uploadPlaylist,
   likePlaylist,
   updatePlaylist,
   deletePlaylist,
-  readTrack,
 };

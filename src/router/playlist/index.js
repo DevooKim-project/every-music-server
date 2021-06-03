@@ -8,13 +8,15 @@ const { tokenTypes } = require("../../config/type");
 
 const router = express.Router();
 
-router.get("/", validate(playlistValidation.readPlaylists), controller.readPlaylists);
+router.get("/", validate(playlistValidation.getPlaylists), controller.getPlaylists);
+
+router.get("/:playlistId", validate(playlistValidation.getPlaylist), controller.getPlaylist);
 
 router.get(
-  "/:userId",
-  validate(playlistValidation.readPlaylistsByUser),
+  "/user/:userId",
+  validate(playlistValidation.getPlaylistsByUser),
   verifyToken(tokenTypes.ACCESS, false),
-  controller.readPlaylistsByUser
+  controller.getPlaylistsByUser
 );
 
 router.post(

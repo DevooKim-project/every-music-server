@@ -67,7 +67,7 @@ const getPlaylistById = async (id, path = undefined) => {
   return await Playlist.findById(id).populate(path);
 };
 
-const getTrack = async (playlistId) => {
+const getPlaylistWithTrack = async (playlistId) => {
   const path = [{ path: "tracks", populate: { path: "artist", model: "Artist" } }, { path: "owner" }];
   const playlist = await getPlaylistById(playlistId, path);
   const tracks = playlist.tracks;
@@ -91,6 +91,6 @@ module.exports = {
   deletePlaylistById,
   deletePlaylistByUserId,
   getPlaylistById,
-  getTrack,
+  getPlaylistWithTrack,
   setVisibleOption,
 };
