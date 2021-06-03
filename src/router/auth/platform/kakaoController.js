@@ -13,6 +13,7 @@ const login = async (req, res) => {
   const userBody = {
     email: account.email,
     nick: account.profile.nickname,
+    image: account.profile.thumbnail_image_url,
     platform: platformTypes.KAKAO,
     platformId: profile.id,
   };

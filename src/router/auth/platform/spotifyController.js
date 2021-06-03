@@ -7,15 +7,16 @@ const { getPlatformTokenByUserId, setPlatformToken } = require("../../../service
 const login = async (req, res) => {
   const platformToken = await spotifyService.getPlatformToken(req.query);
   const profile = await spotifyService.getProfile(platformToken.access_token);
-
   const platformTokenBody = {
     accessToken: platformToken.access_token,
     refreshToken: platformToken.refresh_token,
     expiresIn: platformToken.expires_in,
   };
+  console.log(profile.images.length ? profile.images[0].url : undefined);
   const userBody = {
     email: profile.email,
     nick: profile.display_name,
+    image: profile.images.length ? profile.images[0].url : undefined,
     platform: platformTypes.SPOTIFY,
     platformId: profile.id,
   };

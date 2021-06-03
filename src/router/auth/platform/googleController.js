@@ -8,7 +8,6 @@ const ApiError = require("../../../utils/ApiError");
 const login = async (req, res) => {
   const platformToken = await googleService.getPlatformToken(req.query);
   const profile = googleService.getProfile(platformToken.id_token);
-
   const platformTokenBody = {
     accessToken: platformToken.access_token,
     refreshToken: platformToken.refresh_token,
@@ -17,6 +16,7 @@ const login = async (req, res) => {
   const userBody = {
     email: profile.email,
     nick: profile.name,
+    image: profile.picture,
     platform: platformTypes.GOOGLE,
     platformId: profile.sub,
   };

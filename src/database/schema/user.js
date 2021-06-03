@@ -11,6 +11,9 @@ const userSchema = new Schema({
   nick: {
     type: String,
   },
+  image: {
+    type: String,
+  },
   platform: {
     type: String,
     enum: [platformTypes.KAKAO, platformTypes.GOOGLE, platformTypes.SPOTIFY],
