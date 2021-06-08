@@ -28,6 +28,7 @@ const generateLocalToken = async (user) => {
   const tokenBody = {
     id: user.id,
     name: user.nick,
+    image: user.image,
     platform: user.platform,
     platformId: user.platformId,
   };
