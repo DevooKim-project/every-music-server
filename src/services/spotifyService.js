@@ -149,7 +149,6 @@ const getTrackIdFromPlatform = async (tracks, accessToken) => {
     const artist = track.artist;
     let cachedTrack = await trackService.getTrackByTitleAndArtist(track.title, artist.platformIds.local || artist.id);
     cachedTrackIds.push(cachedTrack.id);
-
     const { platformIds } = cachedTrack;
     const { spotify } = pick(platformIds, ["spotify"]);
 
@@ -166,7 +165,9 @@ const getTrackIdFromPlatform = async (tracks, accessToken) => {
         platformTrackId = items[0].id;
       }
     }
-    platformTrackIds.push(`spotify:track:${platformTrackId}`);
+    if (platformTrackId) {
+      platformTrackIds.push(`spotify:track:${platformTrackId}`);
+    }
   }
 
   return { platform: platformTrackIds, local: cachedTrackIds };

@@ -206,8 +206,9 @@ const getTrackIdFromPlatform = async (tracks, accessToken) => {
           platformTrackId = items[0].id.videoId;
         }
       }
-
-      platformTrackIds.push(platformTrackId);
+      if (platformTrackId) {
+        platformTrackIds.push(platformTrackId);
+      }
     }
 
     return { platform: platformTrackIds, local: cachedTrackIds };
