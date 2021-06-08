@@ -147,8 +147,7 @@ const getTrackIdFromPlatform = async (tracks, accessToken) => {
   for (const track of tracks) {
     let platformTrackId;
     const artist = track.artist;
-    let cachedTrack = await trackService.getTrackByTitleAndArtist(track.title, artist.platformIds.local);
-
+    let cachedTrack = await trackService.getTrackByTitleAndArtist(track.title, artist.platformIds.local || artist.id);
     cachedTrackIds.push(cachedTrack.id);
 
     const { platformIds } = cachedTrack;

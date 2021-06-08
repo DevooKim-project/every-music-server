@@ -1,4 +1,5 @@
 const httpStatus = require("http-status");
+const { platformTypes } = require("../../../config/type");
 
 const { spotifyService } = require("../../../services");
 const splitArray = require("../../../utils/splitArray");
@@ -26,8 +27,13 @@ const getItemFromPlatform = async (req, res) => {
 
 const createPlaylistToPlatform = async (req, res) => {
   const { accessToken } = req.platformToken;
-  const { platformId } = req.payload;
+  let { platform, platformId } = req.payload;
   const { playlists, tracks } = req.body;
+
+  if (platform !== platformTypes.SPOTIFY) {
+    const profile = await spotifyService.getProfile(accessToken);
+    platformId = profile.id;
+  }
 
   const newPlaylists = [];
   for (let i = 0; i < playlists.length; i++) {
