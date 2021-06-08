@@ -64,7 +64,7 @@ const refreshAccessToken = async (refreshToken) => {
 const createPlaylistToPlatform = async (playlist, platformId, accessToken) => {
   const data = {
     name: playlist.title,
-    description: "",
+    description: "This created with URL // " + playlist.description,
     public: false,
   };
   const options = {

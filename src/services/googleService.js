@@ -69,6 +69,7 @@ const createPlaylistToPlatform = async (playlist, accessToken) => {
   const data = {
     snippet: {
       title: playlist.title,
+      description: "This created with URL // " + playlist.description,
     },
   };
   const options = {
