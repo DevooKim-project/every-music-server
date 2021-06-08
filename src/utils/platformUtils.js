@@ -5,7 +5,9 @@ const youtubeUtils = {
     return {
       platformId: playlist.id,
       title: playlist.snippet.title,
-      thumbnail: playlist.snippet.thumbnails.default.url,
+      thumbnail: playlist.snippet.thumbnails.standard
+        ? playlist.snippet.thumbnails.standard.url
+        : playlist.snippet.thumbnails.default.url,
       description: playlist.snippet.description,
       owner: {
         name: playlist.snippet.channelTitle,
@@ -28,7 +30,9 @@ const youtubeUtils = {
           google: track.snippet.channelId,
         },
       },
-      thumbnail: track.snippet.thumbnails.default.url,
+      thumbnail: playlist.snippet.thumbnails.standard
+        ? playlist.snippet.thumbnails.standard.url
+        : playlist.snippet.thumbnails.default.url,
     };
   },
 };
