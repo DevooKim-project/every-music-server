@@ -30,9 +30,9 @@ const youtubeUtils = {
           google: track.snippet.channelId,
         },
       },
-      thumbnail: playlist.snippet.thumbnails.standard
-        ? playlist.snippet.thumbnails.standard.url
-        : playlist.snippet.thumbnails.default.url,
+      thumbnail: track.snippet.thumbnails.standard
+        ? track.snippet.thumbnails.standard.url
+        : track.snippet.thumbnails.default.url,
     };
   },
 };
