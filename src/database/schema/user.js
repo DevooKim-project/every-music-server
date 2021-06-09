@@ -3,30 +3,33 @@ const { platformTypes } = require("../../config/type");
 const { toJSON } = require("./plugins");
 
 const { Schema } = mongoose;
-const userSchema = new Schema({
-  email: {
-    type: String,
-    // unique: true,
+const userSchema = new Schema(
+  {
+    email: {
+      type: String,
+      // unique: true,
+    },
+    nick: {
+      type: String,
+    },
+    image: {
+      type: String,
+    },
+    platform: {
+      type: String,
+      enum: [platformTypes.KAKAO, platformTypes.GOOGLE, platformTypes.SPOTIFY],
+    },
+    platformId: {
+      type: String,
+    },
+    likePlaylists: [{ type: Schema.Types.ObjectId, ref: "Playlist" }],
+    visible: {
+      type: Boolean,
+      default: true,
+    },
   },
-  nick: {
-    type: String,
-  },
-  image: {
-    type: String,
-  },
-  platform: {
-    type: String,
-    enum: [platformTypes.KAKAO, platformTypes.GOOGLE, platformTypes.SPOTIFY],
-  },
-  platformId: {
-    type: String,
-  },
-  likePlaylists: [{ type: Schema.Types.ObjectId, ref: "Playlist" }],
-  visible: {
-    type: Boolean,
-    default: true,
-  },
-});
+  { timestamps: true }
+);
 
 userSchema.plugin(toJSON);
 
