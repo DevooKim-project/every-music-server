@@ -10,8 +10,8 @@ const getPlaylist = catchAsync(async (req, res) => {
 });
 
 const getPlaylists = catchAsync(async (req, res) => {
-  const options = pick(req.query, ["page", "limit"]);
-  options.sort = { like: -1 };
+  const options = pick(req.query, ["page", "limit", "sort"]);
+  options.sort = JSON.parse(options.sort);
   const filter = { visible: true };
   const result = await playlistService.queryPlaylists(filter, options);
   res.send(result);

@@ -40,6 +40,11 @@ const getPlaylists = {
   query: Joi.object().keys({
     page: Joi.number().integer(),
     limit: Joi.number().integer(),
+    // sort: Joi.object().keys({
+    //   like: Joi.number().integer().valid(-1, 1),
+    //   createdAt: Joi.number().integer().valid(-1, 1),
+    // }),
+    sort: Joi.string(),
   }),
 };
 
@@ -47,6 +52,7 @@ const getPlaylistsByUser = {
   query: Joi.object().keys({
     page: Joi.number().integer(),
     limit: Joi.number().integer(),
+    sort: Joi.string(),
   }),
   params: Joi.object().keys({
     userId: Joi.string().required(),
