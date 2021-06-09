@@ -19,7 +19,8 @@ const createPlaylist = async (playlistBody) => {
 };
 
 const queryPlaylists = async (filter, options) => {
-  const result = await paginate(Playlist, filter, options, "owner");
+  // const result = await paginate(Playlist, filter, options, "owner");
+  const result = await paginate(Playlist, filter, options);
 
   return result;
 };
