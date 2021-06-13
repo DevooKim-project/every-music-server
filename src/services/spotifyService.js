@@ -146,16 +146,18 @@ const getTrackIdFromPlatform = async (tracks, accessToken) => {
 
   for (const track of tracks) {
     let platformTrackId;
-    const artist = track.artist;
-    let cachedTrack = await trackService.getTrackByTitleAndArtist(track.title, artist.platformIds.local || artist.id);
-    cachedTrackIds.push(cachedTrack.id);
-    const { platformIds } = cachedTrack;
-    const { spotify } = pick(platformIds, ["spotify"]);
-
-    if (spotify) {
+    let cachedTrack;
+    if (track.hasOwnProperty("artist")) {
+      cachedTrack = await trackService.getTrackByTitleAndArtist(track.title, track.artist);
+      cachedTrackIds.push(cachedTrack.id);
+      const { platformIds } = cachedTrack;
+      const { spotify } = pick(platformIds, ["spotify"]);
       platformTrackId = spotify;
-    } else {
-      const query = `${track.title} artist: "${artist.name}"`;
+    }
+
+    //not Cached
+    if (!platformTrackId) {
+      const query = `${track.title} artist: "${track.artistName}"`;
       params.q = query;
 
       const response = await axios(options);
@@ -163,6 +165,8 @@ const getTrackIdFromPlatform = async (tracks, accessToken) => {
 
       if (items.length) {
         platformTrackId = items[0].id;
+        Object.assign(cachedTrack.platformIds, { spotify: platformTrackId });
+        await cachedTrack.save();
       }
     }
     if (platformTrackId) {
@@ -187,20 +191,18 @@ const getItemFromPlatform = async (playlistId, accessToken) => {
     const response = await axios(options);
     const { data } = response;
     for (const item of data.items) {
-      const trackBody = spotifyUtils.setTrack(item.track);
+      let { track, artist } = spotifyUtils.setTrack(item.track);
 
-      let artist = await artistService.caching(trackBody.artist, platformTypes.SPOTIFY);
-      let track = await trackService.caching(trackBody, artist, platformTypes.SPOTIFY);
+      artist = await artistService.caching(artist, platformTypes.SPOTIFY);
+      track = await trackService.caching(track, artist, platformTypes.SPOTIFY);
       artist = artist.toJSON();
       track = track.toJSON();
 
-      Object.assign(trackBody.platformIds, track.platformIds, {
+      Object.assign(track.platformIds, {
         local: track.id,
       });
-      Object.assign(trackBody.artist.platformIds, artist.platformIds, {
-        local: artist.id,
-      });
-      tracks.push(trackBody);
+
+      tracks.push(track);
     }
     options.url = data.next;
   } while (options.url);

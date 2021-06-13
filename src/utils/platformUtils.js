@@ -35,6 +35,49 @@ const youtubeUtils = {
         : track.snippet.thumbnails.default.url,
     };
   },
+  setTrackV2: (track) => {
+    /*예시1
+    track.snippet.title: All Time Low - Take Cover (Official Music Video)
+    track.snippet.videoOwnerChannelTitle: Hopeless Records
+    titleWithoutArtist = Take Cover (Official Music Video)
+    title = Take Cover
+    artistNameByTitle = All Time Low
+    artistNameByChannel = Hopeless Records
+    */
+    /*
+    예시2
+    track.snippet.title: Take Cover | Take Cover (Official Music Video)
+    track.snippet.videoOwnerChannelTitle: All Time Low - Topic
+    titleWithoutArtist = Take Cover | Take Cover (Official Music Video)
+    title = Take Cover
+    artistNameByTitle = Take Cover | Take Cover (Official Music Video)
+    artistNameByChannel = All Time Low
+    */
+    const titleWithoutArtist = track.snippet.title.replace(/^(.+(-\s?|:\s?))/, "");
+    title = titleWithoutArtist.replace(/\s*((\(|\[).*(Official|video|Lyrics).*(\)|\]))$/gi, "");
+
+    const artistNameByTitle = track.snippet.title.replace(/(\s?-|\s?:).*/, "");
+    const artistNameByChannel = track.snippet.videoOwnerChannelTitle.replace(/ - Topic/, "");
+    const artistName = titleWithoutArtist === artistNameByTitle ? artistNameByChannel : artistNameByTitle;
+    return {
+      track: {
+        title: title,
+        artistName: artistName,
+        platformIds: {
+          google: track.id,
+        },
+        thumbnail: track.snippet.thumbnails.standard
+          ? track.snippet.thumbnails.standard.url
+          : track.snippet.thumbnails.default.url,
+      },
+      artist: {
+        name: artistName,
+        platformIds: {
+          google: track.snippet.videoOwnerChannelId,
+        },
+      },
+    };
+  },
 };
 
 const spotifyUtils = {
@@ -54,9 +97,13 @@ const spotifyUtils = {
   setTrack: (track) => {
     const artist = track.artists[0];
     return {
-      title: track.name,
-      platformIds: {
-        spotify: track.id,
+      track: {
+        title: track.name,
+        artistName: artist.name,
+        platformIds: {
+          spotify: track.id,
+        },
+        thumbnail: track.album.images[0] ? track.album.images[0].url : "",
       },
       artist: {
         name: artist.name,
@@ -64,7 +111,6 @@ const spotifyUtils = {
           spotify: artist.id,
         },
       },
-      thumbnail: track.album.images[0] ? track.album.images[0].url : "",
     };
   },
 };

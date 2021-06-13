@@ -14,7 +14,7 @@ const artistBody = Joi.object().keys({
 
 const playlistBody = Joi.object().keys({
   platformId: Joi.string(),
-  platform: Joi.string().valid(platformTypes.GOOGLE, platformTypes.SPOTIFY),
+  platform: Joi.string().valid(platformTypes.GOOGLE, platformTypes.YOUTUBE, platformTypes.SPOTIFY),
   title: Joi.string(),
   thumbnail: Joi.string().allow(null, ""),
   description: Joi.string().allow(null, ""),
@@ -25,7 +25,8 @@ const trackBody = Joi.array().items(
   Joi.object().keys({
     title: Joi.string(),
     platformIds: platformIdsBody.or(platformTypes.LOCAL),
-    artist: artistBody.or("name", "platformIds"),
+    artist: Joi.string(),
+    artistName: Joi.string(),
     thumbnail: Joi.string(),
   })
 );

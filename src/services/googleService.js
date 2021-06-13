@@ -183,28 +183,24 @@ const getTrackIdFromPlatform = async (tracks, accessToken) => {
 
     for (const track of tracks) {
       let platformTrackId;
-      const artist = track.artist;
-      const cachedTrack = await trackService.getTrackByTitleAndArtist(
-        track.title,
-        artist.platformIds.local || artist.id
-      );
-
-      cachedTrackIds.push(cachedTrack.id);
-
-      const { platformIds } = cachedTrack;
-      const { google } = pick(platformIds, ["google"]);
-
-      if (google) {
-        //캐싱되어 있음
-        platformTrackId = cachedTrack.platformIds.google;
-      } else {
-        const query = `${artist.name} ${track.title}`;
+      let cachedTrack;
+      if (track.hasOwnProperty("artist")) {
+        cachedTrack = await trackService.getTrackByTitleAndArtist(track.title, track.artist);
+        cachedTrackIds.push(cachedTrack.id);
+        const { platformIds } = cachedTrack;
+        const { google } = pick(platformIds, ["google"]);
+        platformTrackId = google;
+      }
+      //not Cached
+      if (!platformTrackId) {
+        const query = `${track.artistName} ${track.title}`;
         Object.assign(params, { q: query });
         const response = await axios(options);
         const items = response.data.items;
-
         if (items.length) {
           platformTrackId = items[0].id.videoId;
+          Object.assign(cachedTrack.platformIds, { google: platformTrackId });
+          await cachedTrack.save();
         }
       }
       if (platformTrackId) {
@@ -218,9 +214,9 @@ const getTrackIdFromPlatform = async (tracks, accessToken) => {
   }
 };
 
-const getItemIdFromPlatform = async (playlistId, accessToken) => {
+const getItemFromPlatform = async (playlistId, accessToken) => {
   const params = {
-    part: "contentDetails",
+    part: "snippet",
     maxResults: 50,
     playlistId: playlistId,
   };
@@ -234,84 +230,27 @@ const getItemIdFromPlatform = async (playlistId, accessToken) => {
   };
 
   try {
-    const trackIds = [];
-    do {
-      const response = await axios(options);
-      const { data } = response;
-
-      data.items.forEach((item) => {
-        let trackId = item.contentDetails.videoId;
-        trackIds.push(trackId);
-      });
-
-      Object.assign(params, { pageToken: data.nextPageToken });
-    } while (params.pageToken);
-
-    return trackIds;
-  } catch (error) {
-    throw new ApiError(error.response.status, error.response.message);
-  }
-};
-
-const getItemInfoFromPlatform = async (trackId, accessToken) => {
-  const params = {
-    part: "snippet",
-    id: trackId.toString(),
-  };
-  const options = {
-    method: "GET",
-    url: "https://www.googleapis.com/youtube/v3/videos",
-    headers: {
-      authorization: `Bearer ${accessToken}`,
-    },
-    params,
-  };
-
-  try {
     const tracks = [];
     do {
       const response = await axios(options);
       const { data } = response;
       for (item of data.items) {
-        let trackBody = youtubeUtils.setTrack(item);
+        let { track, artist } = youtubeUtils.setTrackV2(item);
 
-        let artist = await artistService.caching(trackBody.artist, platformTypes.GOOGLE);
-        let track = await trackService.caching(trackBody, artist, platformTypes.GOOGLE);
+        artist = await artistService.caching(artist, platformTypes.GOOGLE);
+        track = await trackService.caching(track, artist, platformTypes.GOOGLE);
         artist = artist.toJSON();
         track = track.toJSON();
 
-        Object.assign(trackBody.platformIds, track.platformIds, {
+        Object.assign(track.platformIds, {
           local: track.id,
         });
-        Object.assign(trackBody.artist.platformIds, artist.platformIds, {
-          local: artist.id,
-        });
-        tracks.push(trackBody);
+
+        tracks.push(track);
       }
 
       Object.assign(params, { pageToken: data.nextPageToken });
     } while (params.pageToken);
-
-    return tracks;
-  } catch (error) {
-    throw new ApiError(error.response.status, error.response.message);
-  }
-};
-
-//getItemInfoFromPlatform 반복함수
-//한번에 최대 50개의 트랙정보를 가져올 수 있음
-const iterateGetItemInfo = async (trackIds, accessToken) => {
-  try {
-    let tracks = [];
-    for (const trackId of splitArray(trackIds, 50)) {
-      tracks.push(await getItemInfoFromPlatform(trackId, accessToken));
-    }
-
-    if (tracks.length !== 0) {
-      tracks = tracks.reduce((prev, current) => {
-        return prev.concat(current);
-      });
-    }
 
     return tracks;
   } catch (error) {
@@ -327,8 +266,6 @@ module.exports = {
   createPlaylistToPlatform,
   insertTrackToPlatform,
   getPlaylistFromPlatform,
+  getItemFromPlatform,
   getTrackIdFromPlatform,
-  getItemIdFromPlatform,
-  getItemInfoFromPlatform,
-  iterateGetItemInfo,
 };

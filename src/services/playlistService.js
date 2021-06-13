@@ -69,8 +69,7 @@ const getPlaylistById = async (id, path = undefined) => {
 };
 
 const getPlaylistWithTrack = async (playlistId) => {
-  const path = [{ path: "tracks", populate: { path: "artist", model: "Artist" } }, { path: "owner" }];
-  const playlist = await getPlaylistById(playlistId, path);
+  const playlist = await getPlaylistById(playlistId, ["tracks", "owner"]);
   const tracks = playlist.tracks;
   playlist.tracks = undefined;
   return { playlist, tracks };

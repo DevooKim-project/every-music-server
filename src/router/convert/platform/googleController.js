@@ -12,17 +12,9 @@ const getItemFromPlatform = async (req, res) => {
   const platformToken = req.platformToken;
   const { playlists } = req.body;
 
-  //1. 플레이리스트에서 트랙ID를 가져온다.
-  const trackIds = [];
-  for (const playlist of playlists) {
-    const trackId = await googleService.getItemIdFromPlatform(playlist.platformId, platformToken.accessToken);
-    trackIds.push(trackId);
-  }
-
-  //2. 트랙ID로 트랙 정보를 가져온다.
   const tracks = [];
-  for (const trackId of trackIds) {
-    tracks.push(await googleService.iterateGetItemInfo(trackId, platformToken.accessToken));
+  for (const playlist of playlists) {
+    tracks.push(await googleService.getItemFromPlatform(playlist.platformId, platformToken.accessToken));
   }
 
   res.send({
