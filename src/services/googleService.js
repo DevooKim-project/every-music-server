@@ -166,6 +166,7 @@ const getTrackIdFromPlatform = async (tracks, accessToken) => {
     part: "id",
     q: "",
     type: "video",
+    videoLicense: "youtube",
     videoCategoryId: 10,
   };
   const options = {
@@ -193,7 +194,7 @@ const getTrackIdFromPlatform = async (tracks, accessToken) => {
       }
       //not Cached
       if (!platformTrackId) {
-        const query = `${track.artistName} ${track.title}`;
+        const query = `${track.artistName} - Topic ${track.title}`;
         Object.assign(params, { q: query });
         const response = await axios(options);
         const items = response.data.items;
