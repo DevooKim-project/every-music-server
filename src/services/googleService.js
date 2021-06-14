@@ -5,7 +5,6 @@ const config = require("../config/config");
 const trackService = require("./trackService");
 const artistService = require("./artistService");
 const tokenService = require("./tokenService");
-const splitArray = require("../utils/splitArray");
 const pick = require("../utils/pick");
 const ApiError = require("../utils/ApiError");
 const { youtubeUtils } = require("../utils/platformUtils");
@@ -279,7 +278,7 @@ const getItemFromPlatform = async (playlistId, accessToken) => {
       const response = await axios(options);
       const { data } = response;
       for (item of data.items) {
-        let { track, artist } = youtubeUtils.setTrackV2(item);
+        let { track, artist } = youtubeUtils.setTrack(item);
 
         artist = await artistService.caching(artist, platformTypes.GOOGLE);
         track = await trackService.caching(track, artist, platformTypes.GOOGLE);

@@ -11,20 +11,11 @@ const createUser = async (userBody) => {
 };
 
 const login = async (userBody, platform, platformToken) => {
-  // let user = await getUserByEmailAndPlatform(userBody.email, platform);
-  // if (!user) {
-  //   user = await createUser(userBody);
-  // }
-  // if (user.platform !== platform) {
-  //   throw new ApiError(httpStatus.BAD_REQUEST, "Email already taken other platform");
-  // }
-
   const user = await User.findOneAndUpdate(
     { email: userBody.email, platform: platform },
     { $set: { ...userBody } },
     { upsert: true, new: true }
   );
-  console.log(user);
   const localToken = tokenService.generateLocalToken(user);
   await tokenService.setPlatformToken(user.id, platform, platformToken);
 

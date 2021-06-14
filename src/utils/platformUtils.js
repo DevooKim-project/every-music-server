@@ -17,25 +17,6 @@ const youtubeUtils = {
     };
   },
   setTrack: (track) => {
-    const title = track.snippet.title.replace(/.*- /, "");
-    const artistName = track.snippet.title.replace(/ -.*/, "");
-    return {
-      title: title,
-      platformIds: {
-        google: track.id,
-      },
-      artist: {
-        name: title === artistName ? track.snippet.channelTitle.replace(/ - Topic/, "") : artistName,
-        platformIds: {
-          google: track.snippet.channelId,
-        },
-      },
-      thumbnail: track.snippet.thumbnails.standard
-        ? track.snippet.thumbnails.standard.url
-        : track.snippet.thumbnails.default.url,
-    };
-  },
-  setTrackV2: (track) => {
     /*예시1
     track.snippet.title: All Time Low - Take Cover (Official Music Video)
     track.snippet.videoOwnerChannelTitle: Hopeless Records

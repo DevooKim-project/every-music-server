@@ -10,7 +10,6 @@ const oAuthPlatform = {
 const oAuthToken = {
   query: Joi.object().keys({
     code: Joi.string().required(),
-    // type: Joi.string().required().valid(authTypes.LOGIN, authTypes.TOKEN),
     redirectUri: Joi.string().required(),
   }),
 };

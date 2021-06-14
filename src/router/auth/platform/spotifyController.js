@@ -12,7 +12,6 @@ const login = async (req, res) => {
     refreshToken: platformToken.refresh_token,
     expiresIn: platformToken.expires_in,
   };
-  console.log(profile.images.length ? profile.images[0].url : undefined);
   const userBody = {
     email: profile.email,
     nick: profile.display_name,

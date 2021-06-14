@@ -1,4 +1,3 @@
-const { authTypes } = require("../../config/type");
 const catchAsync = require("../../utils/catchAsync");
 const { switchAuthPlatform } = require("../../utils/switchPlatform");
 const { userService, tokenService } = require("../../services");

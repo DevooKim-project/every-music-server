@@ -1,4 +1,3 @@
-const httpStatus = require("http-status");
 const { platformTypes } = require("../../../config/type");
 
 const { spotifyService } = require("../../../services");
@@ -50,7 +49,6 @@ const createPlaylistToPlatform = async (req, res) => {
     newPlaylists.push({ ...playlists[i], platformId: newPlaylist.id });
   }
 
-  // res.status(httpStatus.NO_CONTENT).send();
   res.send({ playlists: newPlaylists });
 };
 
