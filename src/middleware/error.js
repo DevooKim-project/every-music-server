@@ -6,12 +6,14 @@ const logger = require("../config/logger");
 
 const errorConverter = (err, req, res, next) => {
   let error = err;
+  // console.log(error.statusCode, error.message);
   if (!(error instanceof Error)) {
     const statusCode =
       error.statusCode || error instanceof mongoose.Error ? httpStatus.BAD_REQUEST : httpStatus.INTERNAL_SERVER_ERROR;
     const message = error.message || httpStatus[statusCode];
     error = new ApiError(statusCode, message, false, error.stack);
   }
+  console.log(error);
   next(error);
 };
 
@@ -31,6 +33,7 @@ const errorHandler = (err, req, res, next) => {
     ...(config.env === "development" && { stack: err.stack }),
   };
 
+  logger.error(err);
   if (config.env === "development") {
     logger.error(err);
   }

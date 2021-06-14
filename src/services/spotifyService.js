@@ -19,28 +19,46 @@ const getPlatformToken = async ({ code, redirectUri }) => {
 
   const key = Base64.encode(`${config.token.spotifyId}:${config.token.spotifySecret}`);
 
-  const response = await axios({
-    method: "POST",
-    url: "https://accounts.spotify.com/api/token",
-    headers: {
-      authorization: `Basic ${key}`,
-    },
-    data: qs.stringify(data),
-  });
+  try {
+    const response = await axios({
+      method: "POST",
+      url: "https://accounts.spotify.com/api/token",
+      headers: {
+        authorization: `Basic ${key}`,
+      },
+      data: qs.stringify(data),
+    });
 
-  return response.data;
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      const { code, message } = error.response.data.error;
+      throw new ApiError(code, message);
+    } else {
+      throw new Error(error);
+    }
+  }
 };
 
 const getProfile = async (accessToken) => {
-  const response = await axios({
-    method: "GET",
-    url: "https://api.spotify.com/v1/me",
-    headers: {
-      authorization: `Bearer ${accessToken}`,
-    },
-  });
+  try {
+    const response = await axios({
+      method: "GET",
+      url: "https://api.spotify.com/v1/me",
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+      },
+    });
 
-  return response.data;
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      const { code, message } = error.response.data.error;
+      throw new ApiError(code, message);
+    } else {
+      throw new Error(error);
+    }
+  }
 };
 
 const refreshAccessToken = async (refreshToken) => {
@@ -49,15 +67,25 @@ const refreshAccessToken = async (refreshToken) => {
     refresh_token: refreshToken,
     grant_type: "refresh_token",
   };
-  const response = await axios({
-    method: "POST",
-    url: "https://accounts.spotify.com/api/token",
-    headers: {
-      authorization: `Basic ${key}`,
-    },
-    data: qs.stringify(data),
-  });
-  return response.data;
+
+  try {
+    const response = await axios({
+      method: "POST",
+      url: "https://accounts.spotify.com/api/token",
+      headers: {
+        authorization: `Basic ${key}`,
+      },
+      data: qs.stringify(data),
+    });
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      const { code, message } = error.response.data.error;
+      throw new ApiError(code, message);
+    } else {
+      throw new Error(error);
+    }
+  }
 };
 
 //Playlist Service
@@ -76,9 +104,18 @@ const createPlaylistToPlatform = async (playlist, platformId, accessToken) => {
     data,
   };
 
-  const response = await axios(options);
+  try {
+    const response = await axios(options);
 
-  return response.data;
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      const { code, message } = error.response.data.error;
+      throw new ApiError(code, message);
+    } else {
+      throw new Error(error);
+    }
+  }
 };
 
 const insertTrackToPlatform = async (playlistId, trackId, accessToken) => {
@@ -94,8 +131,17 @@ const insertTrackToPlatform = async (playlistId, trackId, accessToken) => {
     data,
   };
 
-  await axios(options);
-  return;
+  try {
+    await axios(options);
+    return;
+  } catch (error) {
+    if (error.response) {
+      const { code, message } = error.response.data.error;
+      throw new ApiError(code, message);
+    } else {
+      throw new Error(error);
+    }
+  }
 };
 
 const getPlaylistFromPlatform = async (accessToken) => {
@@ -111,19 +157,28 @@ const getPlaylistFromPlatform = async (accessToken) => {
     params,
   };
 
-  const playlists = [];
-  do {
-    const response = await axios(options);
-    const { data } = response;
+  try {
+    const playlists = [];
+    do {
+      const response = await axios(options);
+      const { data } = response;
 
-    data.items.forEach((item) => {
-      playlists.push(spotifyUtils.setPlaylist(item));
-    });
+      data.items.forEach((item) => {
+        playlists.push(spotifyUtils.setPlaylist(item));
+      });
 
-    options.url = data.next;
-  } while (options.url);
+      options.url = data.next;
+    } while (options.url);
 
-  return playlists;
+    return playlists;
+  } catch (error) {
+    if (error.response) {
+      const { code, message } = error.response.data.error;
+      throw new ApiError(code, message);
+    } else {
+      throw new Error(error);
+    }
+  }
 };
 
 const getTrackIdFromPlatform = async (tracks, accessToken) => {
@@ -141,40 +196,49 @@ const getTrackIdFromPlatform = async (tracks, accessToken) => {
     params,
   };
 
-  const platformTrackIds = [];
-  const cachedTrackIds = [];
+  try {
+    const platformTrackIds = [];
+    const cachedTrackIds = [];
 
-  for (const track of tracks) {
-    let platformTrackId;
-    let cachedTrack;
-    if (track.hasOwnProperty("artist")) {
-      cachedTrack = await trackService.getTrackByTitleAndArtist(track.title, track.artist);
-      cachedTrackIds.push(cachedTrack.id);
-      const { platformIds } = cachedTrack;
-      const { spotify } = pick(platformIds, ["spotify"]);
-      platformTrackId = spotify;
-    }
+    for (const track of tracks) {
+      let platformTrackId;
+      let cachedTrack;
+      if (track.hasOwnProperty("artist")) {
+        cachedTrack = await trackService.getTrackByTitleAndArtist(track.title, track.artist);
+        cachedTrackIds.push(cachedTrack.id);
+        const { platformIds } = cachedTrack;
+        const { spotify } = pick(platformIds, ["spotify"]);
+        platformTrackId = spotify;
+      }
 
-    //not Cached
-    if (!platformTrackId) {
-      const query = `${track.title} artist: "${track.artistName}"`;
-      params.q = query;
+      //not Cached
+      if (!platformTrackId) {
+        const query = `${track.title} artist: "${track.artistName}"`;
+        params.q = query;
 
-      const response = await axios(options);
-      const items = response.data.tracks.items;
+        const response = await axios(options);
+        const items = response.data.tracks.items;
 
-      if (items.length) {
-        platformTrackId = items[0].id;
-        Object.assign(cachedTrack.platformIds, { spotify: platformTrackId });
-        await cachedTrack.save();
+        if (items.length) {
+          platformTrackId = items[0].id;
+          Object.assign(cachedTrack.platformIds, { spotify: platformTrackId });
+          await cachedTrack.save();
+        }
+      }
+      if (platformTrackId) {
+        platformTrackIds.push(`spotify:track:${platformTrackId}`);
       }
     }
-    if (platformTrackId) {
-      platformTrackIds.push(`spotify:track:${platformTrackId}`);
+
+    return { platform: platformTrackIds, local: cachedTrackIds };
+  } catch (error) {
+    if (error.response) {
+      const { code, message } = error.response.data.error;
+      throw new ApiError(code, message);
+    } else {
+      throw new Error(error);
     }
   }
-
-  return { platform: platformTrackIds, local: cachedTrackIds };
 };
 
 const getItemFromPlatform = async (playlistId, accessToken) => {
@@ -186,28 +250,37 @@ const getItemFromPlatform = async (playlistId, accessToken) => {
     },
   };
 
-  const tracks = [];
-  do {
-    const response = await axios(options);
-    const { data } = response;
-    for (const item of data.items) {
-      let { track, artist } = spotifyUtils.setTrack(item.track);
+  try {
+    const tracks = [];
+    do {
+      const response = await axios(options);
+      const { data } = response;
+      for (const item of data.items) {
+        let { track, artist } = spotifyUtils.setTrack(item.track);
 
-      artist = await artistService.caching(artist, platformTypes.SPOTIFY);
-      track = await trackService.caching(track, artist, platformTypes.SPOTIFY);
-      artist = artist.toJSON();
-      track = track.toJSON();
+        artist = await artistService.caching(artist, platformTypes.SPOTIFY);
+        track = await trackService.caching(track, artist, platformTypes.SPOTIFY);
+        artist = artist.toJSON();
+        track = track.toJSON();
 
-      Object.assign(track.platformIds, {
-        local: track.id,
-      });
+        Object.assign(track.platformIds, {
+          local: track.id,
+        });
 
-      tracks.push(track);
+        tracks.push(track);
+      }
+      options.url = data.next;
+    } while (options.url);
+
+    return tracks;
+  } catch (error) {
+    if (error.response) {
+      const { code, message } = error.response.data.error;
+      throw new ApiError(code, message);
+    } else {
+      throw new Error(error);
     }
-    options.url = data.next;
-  } while (options.url);
-
-  return tracks;
+  }
 };
 
 module.exports = {

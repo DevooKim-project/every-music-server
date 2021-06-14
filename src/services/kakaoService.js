@@ -10,29 +10,44 @@ const getPlatformToken = async ({ code, redirectUri }) => {
     redirect_uri: `${redirectUri}`,
     grant_type: "authorization_code",
   };
+
   try {
     const response = await axios({
       method: "POST",
       url: "https://kauth.kakao.com/oauth/token",
       data: qs.stringify(data),
     });
-    console.log(response.data);
+
     return response.data;
   } catch (error) {
-    console.log(error);
+    if (error.response) {
+      const { code, message } = error.response.data.error;
+      throw new ApiError(code, message);
+    } else {
+      throw new Error(error);
+    }
   }
 };
 
 const getProfile = async (accessToken) => {
-  const profile = await axios({
-    method: "POST",
-    url: "https://kapi.kakao.com/v2/user/me",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
+  try {
+    const profile = await axios({
+      method: "POST",
+      url: "https://kapi.kakao.com/v2/user/me",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
 
-  return profile.data;
+    return profile.data;
+  } catch (error) {
+    if (error.response) {
+      const { code, message } = error.response.data.error;
+      throw new ApiError(code, message);
+    } else {
+      throw new Error(error);
+    }
+  }
 };
 
 const refreshAccessToken = async (refreshToken) => {
@@ -43,12 +58,21 @@ const refreshAccessToken = async (refreshToken) => {
     grant_type: "refresh_token",
   };
 
-  const response = await axios({
-    method: "POST",
-    url: "https://kauth.kakao.com/oauth/token",
-    data: qs.stringify(data),
-  });
-  return response.data;
+  try {
+    const response = await axios({
+      method: "POST",
+      url: "https://kauth.kakao.com/oauth/token",
+      data: qs.stringify(data),
+    });
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      const { code, message } = error.response.data.error;
+      throw new ApiError(code, message);
+    } else {
+      throw new Error(error);
+    }
+  }
 };
 
 const signOut = (platformId) => {
@@ -56,16 +80,24 @@ const signOut = (platformId) => {
     target_id_type: "user_id",
     target_id: platformId,
   };
-  const options = {
-    method: "POST",
-    url: "https://kapi.kakao.com/v1/user/unlink",
-    headers: {
-      Authorization: `KakaoAK ${config.token.kakaoAdmin}`,
-    },
-    params,
-  };
-
-  return axios(options);
+  try {
+    const options = {
+      method: "POST",
+      url: "https://kapi.kakao.com/v1/user/unlink",
+      headers: {
+        Authorization: `KakaoAK ${config.token.kakaoAdmin}`,
+      },
+      params,
+    };
+    return axios(options);
+  } catch (error) {
+    if (error.response) {
+      const { code, message } = error.response.data.error;
+      throw new ApiError(code, message);
+    } else {
+      throw new Error(error);
+    }
+  }
 };
 
 module.exports = {

@@ -20,13 +20,22 @@ const getPlatformToken = async ({ code, redirectUri }) => {
     grant_type: "authorization_code",
   };
 
-  const response = await axios({
-    method: "POST",
-    url: "https://oauth2.googleapis.com/token",
-    data: qs.stringify(data),
-  });
+  try {
+    const response = await axios({
+      method: "POST",
+      url: "https://oauth2.googleapis.com/token",
+      data: qs.stringify(data),
+    });
 
-  return response.data;
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      const { code, message } = error.response.data.error;
+      throw new ApiError(code, message);
+    } else {
+      throw new Error(error);
+    }
+  }
 };
 
 const getProfile = (idToken) => {
@@ -41,25 +50,44 @@ const refreshAccessToken = async (refreshToken) => {
     grant_type: "refresh_token",
   };
 
-  const response = await axios({
-    method: "POST",
-    url: "https://oauth2.googleapis.com/token",
-    data: qs.stringify(data),
-  });
-  return response.data;
+  try {
+    const response = await axios({
+      method: "POST",
+      url: "https://oauth2.googleapis.com/token",
+      data: qs.stringify(data),
+    });
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      const { code, message } = error.response.data.error;
+      throw new ApiError(code, message);
+    } else {
+      throw new Error(error);
+    }
+  }
 };
 
 const revoke = async (userId) => {
-  const token = await tokenService.getPlatformTokenByUserId(userId, platformTypes.GOOGLE);
+  try {
+    const token = await tokenService.getPlatformTokenByUserId(userId, platformTypes.GOOGLE);
 
-  const params = { token: token.refreshToken };
-  const options = {
-    method: "POST",
-    url: "https://oauth2.googleapis.com/revoke",
-    params,
-  };
+    const params = { token: token.refreshToken };
+    const options = {
+      method: "POST",
+      url: "https://oauth2.googleapis.com/revoke",
+      params,
+    };
 
-  await axios(options);
+    await axios(options);
+    return;
+  } catch (error) {
+    if (error.response) {
+      const { code, message } = error.response.data.error;
+      throw new ApiError(code, message);
+    } else {
+      throw new Error(error);
+    }
+  }
 };
 //playlist
 const createPlaylistToPlatform = async (playlist, accessToken) => {
@@ -121,7 +149,12 @@ const insertTrackToPlatform = async (playlistId, trackIds, accessToken) => {
     }
     return;
   } catch (error) {
-    throw new ApiError(error.response.status, error.response.message);
+    if (error.response) {
+      const { code, message } = error.response.data.error;
+      throw new ApiError(code, message);
+    } else {
+      throw new Error(error);
+    }
   }
 };
 
@@ -156,7 +189,12 @@ const getPlaylistFromPlatform = async (accessToken) => {
 
     return playlists;
   } catch (error) {
-    throw new ApiError(error.response.status, error.response.message);
+    if (error.response) {
+      const { code, message } = error.response.data.error;
+      throw new ApiError(code, message);
+    } else {
+      throw new Error(error);
+    }
   }
 };
 
@@ -211,7 +249,12 @@ const getTrackIdFromPlatform = async (tracks, accessToken) => {
 
     return { platform: platformTrackIds, local: cachedTrackIds };
   } catch (error) {
-    throw new ApiError(error.response.status, error.response.message);
+    if (error.response) {
+      const { code, message } = error.response.data.error;
+      throw new ApiError(code, message);
+    } else {
+      throw new Error(error);
+    }
   }
 };
 
@@ -255,7 +298,12 @@ const getItemFromPlatform = async (playlistId, accessToken) => {
 
     return tracks;
   } catch (error) {
-    throw new ApiError(error.response.status, error.response.message);
+    if (error.response) {
+      const { code, message } = error.response.data.error;
+      throw new ApiError(code, message);
+    } else {
+      throw new Error(error);
+    }
   }
 };
 
