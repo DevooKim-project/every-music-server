@@ -5,11 +5,11 @@ const getTrackByTitleAndArtist = async (title, artistId) => {
   return await Track.findOne({ title, artist: artistId });
 };
 
-const updateTrack = async (title, platformIds) => {
-  return await Track.findOneAndUpdate({ title }, { $set: { platformIds } }, { new: true });
+const updateTrack = async (id, platformIds) => {
+  return await Track.findOneAndUpdate({ _id: id }, { $set: { platformIds } }, { new: true });
 };
 
-const saveTrack = async (trackBody, artistId) => {
+const createTrack = async (trackBody, artistId) => {
   const track = await Track.create({
     ...trackBody,
     platformIds: trackBody.platformIds,
@@ -26,12 +26,12 @@ const caching = async (trackBody, artist, key) => {
 
   //플랫폼(key)의 Id가 캐시되어있지 않은 경우
   if (track && !value[key]) {
-    const platformIds = Object.assign({}, track.platformIds, trackBody.platformIds);
-    track = await updateTrack(trackBody.title, platformIds);
+    Object.assign(track.platformIds, trackBody.platformIds);
+    await track.save();
   }
 
   if (!track) {
-    track = await saveTrack(trackBody, artist.id);
+    track = await createTrack(trackBody, artist.id);
   }
 
   return track;
@@ -52,6 +52,6 @@ exports.splitArray = (array, offset) => {
 module.exports = {
   getTrackByTitleAndArtist,
   updateTrack,
-  saveTrack,
+  createTrack,
   caching,
 };

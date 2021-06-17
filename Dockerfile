@@ -7,6 +7,9 @@ WORKDIR /usr/src/app
 COPY package.json yarn.lock ./
 
 RUN yarn install --pure-lockfile
+RUN yarn global add pm2
 
-CMD [ "yarn", "dev" ]
+COPY ./ ./
+
+CMD [ "yarn", "start" ]
 

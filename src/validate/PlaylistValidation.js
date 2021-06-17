@@ -12,35 +12,49 @@ const artistBody = Joi.object().keys({
   platformIds: platformIdsBody.or(platformTypes.LOCAL),
 });
 
-const playlistBody = Joi.object().keys({
-  platformId: Joi.string(),
-  platform: Joi.string().valid(platformTypes.GOOGLE, platformTypes.SPOTIFY),
-  title: Joi.string(),
-  thumbnail: Joi.string().allow(null, ""),
-  description: Joi.string().allow(null, ""),
-  owner: Joi.object(),
-});
+const playlistBody = Joi.object()
+  .keys({
+    platformId: Joi.string(),
+    platform: Joi.string().valid(platformTypes.GOOGLE, platformTypes.YOUTUBE, platformTypes.SPOTIFY),
+    title: Joi.string(),
+    thumbnail: Joi.string().allow(null, ""),
+    description: Joi.string().allow(null, ""),
+    owner: Joi.object(),
+  })
+  .unknown();
 
 const trackBody = Joi.array().items(
-  Joi.object().keys({
-    title: Joi.string(),
-    platformIds: platformIdsBody.or(platformTypes.LOCAL),
-    artist: artistBody.or("name", "platformIds"),
-    thumbnail: Joi.string(),
-  })
+  Joi.object()
+    .keys({
+      title: Joi.string(),
+      platformIds: platformIdsBody.or(platformTypes.LOCAL),
+      artist: Joi.string(),
+      artistName: Joi.string(),
+      description: Joi.string().allow(null, ""),
+      thumbnail: Joi.string(),
+    })
+    .unknown()
 );
 
-const readPlaylists = {
-  query: Joi.object().keys({
-    page: Joi.number().integer(),
-    limit: Joi.number().integer(),
+const getPlaylist = {
+  params: Joi.object().keys({
+    playlistId: Joi.string().required(),
   }),
 };
 
-const readPlaylistsByUser = {
+const getPlaylists = {
   query: Joi.object().keys({
     page: Joi.number().integer(),
     limit: Joi.number().integer(),
+    sort: Joi.string(),
+  }),
+};
+
+const getPlaylistsByUser = {
+  query: Joi.object().keys({
+    page: Joi.number().integer(),
+    limit: Joi.number().integer(),
+    sort: Joi.string(),
   }),
   params: Joi.object().keys({
     userId: Joi.string().required(),
@@ -79,22 +93,16 @@ const deletePlaylist = {
   }),
 };
 
-const readTrack = {
-  params: Joi.object().keys({
-    playlistId: Joi.string().required(),
-  }),
-};
-
 module.exports = {
   platformIdsBody,
   artistBody,
   playlistBody,
   trackBody,
-  readPlaylists,
-  readPlaylistsByUser,
+  getPlaylist,
+  getPlaylists,
+  getPlaylistsByUser,
   uploadPlaylist,
   likePlaylist,
   updatePlaylist,
   deletePlaylist,
-  readTrack,
 };

@@ -4,6 +4,7 @@ const { Schema } = mongoose;
 
 const trackSchema = new Schema({
   title: String,
+  artistName: String,
   artist: { type: Schema.Types.ObjectId, ref: "Artist" },
   thumbnail: String,
   platformIds: {

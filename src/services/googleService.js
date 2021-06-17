@@ -1,51 +1,40 @@
 const axios = require("axios");
 const qs = require("qs");
 const jwt = require("jsonwebtoken");
-
+const config = require("../config/config");
 const trackService = require("./trackService");
 const artistService = require("./artistService");
 const tokenService = require("./tokenService");
-const splitArray = require("../utils/splitArray");
 const pick = require("../utils/pick");
 const ApiError = require("../utils/ApiError");
 const { youtubeUtils } = require("../utils/platformUtils");
 const { platformTypes } = require("../config/type");
-const { googleParams } = require("../config/oAuthParam");
 
-const getOAuthUrl = (type) => {
-  const oAuthParam = googleParams(type);
-  const { scopes, redirectUri } = oAuthParam;
-  const url = "https://accounts.google.com/o/oauth2/v2/auth";
-
-  const params = {
-    client_id: process.env.GOOGLE_ID,
-    redirect_uri: redirectUri,
-    response_type: "code",
-    scope: scopes.join(" "),
-  };
-
-  const oAuthUri = `${url}?${qs.stringify(params)}`;
-  return oAuthUri;
-};
-
-const getPlatformToken = async ({ code, type }) => {
-  const redirectUri = type === "login" ? process.env.REDIRECT_LOGIN : process.env.REDIRECT_TOKEN;
+const getPlatformToken = async ({ code, redirectUri }) => {
   const data = {
     code,
-    client_id: process.env.GOOGLE_ID,
-    client_secret: process.env.GOOGLE_SECRET,
-    redirect_uri: `${redirectUri}/?platform=google&type=${type}`,
+    client_id: config.token.googleId,
+    client_secret: config.token.googleSecret,
+    redirect_uri: `${redirectUri}`,
     grant_type: "authorization_code",
   };
 
-  const response = await axios({
-    method: "POST",
-    url: "https://oauth2.googleapis.com/token",
-    data: qs.stringify(data),
-  });
+  try {
+    const response = await axios({
+      method: "POST",
+      url: "https://oauth2.googleapis.com/token",
+      data: qs.stringify(data),
+    });
 
-  console.log(response.data);
-  return response.data;
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      const { code, message } = error.response.data.error;
+      throw new ApiError(code, message);
+    } else {
+      throw new Error(error);
+    }
+  }
 };
 
 const getProfile = (idToken) => {
@@ -54,31 +43,50 @@ const getProfile = (idToken) => {
 
 const refreshAccessToken = async (refreshToken) => {
   const data = {
-    client_id: process.env.GOOGLE_ID,
-    client_secret: process.env.GOOGLE_SECRET,
+    client_id: config.token.googleId,
+    client_secret: config.token.googleSecret,
     refresh_token: refreshToken,
     grant_type: "refresh_token",
   };
 
-  const response = await axios({
-    method: "POST",
-    url: "https://oauth2.googleapis.com/token",
-    data: qs.stringify(data),
-  });
-  return response.data;
+  try {
+    const response = await axios({
+      method: "POST",
+      url: "https://oauth2.googleapis.com/token",
+      data: qs.stringify(data),
+    });
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      const { code, message } = error.response.data.error;
+      throw new ApiError(code, message);
+    } else {
+      throw new Error(error);
+    }
+  }
 };
 
 const revoke = async (userId) => {
-  const token = await tokenService.getPlatformTokenByUserId(userId, platformTypes.GOOGLE);
+  try {
+    const token = await tokenService.getPlatformTokenByUserId(userId, platformTypes.GOOGLE);
 
-  const params = { token: token.refreshToken };
-  const options = {
-    method: "POST",
-    url: "https://oauth2.googleapis.com/revoke",
-    params,
-  };
+    const params = { token: token.refreshToken };
+    const options = {
+      method: "POST",
+      url: "https://oauth2.googleapis.com/revoke",
+      params,
+    };
 
-  await axios(options);
+    await axios(options);
+    return;
+  } catch (error) {
+    if (error.response) {
+      const { code, message } = error.response.data.error;
+      throw new ApiError(code, message);
+    } else {
+      throw new Error(error);
+    }
+  }
 };
 //playlist
 const createPlaylistToPlatform = async (playlist, accessToken) => {
@@ -88,6 +96,7 @@ const createPlaylistToPlatform = async (playlist, accessToken) => {
   const data = {
     snippet: {
       title: playlist.title,
+      description: "This created with URL // " + playlist.description,
     },
   };
   const options = {
@@ -139,7 +148,12 @@ const insertTrackToPlatform = async (playlistId, trackIds, accessToken) => {
     }
     return;
   } catch (error) {
-    throw new ApiError(error.response.status, error.response.message);
+    if (error.response) {
+      const { code, message } = error.response.data.error;
+      throw new ApiError(code, message);
+    } else {
+      throw new Error(error);
+    }
   }
 };
 
@@ -174,7 +188,12 @@ const getPlaylistFromPlatform = async (accessToken) => {
 
     return playlists;
   } catch (error) {
-    throw new ApiError(error.response.status, error.response.message);
+    if (error.response) {
+      const { code, message } = error.response.data.error;
+      throw new ApiError(code, message);
+    } else {
+      throw new Error(error);
+    }
   }
 };
 
@@ -184,6 +203,7 @@ const getTrackIdFromPlatform = async (tracks, accessToken) => {
     part: "id",
     q: "",
     type: "video",
+    videoLicense: "youtube",
     videoCategoryId: 10,
   };
   const options = {
@@ -201,43 +221,45 @@ const getTrackIdFromPlatform = async (tracks, accessToken) => {
 
     for (const track of tracks) {
       let platformTrackId;
-      const artist = track.artist;
-      const cachedTrack = await trackService.getTrackByTitleAndArtist(track.title, artist.platformIds.local);
-
-      cachedTrackIds.push(cachedTrack.id);
-
-      const { platformIds } = cachedTrack;
-      const { google } = pick(platformIds, ["google"]);
-
-      if (google) {
-        //캐싱되어 있음
-        console.log("cached");
-        platformTrackId = cachedTrack.platformIds.google;
-      } else {
-        console.log("not cached");
-
-        const query = `${artist.name} ${track.title}`;
+      let cachedTrack;
+      if (track.hasOwnProperty("artist")) {
+        cachedTrack = await trackService.getTrackByTitleAndArtist(track.title, track.artist);
+        cachedTrackIds.push(cachedTrack.id);
+        const { platformIds } = cachedTrack;
+        const { google } = pick(platformIds, ["google"]);
+        platformTrackId = google;
+      }
+      //not Cached
+      if (!platformTrackId) {
+        const query = `${track.artistName} - Topic ${track.title}`;
         Object.assign(params, { q: query });
         const response = await axios(options);
         const items = response.data.items;
-
         if (items.length) {
           platformTrackId = items[0].id.videoId;
+          Object.assign(cachedTrack.platformIds, { google: platformTrackId });
+          await cachedTrack.save();
         }
       }
-
-      platformTrackIds.push(platformTrackId);
+      if (platformTrackId) {
+        platformTrackIds.push(platformTrackId);
+      }
     }
 
     return { platform: platformTrackIds, local: cachedTrackIds };
   } catch (error) {
-    throw new ApiError(error.response.status, error.response.message);
+    if (error.response) {
+      const { code, message } = error.response.data.error;
+      throw new ApiError(code, message);
+    } else {
+      throw new Error(error);
+    }
   }
 };
 
-const getItemIdFromPlatform = async (playlistId, accessToken) => {
+const getItemFromPlatform = async (playlistId, accessToken) => {
   const params = {
-    part: "contentDetails",
+    part: "snippet",
     maxResults: 50,
     playlistId: playlistId,
   };
@@ -251,59 +273,23 @@ const getItemIdFromPlatform = async (playlistId, accessToken) => {
   };
 
   try {
-    const trackIds = [];
-    do {
-      const response = await axios(options);
-      const { data } = response;
-
-      data.items.forEach((item) => {
-        let trackId = item.contentDetails.videoId;
-        trackIds.push(trackId);
-      });
-
-      Object.assign(params, { pageToken: data.nextPageToken });
-    } while (params.pageToken);
-
-    return trackIds;
-  } catch (error) {
-    throw new ApiError(error.response.status, error.response.message);
-  }
-};
-
-const getItemInfoFromPlatform = async (trackId, accessToken) => {
-  const params = {
-    part: "snippet",
-    id: trackId.toString(),
-  };
-  const options = {
-    method: "GET",
-    url: "https://www.googleapis.com/youtube/v3/videos",
-    headers: {
-      authorization: `Bearer ${accessToken}`,
-    },
-    params,
-  };
-
-  try {
     const tracks = [];
     do {
       const response = await axios(options);
       const { data } = response;
       for (item of data.items) {
-        let trackBody = youtubeUtils.setTrack(item);
+        let { track, artist } = youtubeUtils.setTrack(item);
 
-        let artist = await artistService.caching(trackBody.artist, platformTypes.GOOGLE);
-        let track = await trackService.caching(trackBody, artist, platformTypes.GOOGLE);
+        artist = await artistService.caching(artist, platformTypes.GOOGLE);
+        track = await trackService.caching(track, artist, platformTypes.GOOGLE);
         artist = artist.toJSON();
         track = track.toJSON();
 
-        Object.assign(trackBody.platformIds, track.platformIds, {
+        Object.assign(track.platformIds, {
           local: track.id,
         });
-        Object.assign(trackBody.artist.platformIds, artist.platformIds, {
-          local: artist.id,
-        });
-        tracks.push(trackBody);
+
+        tracks.push(track);
       }
 
       Object.assign(params, { pageToken: data.nextPageToken });
@@ -311,33 +297,16 @@ const getItemInfoFromPlatform = async (trackId, accessToken) => {
 
     return tracks;
   } catch (error) {
-    throw new ApiError(error.response.status, error.response.message);
-  }
-};
-
-//getItemInfoFromPlatform 반복함수
-//한번에 최대 50개의 트랙정보를 가져올 수 있음
-const iterateGetItemInfo = async (trackIds, accessToken) => {
-  try {
-    let tracks = [];
-    for (const trackId of splitArray(trackIds, 50)) {
-      tracks.push(await getItemInfoFromPlatform(trackId, accessToken));
+    if (error.response) {
+      const { code, message } = error.response.data.error;
+      throw new ApiError(code, message);
+    } else {
+      throw new Error(error);
     }
-
-    if (tracks.length !== 0) {
-      tracks = tracks.reduce((prev, current) => {
-        return prev.concat(current);
-      });
-    }
-
-    return tracks;
-  } catch (error) {
-    throw new ApiError(error.response.status, error.response.message);
   }
 };
 
 module.exports = {
-  getOAuthUrl,
   getPlatformToken,
   getProfile,
   refreshAccessToken,
@@ -345,8 +314,6 @@ module.exports = {
   createPlaylistToPlatform,
   insertTrackToPlatform,
   getPlaylistFromPlatform,
+  getItemFromPlatform,
   getTrackIdFromPlatform,
-  getItemIdFromPlatform,
-  getItemInfoFromPlatform,
-  iterateGetItemInfo,
 };

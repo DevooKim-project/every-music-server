@@ -1,4 +1,4 @@
-const httpStatus = require("http-status");
+const { platformTypes } = require("../../../config/type");
 
 const { spotifyService } = require("../../../services");
 const splitArray = require("../../../utils/splitArray");
@@ -12,7 +12,6 @@ const getPlaylistFromPlatform = async (req, res) => {
 const getItemFromPlatform = async (req, res) => {
   const platformToken = req.platformToken;
   const { playlists } = req.body;
-  console.log(req.body);
   const tracks = [];
   for (const playlist of playlists) {
     const track = await spotifyService.getItemFromPlatform(playlist.platformId, platformToken.accessToken);
@@ -27,8 +26,13 @@ const getItemFromPlatform = async (req, res) => {
 
 const createPlaylistToPlatform = async (req, res) => {
   const { accessToken } = req.platformToken;
-  const { platformId } = req.payload;
+  let { platform, platformId } = req.payload;
   const { playlists, tracks } = req.body;
+
+  if (platform !== platformTypes.SPOTIFY) {
+    const profile = await spotifyService.getProfile(accessToken);
+    platformId = profile.id;
+  }
 
   const newPlaylists = [];
   for (let i = 0; i < playlists.length; i++) {
@@ -37,18 +41,14 @@ const createPlaylistToPlatform = async (req, res) => {
 
     const [newPlaylist, trackIds] = await Promise.all([createPlaylistPromise, getTrackIdsPromise]);
 
-    console.log("create playlist ok");
-    console.log("get trackId ok");
-
     // //*spotify* 한번에 최대 100개까지 아이템 생성 가능
     for (const trackId of splitArray(trackIds.platform, 100)) {
       await spotifyService.insertTrackToPlatform(newPlaylist.id, trackId, accessToken);
     }
-    console.log("insert track ok");
+
     newPlaylists.push({ ...playlists[i], platformId: newPlaylist.id });
   }
 
-  // res.status(httpStatus.NO_CONTENT).send();
   res.send({ playlists: newPlaylists });
 };
 

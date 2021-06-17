@@ -13,6 +13,7 @@ const platformTypes = {
   LOCAL: "local",
   SPOTIFY: "spotify",
   GOOGLE: "google",
+  YOUTUBE: "youtube",
 };
 
 const likeTypes = {

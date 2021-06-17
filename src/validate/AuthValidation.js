@@ -1,26 +1,23 @@
 const Joi = require("joi");
-const { platformTypes } = require("../config/type");
+const { platformTypes, authTypes } = require("../config/type");
 
 const oAuthPlatform = {
   params: Joi.object().keys({
-    platform: Joi.string()
-      .required()
-      .valid(platformTypes.GOOGLE, platformTypes.KAKAO, platformTypes.SPOTIFY),
+    platform: Joi.string().required().valid(platformTypes.GOOGLE, platformTypes.KAKAO, platformTypes.SPOTIFY),
   }),
 };
 
-const oAuth = {
+const oAuthToken = {
   query: Joi.object().keys({
     code: Joi.string().required(),
+    redirectUri: Joi.string().required(),
   }),
 };
 
-const refreshPlatform = {
-  params: Joi.object().keys({
-    platform: Joi.string()
-      .required()
-      .valid(platformTypes.LOCAL, platformTypes.GOOGLE, platformTypes.SPOTIFY),
+const getAuthorizationUrl = {
+  query: Joi.object().keys({
+    redirectUri: Joi.string().required(),
   }),
 };
 
-module.exports = { oAuthPlatform, oAuth, refreshPlatform };
+module.exports = { oAuthPlatform, oAuthToken, getAuthorizationUrl };
