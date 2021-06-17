@@ -1,38 +1,58 @@
 const httpStatus = require("http-status");
 const { platformTypes } = require("../../../config/type");
 const { kakaoService, userService } = require("../../../services");
+const { refreshAccessToken } = require("../../../services/kakaoService");
+const { getPlatformTokenByUserId, setPlatformToken } = require("../../../services/tokenService");
+const ApiError = require("../../../utils/ApiError");
 
-const obtainOAuth = (type) => (req, res) => {
-  const oAuthUri = kakaoService.getOAuthUrl(type);
-  res.redirect(oAuthUri);
-};
-
-const login = (type) => async (req, res) => {
-  const platformToken = await kakaoService.getPlatformToken(req.query.code, type);
+const login = async (req, res) => {
+  const platformToken = await kakaoService.getPlatformToken(req.query);
 
   const profile = await kakaoService.getProfile(platformToken.access_token);
   const account = profile.kakao_account;
   const userBody = {
     email: account.email,
     nick: account.profile.nickname,
+    image: account.profile.thumbnail_image_url,
     platform: platformTypes.KAKAO,
     platformId: profile.id,
   };
   const platformTokenBody = {
     accessToken: platformToken.access_token,
     refreshToken: platformToken.refresh_token,
+    expiresIn: platformToken.expires_in,
+    refreshTokenExpiresIn: platformToken.refresh_token_expires_in,
   };
-  const localToken = await userService.login(userBody, platformTypes.KAKAO, platformTokenBody);
+  const { accessToken, refreshToken, expiresIn } = await userService.login(
+    userBody,
+    platformTypes.KAKAO,
+    platformTokenBody
+  );
 
   res.clearCookie("refreshToken");
-  res.cookie("refreshToken", localToken.refreshToken, {
+  res.cookie("refreshToken", refreshToken, {
     httpOnly: true, //JS에서 쿠키 접근 불가능
     // secure: true, //https에서만 쿠키 생성
     expires: new Date(Date.now() + 2592000), //unixTime: 1month
     signed: true,
   });
 
-  res.send({ accessToken: localToken.accessToken });
+  res.json({ accessToken, expiresIn });
+};
+
+const refreshToken = async (req, res) => {
+  const { refreshToken } = await getPlatformTokenByUserId(req.payload.id, platformTypes.KAKAO);
+  if (!refreshToken) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Not found kakao refreshToken");
+  }
+
+  const platformToken = await refreshAccessToken(refreshToken);
+  const platformTokenBody = {
+    accessToken: platformToken.access_token,
+    expiresIn: platformToken.expires_in,
+  };
+  await setPlatformToken(req.payload.id, platformTypes.KAKAO, platformTokenBody);
+  res.status(httpStatus.NO_CONTENT).send();
 };
 
 const signOut = async (req, res) => {
@@ -45,7 +65,7 @@ const signOut = async (req, res) => {
 };
 
 module.exports = {
-  obtainOAuth,
   login,
+  refreshToken,
   signOut,
 };

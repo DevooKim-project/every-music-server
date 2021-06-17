@@ -1,74 +1,98 @@
 const axios = require("axios");
 const qs = require("qs");
 const { Base64 } = require("js-base64");
-
-const { spotifyParams } = require("../config/oAuthParam");
+const config = require("../config/config");
 const trackService = require("./trackService");
 const artistService = require("./artistService");
 const { spotifyUtils } = require("../utils/platformUtils");
 const { platformTypes } = require("../config/type");
 const pick = require("../utils/pick");
+const ApiError = require("../utils/ApiError");
 
 //OAuth Service
-const getOAuthUrl = (type) => {
-  const oAuthParam = spotifyParams(type);
-  const { scopes, redirectUri } = oAuthParam;
-  const url = "https://accounts.spotify.com/authorize";
-
-  const params = {
-    response_type: "code",
-    client_id: process.env.SPOTIFY_ID,
-    redirect_uri: redirectUri,
-    scope: scopes.join(" "),
-  };
-
-  const oAuthUri = `${url}?${qs.stringify(params)}`;
-  return oAuthUri;
-};
-
-const getPlatformToken = async (code, type) => {
-  const oAuthParam = spotifyParams(type);
-  const { redirectUri } = oAuthParam;
-
+const getPlatformToken = async ({ code, redirectUri }) => {
   const data = {
     code,
     grant_type: "authorization_code",
-    redirect_uri: redirectUri,
+    redirect_uri: `${redirectUri}`,
   };
 
-  const key = Base64.encode(`${process.env.SPOTIFY_ID}:${process.env.SPOTIFY_SECRET}`);
+  const key = Base64.encode(`${config.token.spotifyId}:${config.token.spotifySecret}`);
 
-  const response = await axios({
-    method: "POST",
-    url: "https://accounts.spotify.com/api/token",
-    headers: {
-      authorization: `Basic ${key}`,
-    },
-    data: qs.stringify(data),
-  });
+  try {
+    const response = await axios({
+      method: "POST",
+      url: "https://accounts.spotify.com/api/token",
+      headers: {
+        authorization: `Basic ${key}`,
+      },
+      data: qs.stringify(data),
+    });
 
-  console.log("response: ", response.data);
-
-  return response.data;
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      const { code, message } = error.response.data.error;
+      throw new ApiError(code, message);
+    } else {
+      throw new Error(error);
+    }
+  }
 };
 
 const getProfile = async (accessToken) => {
-  const response = await axios({
-    method: "GET",
-    url: "https://api.spotify.com/v1/me",
-    headers: {
-      authorization: `Bearer ${accessToken}`,
-    },
-  });
-  console.log(response.data);
-  return response.data;
+  try {
+    const response = await axios({
+      method: "GET",
+      url: "https://api.spotify.com/v1/me",
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      const { code, message } = error.response.data.error;
+      throw new ApiError(code, message);
+    } else {
+      throw new Error(error);
+    }
+  }
+};
+
+const refreshAccessToken = async (refreshToken) => {
+  const key = Base64.encode(`${config.token.spotifyId}:${config.token.spotifySecret}`);
+  const data = {
+    refresh_token: refreshToken,
+    grant_type: "refresh_token",
+  };
+
+  try {
+    const response = await axios({
+      method: "POST",
+      url: "https://accounts.spotify.com/api/token",
+      headers: {
+        authorization: `Basic ${key}`,
+      },
+      data: qs.stringify(data),
+    });
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      const { code, message } = error.response.data.error;
+      throw new ApiError(code, message);
+    } else {
+      throw new Error(error);
+    }
+  }
 };
 
 //Playlist Service
 const createPlaylistToPlatform = async (playlist, platformId, accessToken) => {
   const data = {
     name: playlist.title,
-    description: "",
+    description: "This created with URL // " + playlist.description,
     public: false,
   };
   const options = {
@@ -80,9 +104,18 @@ const createPlaylistToPlatform = async (playlist, platformId, accessToken) => {
     data,
   };
 
-  const response = await axios(options);
+  try {
+    const response = await axios(options);
 
-  return response.data;
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      const { code, message } = error.response.data.error;
+      throw new ApiError(code, message);
+    } else {
+      throw new Error(error);
+    }
+  }
 };
 
 const insertTrackToPlatform = async (playlistId, trackId, accessToken) => {
@@ -98,8 +131,17 @@ const insertTrackToPlatform = async (playlistId, trackId, accessToken) => {
     data,
   };
 
-  await axios(options);
-  return;
+  try {
+    await axios(options);
+    return;
+  } catch (error) {
+    if (error.response) {
+      const { code, message } = error.response.data.error;
+      throw new ApiError(code, message);
+    } else {
+      throw new Error(error);
+    }
+  }
 };
 
 const getPlaylistFromPlatform = async (accessToken) => {
@@ -115,19 +157,28 @@ const getPlaylistFromPlatform = async (accessToken) => {
     params,
   };
 
-  const playlists = [];
-  do {
-    const response = await axios(options);
-    const { data } = response;
+  try {
+    const playlists = [];
+    do {
+      const response = await axios(options);
+      const { data } = response;
 
-    data.items.forEach((item) => {
-      playlists.push(spotifyUtils.setPlaylist(item));
-    });
+      data.items.forEach((item) => {
+        playlists.push(spotifyUtils.setPlaylist(item));
+      });
 
-    options.url = data.next;
-  } while (options.url);
+      options.url = data.next;
+    } while (options.url);
 
-  return playlists;
+    return playlists;
+  } catch (error) {
+    if (error.response) {
+      const { code, message } = error.response.data.error;
+      throw new ApiError(code, message);
+    } else {
+      throw new Error(error);
+    }
+  }
 };
 
 const getTrackIdFromPlatform = async (tracks, accessToken) => {
@@ -145,41 +196,49 @@ const getTrackIdFromPlatform = async (tracks, accessToken) => {
     params,
   };
 
-  const platformTrackIds = [];
-  const cachedTrackIds = [];
+  try {
+    const platformTrackIds = [];
+    const cachedTrackIds = [];
 
-  for (const track of tracks) {
-    let platformTrackId;
-    const artist = track.artist;
-    let cachedTrack = await trackService.getTrackByTitleAndArtist(track.title, artist.platformIds.local);
+    for (const track of tracks) {
+      let platformTrackId;
+      let cachedTrack;
+      if (track.hasOwnProperty("artist")) {
+        cachedTrack = await trackService.getTrackByTitleAndArtist(track.title, track.artist);
+        cachedTrackIds.push(cachedTrack.id);
+        const { platformIds } = cachedTrack;
+        const { spotify } = pick(platformIds, ["spotify"]);
+        platformTrackId = spotify;
+      }
 
-    cachedTrackIds.push(cachedTrack.id);
+      //not Cached
+      if (!platformTrackId) {
+        const query = `${track.title} artist: "${track.artistName}"`;
+        params.q = query;
 
-    const { platformIds } = cachedTrack;
-    const { spotify } = pick(platformIds, ["spotify"]);
+        const response = await axios(options);
+        const items = response.data.tracks.items;
 
-    if (spotify) {
-      console.log("cached");
-      platformTrackId = spotify;
-    } else {
-      console.log("not cached");
-      const query = `${track.title} artist: "${artist.name}"`;
-      params.q = query;
-
-      const response = await axios(options);
-      const items = response.data.tracks.items;
-
-      if (items.length) {
-        platformTrackId = items[0].id;
-        console.log(platformTrackId);
-      } else {
-        console.log("not found track");
+        if (items.length) {
+          platformTrackId = items[0].id;
+          Object.assign(cachedTrack.platformIds, { spotify: platformTrackId });
+          await cachedTrack.save();
+        }
+      }
+      if (platformTrackId) {
+        platformTrackIds.push(`spotify:track:${platformTrackId}`);
       }
     }
-    platformTrackIds.push(`spotify:track:${platformTrackId}`);
-  }
 
-  return { platform: platformTrackIds, local: cachedTrackIds };
+    return { platform: platformTrackIds, local: cachedTrackIds };
+  } catch (error) {
+    if (error.response) {
+      const { code, message } = error.response.data.error;
+      throw new ApiError(code, message);
+    } else {
+      throw new Error(error);
+    }
+  }
 };
 
 const getItemFromPlatform = async (playlistId, accessToken) => {
@@ -191,36 +250,43 @@ const getItemFromPlatform = async (playlistId, accessToken) => {
     },
   };
 
-  const tracks = [];
-  do {
-    const response = await axios(options);
-    const { data } = response;
-    for (const item of data.items) {
-      const trackBody = spotifyUtils.setTrack(item.track);
+  try {
+    const tracks = [];
+    do {
+      const response = await axios(options);
+      const { data } = response;
+      for (const item of data.items) {
+        let { track, artist } = spotifyUtils.setTrack(item.track);
 
-      let artist = await artistService.caching(trackBody.artist, platformTypes.SPOTIFY);
-      let track = await trackService.caching(trackBody, artist, platformTypes.SPOTIFY);
-      artist = artist.toJSON();
-      track = track.toJSON();
+        artist = await artistService.caching(artist, platformTypes.SPOTIFY);
+        track = await trackService.caching(track, artist, platformTypes.SPOTIFY);
+        artist = artist.toJSON();
+        track = track.toJSON();
 
-      Object.assign(trackBody.platformIds, track.platformIds, {
-        local: track.id,
-      });
-      Object.assign(trackBody.artist.platformIds, artist.platformIds, {
-        local: artist.id,
-      });
-      tracks.push(trackBody);
+        Object.assign(track.platformIds, {
+          local: track.id,
+        });
+
+        tracks.push(track);
+      }
+      options.url = data.next;
+    } while (options.url);
+
+    return tracks;
+  } catch (error) {
+    if (error.response) {
+      const { code, message } = error.response.data.error;
+      throw new ApiError(code, message);
+    } else {
+      throw new Error(error);
     }
-    options.url = data.next;
-  } while (options.url);
-
-  return tracks;
+  }
 };
 
 module.exports = {
-  getOAuthUrl,
   getPlatformToken,
   getProfile,
+  refreshAccessToken,
   createPlaylistToPlatform,
   insertTrackToPlatform,
   getPlaylistFromPlatform,

@@ -5,11 +5,11 @@ const getArtistByName = async (name) => {
   return await Artist.findOne({ name });
 };
 
-const updateArtist = async (name, platformIds) => {
-  return await Artist.findOneAndUpdate({ name }, { $set: { platformIds } }, { new: true });
+const updateArtist = async (id, platformIds) => {
+  return await Artist.findOneAndUpdate({ _id: id }, { $set: { platformIds } }, { new: true });
 };
 
-const saveArtist = async (artistBody) => {
+const createArtist = async (artistBody) => {
   const artist = await Artist.create({
     name: artistBody.name,
     platformIds: artistBody.platformIds,
@@ -25,12 +25,12 @@ const caching = async (artistBody, key) => {
 
   //플랫폼(key)의 Id가 캐시되어있지 않은 경우
   if (artist && !value[key]) {
-    const platformIds = Object.assign({}, artist.platformIds, artistBody.platformIds);
-    artist = await updateArtist(artistBody.name, platformIds);
+    Object.assign(artist.platformIds, artistBody.platformIds);
+    await artist.save();
   }
 
   if (!artist) {
-    artist = await saveArtist(artistBody);
+    artist = await createArtist(artistBody);
   }
 
   return artist;
@@ -39,6 +39,6 @@ const caching = async (artistBody, key) => {
 module.exports = {
   getArtistByName,
   updateArtist,
-  saveArtist,
+  createArtist,
   caching,
 };
