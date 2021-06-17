@@ -1,19 +1,15 @@
 const qs = require("qs");
 
-const googleAuthorizationUrl = (redirectUri, type) => {
+const googleAuthorizationUrl = (redirectUri) => {
   const url = "https://accounts.google.com/o/oauth2/v2/auth";
-  let scopes;
-  if (type === "login") {
-    scopes = ["https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"];
-  }
-  if (type === "token") {
-    scopes = [
-      "https://www.googleapis.com/auth/youtube.readonly",
-      "https://www.googleapis.com/auth/youtube.upload",
-      "https://www.googleapis.com/auth/youtube.force-ssl",
-      "https://www.googleapis.com/auth/youtube",
-    ];
-  }
+  const scopes = [
+    "https://www.googleapis.com/auth/userinfo.email",
+    "https://www.googleapis.com/auth/userinfo.profile",
+    "https://www.googleapis.com/auth/youtube.readonly",
+    "https://www.googleapis.com/auth/youtube.upload",
+    "https://www.googleapis.com/auth/youtube.force-ssl",
+    "https://www.googleapis.com/auth/youtube",
+  ];
 
   const params = {
     client_id: process.env.GOOGLE_ID,
@@ -27,15 +23,16 @@ const googleAuthorizationUrl = (redirectUri, type) => {
   return oAuthUri;
 };
 
-const spotifyAuthorizationUrl = (redirectUri, type) => {
+const spotifyAuthorizationUrl = (redirectUri) => {
   const url = "https://accounts.spotify.com/authorize";
-  let scopes;
-  if (type === "login") {
-    scopes = ["user-read-email"];
-  }
-  if (type === "token") {
-    scopes = ["playlist-modify-public", "playlist-modify-private", "playlist-read-private"];
-  }
+
+  const scopes = [
+    "user-read-email",
+    "playlist-read-private",
+    "playlist-modify-public",
+    "playlist-modify-private",
+    "playlist-read-private",
+  ];
 
   const params = {
     response_type: "code",
@@ -48,14 +45,10 @@ const spotifyAuthorizationUrl = (redirectUri, type) => {
   return oAuthUri;
 };
 
-const kakaoAuthorizationUrl = (redirectUri, type) => {
+const kakaoAuthorizationUrl = (redirectUri) => {
   const url = "https://kauth.kakao.com/oauth/authorize";
-  let scopes;
-  if (type === "login") {
-    scopes = ["account_email", "profile"];
-  }
-  if (type === "token") {
-  }
+
+  const scopes = ["account_email", "profile"];
 
   const params = {
     client_id: process.env.KAKAO_ID,

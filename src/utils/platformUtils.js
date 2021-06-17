@@ -104,14 +104,14 @@ const spotifyUtils = {
   },
 };
 
-const getAuthorizationUrl = (platform, { redirectUri, type }) => {
+const getAuthorizationUrl = (platform, { redirectUri }) => {
   switch (platform) {
     case platformTypes.GOOGLE:
-      return googleAuthorizationUrl(redirectUri, type);
+      return googleAuthorizationUrl(redirectUri);
     case platformTypes.SPOTIFY:
-      return spotifyAuthorizationUrl(redirectUri, type);
+      return spotifyAuthorizationUrl(redirectUri);
     case platformTypes.KAKAO:
-      return kakaoAuthorizationUrl(redirectUri, type);
+      return kakaoAuthorizationUrl(redirectUri);
     default:
       throw new ApiError(httpStatus.NOT_FOUND, "Not found oAuth Platform");
   }
