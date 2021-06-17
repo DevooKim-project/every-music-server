@@ -14,4 +14,11 @@ const oAuthToken = {
   }),
 };
 
-module.exports = { oAuthPlatform, oAuthToken };
+const getAuthorizationUrl = {
+  body: Joi.object().keys({
+    redirectUri: Joi.string().required(),
+    type: Joi.string().required(),
+  }),
+};
+
+module.exports = { oAuthPlatform, oAuthToken, getAuthorizationUrl };

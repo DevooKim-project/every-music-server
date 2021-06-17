@@ -1,4 +1,12 @@
+const httpStatus = require("http-status");
+
+const ApiError = require("../utils/ApiError");
 const { platformTypes } = require("../config/type");
+const {
+  googleAuthorizationUrl,
+  spotifyAuthorizationUrl,
+  kakaoAuthorizationUrl,
+} = require("../config/authorizationUrl");
 
 const youtubeUtils = {
   setPlaylist: (playlist) => {
@@ -96,4 +104,17 @@ const spotifyUtils = {
   },
 };
 
-module.exports = { youtubeUtils, spotifyUtils };
+const getAuthorizationUrl = (platform, { redirectUri, type }) => {
+  switch (platform) {
+    case platformTypes.GOOGLE:
+      return googleAuthorizationUrl(redirectUri, type);
+    case platformTypes.SPOTIFY:
+      return spotifyAuthorizationUrl(redirectUri, type);
+    case platformTypes.KAKAO:
+      return kakaoAuthorizationUrl(redirectUri, type);
+    default:
+      throw new ApiError(httpStatus.NOT_FOUND, "Not found oAuth Platform");
+  }
+};
+
+module.exports = { youtubeUtils, spotifyUtils, getAuthorizationUrl };

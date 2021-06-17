@@ -1,8 +1,9 @@
+const httpStatus = require("http-status");
+
 const catchAsync = require("../../utils/catchAsync");
 const { switchAuthPlatform } = require("../../utils/switchPlatform");
 const { userService, tokenService } = require("../../services");
-const httpStatus = require("http-status");
-const { NON_AUTHORITATIVE_INFORMATION } = require("http-status");
+const { getAuthorizationUrl: getOAuthUrl } = require("../../utils/platformUtils");
 
 const login = catchAsync((req, res) => {
   const controller = switchAuthPlatform(req.params.platform);
@@ -16,9 +17,10 @@ const logout = catchAsync((req, res) => {
 
 const loginWithUserId = catchAsync(async (req, res) => {
   if (!req.payload) {
-    return res.status(NON_AUTHORITATIVE_INFORMATION).send();
+    return res.status(httpStatus.NON_AUTHORITATIVE_INFORMATION).send();
   }
   const user = await userService.getUserById(req.payload.id);
+  console.log(user);
   const { accessToken, refreshToken, expiresIn } = await tokenService.generateLocalToken(user);
 
   res.clearCookie("refreshToken");
@@ -56,6 +58,11 @@ const getPlatformToken = catchAsync(async (req, res) => {
   res.send({ accessToken, refreshToken });
 });
 
+const getAuthorizationUrl = catchAsync(async (req, res) => {
+  const authorizationUrl = getOAuthUrl(req.params.platform, req.body);
+  res.send({ authorizationUrl });
+});
+
 module.exports = {
   login,
   logout,
@@ -64,4 +71,5 @@ module.exports = {
   generatePlatformToken,
   refreshPlatformToken,
   getPlatformToken,
+  getAuthorizationUrl,
 };
