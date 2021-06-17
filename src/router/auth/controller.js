@@ -20,7 +20,6 @@ const loginWithUserId = catchAsync(async (req, res) => {
     return res.status(httpStatus.NON_AUTHORITATIVE_INFORMATION).send();
   }
   const user = await userService.getUserById(req.payload.id);
-  console.log(user);
   const { accessToken, refreshToken, expiresIn } = await tokenService.generateLocalToken(user);
 
   res.clearCookie("refreshToken");
@@ -59,7 +58,7 @@ const getPlatformToken = catchAsync(async (req, res) => {
 });
 
 const getAuthorizationUrl = catchAsync(async (req, res) => {
-  const authorizationUrl = getOAuthUrl(req.params.platform, req.body);
+  const authorizationUrl = getOAuthUrl(req.params.platform, req.query);
   res.send({ authorizationUrl });
 });
 

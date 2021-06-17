@@ -15,7 +15,7 @@ const oAuthToken = {
 };
 
 const getAuthorizationUrl = {
-  body: Joi.object().keys({
+  query: Joi.object().keys({
     redirectUri: Joi.string().required(),
     type: Joi.string().required(),
   }),
