@@ -248,6 +248,7 @@ const getTrackIdFromPlatform = async (tracks, accessToken) => {
 
     return { platform: platformTrackIds, local: cachedTrackIds };
   } catch (error) {
+    console.log(error);
     if (error.response) {
       const { code, message } = error.response.data.error;
       throw new ApiError(code, message);
