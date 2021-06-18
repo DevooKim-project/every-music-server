@@ -53,7 +53,7 @@ const youtubeUtils = {
         title: title,
         artistName: artistName,
         platformIds: {
-          google: track.id,
+          google: track.snippet.resourceId.videoId,
         },
         thumbnail: track.snippet.thumbnails.standard
           ? track.snippet.thumbnails.standard.url
