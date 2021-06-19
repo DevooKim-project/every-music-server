@@ -28,7 +28,7 @@ const login = async (req, res) => {
   res.clearCookie("refreshToken");
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true, //JS에서 쿠키 접근 불가능
-    // secure: true, //https에서만 쿠키 생성
+    secure: true, //https에서만 쿠키 생성
     expires: new Date(Date.now() + 2592000), //unixTime: 1month
     signed: true,
   });
